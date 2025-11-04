@@ -28,6 +28,11 @@ npm run preview      # Preview production build locally
 # Code Quality
 npm run lint         # ESLint check
 
+# Testing
+npm run test:e2e                                      # Run E2E tests (dev mode)
+npm run test:e2e:ui                                   # Run E2E tests in UI mode
+npx playwright test --config=playwright.config.prod.ts  # Run E2E tests (production mode)
+
 # Database Management
 npm run db:download                      # Download latest database from S3 to ./public
 bash scripts/download-db.sh v1.2.3       # Download specific version
@@ -339,6 +344,60 @@ GitHub Actions workflows download the database from S3 during test runs:
 - Uses `s3://db.lenr.academy/latest/` for current version
 - No Git LFS bandwidth consumption
 - Fast downloads from S3
+
+### Production E2E Testing
+
+The project includes two types of E2E tests:
+
+1. **Standard E2E Tests** (run on every PR):
+   - Run against development server (`npm run dev` on port 5173)
+   - Service worker and PWA features are disabled
+   - Tests requiring production features are automatically skipped
+   - Fast feedback for typical development work
+
+2. **Production E2E Tests** (label-triggered):
+   - Run against production build (`npm run build` + `npm run preview` on port 4173)
+   - Service worker, PWA manifest, and offline capabilities enabled
+   - All tests run, including those requiring production features
+   - Tests AppUpdateBanner, service worker registration, offline database access, etc.
+
+**When to use the `prod-e2e-test` label:**
+
+Apply this label to PRs that:
+- Touch service worker configuration (`vite.config.ts`, `vite-plugin-pwa` settings)
+- Modify AppUpdateBanner or PWA update detection logic
+- Change offline/online indicator behavior
+- Update PWA manifest or meta tags
+- Make major dependency updates (Workbox, vite-plugin-pwa)
+- Before releases to verify critical update flow
+
+**How it works:**
+
+1. Add the `prod-e2e-test` label to your PR
+2. GitHub Actions workflow `.github/workflows/prod-e2e-test.yml` triggers automatically
+3. Builds production bundle with `npm run build`
+4. Serves it with `npm run preview` (port 4173)
+5. Runs full E2E suite using `playwright.config.prod.ts`
+6. Posts results as PR comment with pass/fail status and workflow link
+
+**Running production tests locally:**
+
+```bash
+# Build production bundle
+npm run build
+
+# In one terminal: serve production build
+npm run preview
+
+# In another terminal: run E2E tests against production
+npx playwright test --config=playwright.config.prod.ts
+```
+
+**Test detection logic:**
+
+Tests automatically detect whether they're running in dev or production mode by checking the port:
+- Port 5173 = development mode (tests requiring service worker are skipped)
+- Port 4173 = production mode (all tests run)
 
 ### Local Development Setup
 
