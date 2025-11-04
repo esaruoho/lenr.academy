@@ -4,6 +4,7 @@ import { DatabaseProvider } from './contexts/DatabaseContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { LayoutProvider } from './contexts/LayoutContext'
 import { QueryStateProvider } from './contexts/QueryStateContext'
+import { LanguageProvider } from './contexts/LanguageContext'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import FusionQuery from './pages/FusionQuery'
@@ -43,11 +44,12 @@ function App() {
         );
       }}
     >
-      <ThemeProvider>
-        <DatabaseProvider>
-          <QueryStateProvider>
-            <Router>
-              <LayoutProvider>
+      <LanguageProvider>
+        <ThemeProvider>
+          <DatabaseProvider>
+            <QueryStateProvider>
+              <Router>
+                <LayoutProvider>
               {/* PWA Components */}
               <PWAUpdatePrompt />
               <OfflineIndicator />
@@ -70,11 +72,12 @@ function App() {
                 )}
                 </Routes>
               </Layout>
-            </LayoutProvider>
-          </Router>
-          </QueryStateProvider>
-        </DatabaseProvider>
-      </ThemeProvider>
+              </LayoutProvider>
+            </Router>
+            </QueryStateProvider>
+          </DatabaseProvider>
+        </ThemeProvider>
+      </LanguageProvider>
     </Sentry.ErrorBoundary>
   )
 }
