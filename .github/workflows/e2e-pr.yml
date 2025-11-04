@@ -8,7 +8,25 @@ on:
       - 'screenshot-scenarios.json'
 
 jobs:
+  check-label:
+    runs-on: ubuntu-latest
+    outputs:
+      should-skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - name: Check for prod-e2e-test label
+        id: check
+        run: |
+          if [[ "${{ contains(github.event.pull_request.labels.*.name, 'prod-e2e-test') }}" == "true" ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "⏭️ Skipping standard E2E tests because prod-e2e-test label is present"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "▶️ Running standard E2E tests"
+          fi
+
   test:
+    needs: check-label
+    if: needs.check-label.outputs.should-skip != 'true'
     timeout-minutes: 90
     runs-on: ubuntu-latest
     strategy:

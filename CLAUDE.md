@@ -374,11 +374,14 @@ Apply this label to PRs that:
 **How it works:**
 
 1. Add the `prod-e2e-test` label to your PR
-2. GitHub Actions workflow `.github/workflows/prod-e2e-test.yml` triggers automatically
-3. Builds production bundle with `npm run build`
-4. Serves it with `npm run preview` (port 4173)
-5. Runs full E2E suite using `playwright.config.prod.ts`
-6. Posts results as PR comment with pass/fail status and workflow link
+2. Standard E2E workflow automatically skips (to avoid redundant testing)
+3. Production E2E workflow `.github/workflows/prod-e2e-test.yml` triggers automatically
+4. Builds production bundle with `npm run build`
+5. Serves it with `npm run preview` (port 4173)
+6. Runs full E2E suite using `playwright.config.prod.ts`
+7. Posts results as PR comment with pass/fail status and workflow link
+
+**Note:** When the `prod-e2e-test` label is present, the standard E2E tests are automatically skipped to avoid redundant test runs. The production E2E tests run the complete suite including all tests that would normally be skipped in dev mode.
 
 **Running production tests locally:**
 
