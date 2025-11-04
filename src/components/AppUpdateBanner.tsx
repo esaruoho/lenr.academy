@@ -140,12 +140,23 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
 
   const handleRefresh = async () => {
     setIsUpdating(true)
+
+    // Set a timeout to ensure reload happens even if service worker doesn't respond
+    const reloadTimeout = setTimeout(() => {
+      window.location.reload()
+    }, 3000) // 3 second timeout
+
     try {
       // Trigger service worker update - it will handle the reload after activation
       await updateServiceWorker(true)
+      // If we get here without reloading, the service worker update completed
+      // but didn't trigger a reload (edge case). Force reload.
+      clearTimeout(reloadTimeout)
+      window.location.reload()
     } catch (error) {
       console.error('Failed to update service worker:', error)
-      // Fallback to manual reload if service worker update fails
+      // Clear timeout and force immediate reload
+      clearTimeout(reloadTimeout)
       window.location.reload()
     }
   }
