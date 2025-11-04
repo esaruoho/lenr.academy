@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { RefreshCw, X, Sparkles } from 'lucide-react'
+import { RefreshCw, X, Sparkles, Loader2 } from 'lucide-react'
 import { startVersionPolling, VersionCheckResult } from '../services/versionCheck'
+import { useRegisterSW } from 'virtual:pwa-register/react'
 
 interface AppUpdateBannerProps {
   className?: string
@@ -54,7 +55,22 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
   const [buildTime, setBuildTime] = useState<string | null>(null)
   const [isRendered, setIsRendered] = useState(false)
   const [isActive, setIsActive] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Register service worker and get update function
+  const {
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegistered(registration?: ServiceWorkerRegistration) {
+      // Check for updates every hour (optional - autoUpdate mode already handles this)
+      if (registration) {
+        setInterval(() => {
+          registration.update()
+        }, 60 * 60 * 1000)
+      }
+    },
+  })
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -122,8 +138,16 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
     }, EXIT_ANIMATION_MS)
   }
 
-  const handleRefresh = () => {
-    window.location.reload()
+  const handleRefresh = async () => {
+    setIsUpdating(true)
+    try {
+      // Trigger service worker update - it will handle the reload after activation
+      await updateServiceWorker(true)
+    } catch (error) {
+      console.error('Failed to update service worker:', error)
+      // Fallback to manual reload if service worker update fails
+      window.location.reload()
+    }
   }
 
   const formattedBuildTime = buildTime && !Number.isNaN(Date.parse(buildTime))
@@ -163,10 +187,20 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
             )}
             <button
               onClick={handleRefresh}
-              className="px-4 py-2 bg-white text-amber-600 rounded-md text-sm font-medium hover:bg-amber-50 transition-colors"
+              disabled={isUpdating}
+              className="px-4 py-2 bg-white text-amber-600 rounded-md text-sm font-medium hover:bg-amber-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <RefreshCw className="w-4 h-4 inline mr-1" aria-hidden="true" />
-              Refresh Now
+              {isUpdating ? (
+                <>
+                  <Loader2 className="w-4 h-4 inline mr-1 animate-spin" aria-hidden="true" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4 inline mr-1" aria-hidden="true" />
+                  Refresh Now
+                </>
+              )}
             </button>
             <button
               onClick={handleDismiss}
