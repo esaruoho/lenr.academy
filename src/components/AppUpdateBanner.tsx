@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { RefreshCw, X, Sparkles, Loader2 } from 'lucide-react'
-import { startVersionPolling, VersionCheckResult } from '../services/versionCheck'
+import { checkForUpdate } from '../services/versionCheck'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
 interface AppUpdateBannerProps {
@@ -10,23 +10,19 @@ interface AppUpdateBannerProps {
 }
 
 const CURRENT_VERSION = (import.meta.env.VITE_APP_VERSION as string | undefined) ?? 'unknown'
-const DISMISS_KEY_PREFIX = 'lenr-app-update-dismissed'
+const DISMISS_KEY = 'lenr-app-update-dismissed'
 const SNOOZE_DURATION_MS = 6 * 60 * 60 * 1000 // 6 hours
 const EXIT_ANIMATION_MS = 250
 
-function getDismissKey(version: string): string {
-  return `${DISMISS_KEY_PREFIX}-${version}`
-}
-
-function hasDismissedVersion(version: string): boolean {
+function hasDismissedUpdate(): boolean {
   if (typeof window === 'undefined') return false
   try {
-    const storedValue = window.sessionStorage.getItem(getDismissKey(version))
+    const storedValue = window.sessionStorage.getItem(DISMISS_KEY)
     if (!storedValue) return false
 
     const dismissedAt = Number(storedValue)
     if (!Number.isFinite(dismissedAt)) {
-      window.sessionStorage.removeItem(getDismissKey(version))
+      window.sessionStorage.removeItem(DISMISS_KEY)
       return false
     }
 
@@ -34,17 +30,17 @@ function hasDismissedVersion(version: string): boolean {
       return true
     }
 
-    window.sessionStorage.removeItem(getDismissKey(version))
+    window.sessionStorage.removeItem(DISMISS_KEY)
     return false
   } catch {
     return false
   }
 }
 
-function markVersionDismissed(version: string) {
+function markUpdateDismissed() {
   if (typeof window === 'undefined') return
   try {
-    window.sessionStorage.setItem(getDismissKey(version), String(Date.now()))
+    window.sessionStorage.setItem(DISMISS_KEY, String(Date.now()))
   } catch {
     // Ignore storage errors (e.g., quota exceeded, private mode)
   }
@@ -57,13 +53,16 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
   const [isActive, setIsActive] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hasFetchedVersion = useRef(false)
 
-  // Register service worker and get update function
+  // Use service worker as the single source of truth for update availability.
+  // This eliminates race conditions between independent version polling and SW updates.
   const {
+    needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegistered(registration?: ServiceWorkerRegistration) {
-      // Check for updates every hour (optional - autoUpdate mode already handles this)
+      // Check for updates every hour
       if (registration) {
         setInterval(() => {
           registration.update()
@@ -72,26 +71,28 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
     },
   })
 
+  // When service worker detects an update, fetch version info for display
   useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const handleResult = (result: VersionCheckResult) => {
-      if (!result.version) return
-
-      if (hasDismissedVersion(result.version)) {
-        return
-      }
-
-      setAvailableVersion(result.version)
-      setBuildTime(result.buildTime ?? null)
+    if (!needRefresh || hasFetchedVersion.current || hasDismissedUpdate()) {
+      return
     }
 
-    const pollingHandle = startVersionPolling(handleResult)
+    hasFetchedVersion.current = true
 
-    return () => {
-      pollingHandle.stop()
-    }
-  }, [])
+    checkForUpdate({ currentVersion: CURRENT_VERSION })
+      .then((result) => {
+        if (result.hasUpdate) {
+          setAvailableVersion(result.version)
+          setBuildTime(result.buildTime)
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to fetch version info:', error)
+        // Still show banner even without version info
+        setAvailableVersion('latest')
+        setBuildTime(null)
+      })
+  }, [needRefresh])
 
   useEffect(() => {
     if (availableVersion) {
@@ -129,36 +130,22 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
   }
 
   const handleDismiss = () => {
-    markVersionDismissed(availableVersion)
+    markUpdateDismissed()
     setIsActive(false)
     exitTimerRef.current = setTimeout(() => {
       setAvailableVersion(null)
       setBuildTime(null)
+      hasFetchedVersion.current = false
       exitTimerRef.current = null
     }, EXIT_ANIMATION_MS)
   }
 
-  const handleRefresh = async () => {
+  const handleRefresh = () => {
     setIsUpdating(true)
-
-    // Set a timeout to ensure reload happens even if service worker doesn't respond
-    const reloadTimeout = setTimeout(() => {
-      window.location.reload()
-    }, 3000) // 3 second timeout
-
-    try {
-      // Trigger service worker update - it will handle the reload after activation
-      await updateServiceWorker(true)
-      // If we get here without reloading, the service worker update completed
-      // but didn't trigger a reload (edge case). Force reload.
-      clearTimeout(reloadTimeout)
-      window.location.reload()
-    } catch (error) {
-      console.error('Failed to update service worker:', error)
-      // Clear timeout and force immediate reload
-      clearTimeout(reloadTimeout)
-      window.location.reload()
-    }
+    // In prompt mode, the service worker has already downloaded the update
+    // and is waiting. Calling updateServiceWorker(true) activates it and
+    // reloads the page. This provides a single, coordinated reload.
+    updateServiceWorker(true)
   }
 
   const formattedBuildTime = buildTime && !Number.isNaN(Date.parse(buildTime))
