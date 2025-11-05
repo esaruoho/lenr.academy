@@ -59,9 +59,9 @@ export default function LanguageSwitcher({ className = '', compact = false }: La
         )}
       </button>
 
-      {/* Dropdown menu */}
+      {/* Dropdown menu - responsive positioning and sizing */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+        <div className="absolute right-0 sm:right-0 left-0 sm:left-auto mt-2 w-full sm:w-64 max-w-xs sm:max-w-none bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-[calc(100vh-100px)] overflow-y-auto">
           <div className="p-2">
             <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 py-2">
               {t('language.selectLanguage')}
@@ -89,7 +89,7 @@ export default function LanguageSwitcher({ className = '', compact = false }: La
                     </div>
                   </div>
                   {language === code && (
-                    <Check className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    <Check className="w-4 h-4 text-primary-600 dark:text-primary-400 flex-shrink-0" />
                   )}
                 </button>
               ))}
