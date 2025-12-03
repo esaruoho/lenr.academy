@@ -1,14 +1,27 @@
 import { useState, useMemo } from 'react';
-import { Search, ArrowUpDown, Filter, ChevronUp, ChevronDown } from 'lucide-react';
+import { Search, ArrowUpDown, Filter, ChevronUp, ChevronDown, Scale } from 'lucide-react';
 import type { PathwayAnalysis } from '../services/pathwayAnalyzer';
+import type { WeightedPathwayAnalysis } from '../types';
 import { VirtualizedList } from './VirtualizedList';
 
 interface PathwayBrowserTableProps {
-  pathways: PathwayAnalysis[];
+  pathways: PathwayAnalysis[] | WeightedPathwayAnalysis[];
+  useWeightedMode?: boolean; // Whether weighted data is available (Issue #96)
 }
 
-type SortField = 'frequency' | 'avgEnergy' | 'totalEnergy' | 'rarity' | 'loops';
+// Sort fields include weighted frequency when available
+type SortField = 'frequency' | 'weightedFrequency' | 'avgEnergy' | 'totalEnergy' | 'rarity' | 'loops';
 type SortDirection = 'asc' | 'desc';
+
+/**
+ * Helper to get frequency value (weighted or regular)
+ */
+function getFrequencyValue(pathway: PathwayAnalysis | WeightedPathwayAnalysis, useWeighted: boolean): number {
+  if (useWeighted && 'weightedFrequency' in pathway) {
+    return pathway.weightedFrequency;
+  }
+  return pathway.frequency;
+}
 
 /**
  * Format loop array for display
@@ -40,7 +53,7 @@ function formatLoops(loops: number[]): string {
  * Sortable, filterable table for exploring cascade pathways.
  * Enables pattern discovery through ranking and filtering.
  */
-export default function PathwayBrowserTable({ pathways }: PathwayBrowserTableProps) {
+export default function PathwayBrowserTable({ pathways, useWeightedMode = false }: PathwayBrowserTableProps) {
   const [sortField, setSortField] = useState<SortField>('frequency');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,6 +62,12 @@ export default function PathwayBrowserTable({ pathways }: PathwayBrowserTablePro
   const [feedbackOnly, setFeedbackOnly] = useState(false);
   const [minFrequency, setMinFrequency] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  // Toggle for weighted view when weighted data is available (Issue #96)
+  const [showWeightedView, setShowWeightedView] = useState(useWeightedMode);
+
+  // Determine if weighted data is actually available
+  const hasWeightedData = pathways.length > 0 && 'weightedFrequency' in pathways[0];
+  const useWeighted = showWeightedView && hasWeightedData;
 
   // Filter and sort pathways
   const filteredAndSorted = useMemo(() => {
@@ -88,6 +107,10 @@ export default function PathwayBrowserTable({ pathways }: PathwayBrowserTablePro
         case 'frequency':
           comparison = a.frequency - b.frequency;
           break;
+        case 'weightedFrequency':
+          // Sort by weighted frequency when available (Issue #96)
+          comparison = getFrequencyValue(a, true) - getFrequencyValue(b, true);
+          break;
         case 'avgEnergy':
           comparison = a.avgEnergy - b.avgEnergy;
           break;
@@ -109,7 +132,7 @@ export default function PathwayBrowserTable({ pathways }: PathwayBrowserTablePro
     });
 
     return result;
-  }, [pathways, sortField, sortDirection, searchTerm, showFusion, showTwoToTwo, feedbackOnly, minFrequency]);
+  }, [pathways, sortField, sortDirection, searchTerm, showFusion, showTwoToTwo, feedbackOnly, minFrequency, useWeighted]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -233,10 +256,33 @@ export default function PathwayBrowserTable({ pathways }: PathwayBrowserTablePro
         </div>
       </div>
 
-      {/* Results Count */}
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        Showing {filteredAndSorted.length} of {pathways.length} pathways
-      </p>
+      {/* Results Count and Weighted Toggle */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Showing {filteredAndSorted.length} of {pathways.length} pathways
+          {useWeighted && (
+            <span className="ml-2 text-purple-600 dark:text-purple-400 font-medium">
+              <Scale className="w-3 h-3 inline mr-0.5" />
+              Weighted view
+            </span>
+          )}
+        </p>
+        {/* Weighted view toggle (Issue #96) */}
+        {hasWeightedData && (
+          <button
+            onClick={() => setShowWeightedView(!showWeightedView)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+              showWeightedView
+                ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+            title={showWeightedView ? 'Switch to raw frequencies' : 'Switch to weighted frequencies'}
+          >
+            <Scale className="w-4 h-4" />
+            {showWeightedView ? 'Weighted' : 'Raw'}
+          </button>
+        )}
+      </div>
 
       {/* Table with Virtualization */}
       <div className="rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
@@ -245,11 +291,19 @@ export default function PathwayBrowserTable({ pathways }: PathwayBrowserTablePro
           <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
             <thead className="bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700">
               <tr>
-                <th className="hidden md:table-cell px-4 py-3 text-left font-medium" style={{ width: '30%' }}>Pathway</th>
+                <th className="hidden md:table-cell px-4 py-3 text-left font-medium" style={{ width: useWeighted ? '25%' : '30%' }}>Pathway</th>
                 <th className="px-4 py-3 text-left font-medium" style={{ width: '10%' }}>Type</th>
                 <th className="px-4 py-3 text-right font-medium" style={{ width: '10%' }}>
                   <SortButton field="frequency">Count</SortButton>
                 </th>
+                {/* Weighted frequency column (Issue #96) */}
+                {useWeighted && (
+                  <th className="px-4 py-3 text-right font-medium" style={{ width: '10%' }}>
+                    <SortButton field="weightedFrequency">
+                      <span className="text-purple-600 dark:text-purple-400">Wtd</span>
+                    </SortButton>
+                  </th>
+                )}
                 <th className="px-4 py-3 text-right font-medium" style={{ width: '12%' }}>
                   <SortButton field="avgEnergy">Avg (MeV)</SortButton>
                 </th>
@@ -288,7 +342,7 @@ export default function PathwayBrowserTable({ pathways }: PathwayBrowserTablePro
                   {/* Data row */}
                   <tr className="text-gray-900 dark:text-gray-100">
                     {/* Desktop: Pathway in first column */}
-                    <td className="hidden md:table-cell px-4 py-2 font-mono text-sm align-middle" style={{ width: '30%' }}>
+                    <td className="hidden md:table-cell px-4 py-2 font-mono text-sm align-middle" style={{ width: useWeighted ? '25%' : '30%' }}>
                       {pathway.pathway}
                     </td>
 
@@ -304,6 +358,12 @@ export default function PathwayBrowserTable({ pathways }: PathwayBrowserTablePro
                       </span>
                     </td>
                     <td className="px-4 py-2 align-middle text-right font-medium" style={{ width: '10%' }}>×{pathway.frequency}</td>
+                    {/* Weighted frequency column (Issue #96) */}
+                    {useWeighted && (
+                      <td className="px-4 py-2 align-middle text-right font-medium text-purple-600 dark:text-purple-400" style={{ width: '10%' }}>
+                        ×{getFrequencyValue(pathway, true).toFixed(2)}
+                      </td>
+                    )}
                     <td className="px-4 py-2 align-middle text-right" style={{ width: '12%' }}>{pathway.avgEnergy.toFixed(2)}</td>
                     <td className="px-4 py-2 align-middle text-right" style={{ width: '12%' }}>{pathway.totalEnergy.toFixed(2)}</td>
                     <td className="hidden sm:table-cell px-4 py-2 align-middle text-center text-xs text-gray-600 dark:text-gray-400" style={{ width: '10%' }}>
