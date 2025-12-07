@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { X, Search, Beaker, Factory, FlaskConical, Atom, Save, Trash2, ChevronRight, User } from 'lucide-react';
+import { X, Search, Beaker, Factory, FlaskConical, Atom, Save, Trash2, ChevronRight, User, Plus, Layers } from 'lucide-react';
 import type { Material, MaterialCategory, WeightedNuclide } from '../types';
 import {
   getAllMaterials,
@@ -10,7 +10,7 @@ import {
   createMaterialFromWeightedNuclides,
   getCustomMaterials,
 } from '../services/materialsService';
-import { formatProportion } from '../services/proportionService';
+import { formatProportion, mergeWeightedNuclides } from '../services/proportionService';
 
 interface MaterialsCatalogProps {
   isOpen: boolean;
@@ -48,6 +48,10 @@ export default function MaterialsCatalog({
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saveName, setSaveName] = useState('');
   const [saveDescription, setSaveDescription] = useState('');
+
+  // Blend mode state
+  const [blendMode, setBlendMode] = useState(false);
+  const [blendMaterials, setBlendMaterials] = useState<Material[]>([]);
 
   // Filter materials based on tab and search
   const filteredMaterials = useMemo(() => {
@@ -94,12 +98,47 @@ export default function MaterialsCatalog({
     }
   };
 
-  // Handle material selection
+  // Handle material selection (single replace mode)
   const handleSelect = () => {
     if (!selectedMaterial) return;
     const weightedNuclides = materialToWeightedNuclides(selectedMaterial);
     onSelectMaterial(weightedNuclides);
     onClose();
+  };
+
+  // Add material to blend queue
+  const handleAddToBlend = () => {
+    if (!selectedMaterial) return;
+    // Don't add duplicates
+    if (blendMaterials.some((m) => m.id === selectedMaterial.id)) return;
+    setBlendMaterials([...blendMaterials, selectedMaterial]);
+    setSelectedMaterial(null);
+  };
+
+  // Remove material from blend queue
+  const handleRemoveFromBlend = (materialId: string) => {
+    setBlendMaterials(blendMaterials.filter((m) => m.id !== materialId));
+  };
+
+  // Clear all materials from blend queue
+  const handleClearBlend = () => {
+    setBlendMaterials([]);
+    setSelectedMaterial(null);
+  };
+
+  // Apply blended materials
+  const handleApplyBlend = () => {
+    if (blendMaterials.length === 0) return;
+    const allNuclides = blendMaterials.map((m) => materialToWeightedNuclides(m));
+    const blended = mergeWeightedNuclides(...allNuclides);
+    onSelectMaterial(blended);
+    setBlendMaterials([]);
+    onClose();
+  };
+
+  // Check if material is in blend queue
+  const isInBlend = (materialId: string) => {
+    return blendMaterials.some((m) => m.id === materialId);
   };
 
   // Handle save custom material
@@ -167,7 +206,7 @@ export default function MaterialsCatalog({
 
           {/* Search and Actions */}
           <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex gap-3">
+            <div className="flex gap-3 mb-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -190,10 +229,80 @@ export default function MaterialsCatalog({
                 </button>
               )}
             </div>
+
+            {/* Mode Toggle */}
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Mode:</span>
+              <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
+                <button
+                  onClick={() => setBlendMode(false)}
+                  className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                    !blendMode
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                  data-testid="mode-replace"
+                >
+                  Replace
+                </button>
+                <button
+                  onClick={() => setBlendMode(true)}
+                  className={`px-3 py-1.5 text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                    blendMode
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                  data-testid="mode-blend"
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  Blend
+                </button>
+              </div>
+              {blendMode && blendMaterials.length > 0 && (
+                <span className="text-sm text-primary-600 dark:text-primary-400 font-medium">
+                  {blendMaterials.length} selected
+                </span>
+              )}
+            </div>
+
+            {/* Blend Queue */}
+            {blendMode && blendMaterials.length > 0 && (
+              <div className="mt-3 p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
+                    Materials to blend:
+                  </span>
+                  <button
+                    onClick={handleClearBlend}
+                    className="text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                    data-testid="clear-blend-button"
+                  >
+                    Clear all
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {blendMaterials.map((material) => (
+                    <span
+                      key={material.id}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded text-sm text-gray-700 dark:text-gray-300 border border-primary-200 dark:border-primary-700"
+                    >
+                      {material.name}
+                      <button
+                        onClick={() => handleRemoveFromBlend(material.id)}
+                        className="text-gray-400 hover:text-red-500 ml-1"
+                        title="Remove from blend"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <div className="flex flex-wrap border-b border-gray-200 dark:border-gray-700">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               const count = tab.key === 'all'
@@ -237,58 +346,68 @@ export default function MaterialsCatalog({
                 </div>
               ) : (
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {filteredMaterials.map((material) => (
-                    <button
-                      key={material.id}
-                      onClick={() => setSelectedMaterial(material)}
-                      className={`
-                        w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors
-                        ${selectedMaterial?.id === material.id
-                          ? 'bg-primary-50 dark:bg-primary-900/20 border-l-4 border-primary-500'
-                          : ''
-                        }
-                      `}
-                      data-testid={`material-item-${material.id}`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className={`p-1 rounded ${getCategoryColor(material.category)}`}>
-                              {getCategoryIcon(material.category)}
-                            </span>
-                            <span className="font-medium text-gray-900 dark:text-white">
-                              {material.name}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-                            {material.description}
-                          </p>
-                          <div className="flex gap-1 mt-2">
-                            {material.tags?.slice(0, 3).map((tag) => (
-                              <span
-                                key={tag}
-                                className="text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded"
-                              >
-                                {tag}
+                  {filteredMaterials.map((material) => {
+                    const inBlend = isInBlend(material.id);
+                    return (
+                      <button
+                        key={material.id}
+                        onClick={() => setSelectedMaterial(material)}
+                        className={`
+                          w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors
+                          ${selectedMaterial?.id === material.id
+                            ? 'bg-primary-50 dark:bg-primary-900/20 border-l-4 border-primary-500'
+                            : inBlend
+                              ? 'bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500'
+                              : ''
+                          }
+                        `}
+                        data-testid={`material-item-${material.id}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`p-1 rounded ${getCategoryColor(material.category)}`}>
+                                {getCategoryIcon(material.category)}
                               </span>
-                            ))}
+                              <span className="font-medium text-gray-900 dark:text-white">
+                                {material.name}
+                              </span>
+                              {inBlend && (
+                                <span className="text-xs px-1.5 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
+                                  In blend
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                              {material.description}
+                            </p>
+                            <div className="flex gap-1 mt-2">
+                              {material.tags?.slice(0, 3).map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {material.isCustom && (
+                              <button
+                                onClick={(e) => handleDeleteCustom(material.id, e)}
+                                className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                                title="Delete custom material"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                            <ChevronRight className="w-5 h-5 text-gray-400" />
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {material.isCustom && (
-                            <button
-                              onClick={(e) => handleDeleteCustom(material.id, e)}
-                              className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
-                              title="Delete custom material"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                          <ChevronRight className="w-5 h-5 text-gray-400" />
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -351,9 +470,9 @@ export default function MaterialsCatalog({
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Composition ({selectedMaterial.composition.length} nuclides)
                     </h4>
-                    <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div className="max-h-80 overflow-y-auto overscroll-contain border border-gray-200 dark:border-gray-700 rounded-lg">
                       <table className="w-full text-sm">
-                        <thead className="bg-gray-50 dark:bg-gray-900/50 sticky top-0">
+                        <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
                           <tr>
                             <th className="text-left px-3 py-2 text-gray-600 dark:text-gray-400">
                               Nuclide
@@ -402,14 +521,37 @@ export default function MaterialsCatalog({
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSelect}
-                disabled={!selectedMaterial}
-                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
-                data-testid="load-material-button"
-              >
-                Load Material
-              </button>
+              {blendMode ? (
+                <>
+                  <button
+                    onClick={handleAddToBlend}
+                    disabled={!selectedMaterial || isInBlend(selectedMaterial?.id || '')}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
+                    data-testid="add-to-blend-button"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add to Blend
+                  </button>
+                  <button
+                    onClick={handleApplyBlend}
+                    disabled={blendMaterials.length === 0}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
+                    data-testid="apply-blend-button"
+                  >
+                    <Layers className="w-4 h-4" />
+                    Apply Blend ({blendMaterials.length})
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={handleSelect}
+                  disabled={!selectedMaterial}
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
+                  data-testid="load-material-button"
+                >
+                  Load Material
+                </button>
+              )}
             </div>
           </div>
         </div>

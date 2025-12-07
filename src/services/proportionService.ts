@@ -304,6 +304,7 @@ export function mergeWeightedNuclides(
 
 /**
  * Format a proportion for display
+ * Uses consistent decimal precision without scientific notation
  */
 export function formatProportion(proportion: number): string {
   if (proportion >= 10) {
@@ -312,8 +313,13 @@ export function formatProportion(proportion: number): string {
     return `${proportion.toFixed(2)}%`;
   } else if (proportion >= 0.01) {
     return `${proportion.toFixed(3)}%`;
+  } else if (proportion >= 0.001) {
+    return `${proportion.toFixed(4)}%`;
+  } else if (proportion > 0) {
+    // For very small values, show enough precision to see the value
+    return `${proportion.toFixed(5)}%`;
   } else {
-    return `${proportion.toExponential(2)}%`;
+    return '0%';
   }
 }
 

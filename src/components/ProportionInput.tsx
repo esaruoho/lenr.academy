@@ -61,17 +61,33 @@ export default function ProportionInput({
   const [inputValues, setInputValues] = useState<Map<string, string>>(new Map());
   const [showTooltip, setShowTooltip] = useState(false);
 
+  // Format proportion for display in input field
+  // Uses reasonable precision: 2 decimals for values >= 1, 3 for < 1, 4 for < 0.1
+  const formatForInput = (value: number): string => {
+    if (value >= 1) {
+      return value.toFixed(2);
+    } else if (value >= 0.1) {
+      return value.toFixed(3);
+    } else if (value >= 0.001) {
+      return value.toFixed(4);
+    } else if (value === 0) {
+      return '0';
+    } else {
+      return value.toExponential(2);
+    }
+  };
+
   // Sync input values with weighted nuclides
   useEffect(() => {
     const newValues = new Map<string, string>();
     for (const nuclide of weightedNuclides) {
-      newValues.set(nuclide.nuclideId, nuclide.proportion.toString());
+      newValues.set(nuclide.nuclideId, formatForInput(nuclide.proportion));
     }
     // Add any new nuclides that aren't in weighted list
     for (const id of nuclideIds) {
       if (!newValues.has(id)) {
         // Default to equal distribution
-        newValues.set(id, (100 / nuclideIds.length).toFixed(2));
+        newValues.set(id, formatForInput(100 / nuclideIds.length));
       }
     }
     setInputValues(newValues);
@@ -307,7 +323,7 @@ export default function ProportionInput({
               </div>
 
               {/* Normalized percentage */}
-              <div className="w-16 text-right text-sm text-gray-500 dark:text-gray-400 font-mono">
+              <div className="w-20 text-right text-sm text-gray-500 dark:text-gray-400 font-mono">
                 {formatProportion(proportion)}
               </div>
             </div>

@@ -38,11 +38,11 @@ export const NATURAL_ABUNDANCES: Material[] = [
     category: 'natural-abundance',
     description: 'Natural nickel isotopic composition',
     composition: [
-      { nuclideId: 'Ni-58', proportion: 68.077 },
-      { nuclideId: 'Ni-60', proportion: 26.223 },
-      { nuclideId: 'Ni-61', proportion: 1.140 },
-      { nuclideId: 'Ni-62', proportion: 3.635 },
-      { nuclideId: 'Ni-64', proportion: 0.926 },
+      { nuclideId: 'Ni-58', proportion: 68.08 },
+      { nuclideId: 'Ni-60', proportion: 26.22 },
+      { nuclideId: 'Ni-61', proportion: 1.14 },
+      { nuclideId: 'Ni-62', proportion: 3.63 },
+      { nuclideId: 'Ni-64', proportion: 0.93 },
     ],
     source: 'IUPAC 2016 atomic weights',
     tags: ['nickel', 'natural', 'fuel', 'ni-h'],
@@ -53,8 +53,8 @@ export const NATURAL_ABUNDANCES: Material[] = [
     category: 'natural-abundance',
     description: 'Natural hydrogen isotopic composition',
     composition: [
-      { nuclideId: 'H-1', proportion: 99.9885 },
-      { nuclideId: 'D', proportion: 0.0115 },
+      { nuclideId: 'H-1', proportion: 99.99 },
+      { nuclideId: 'D', proportion: 0.01 },
     ],
     source: 'IUPAC 2016 atomic weights',
     tags: ['hydrogen', 'natural', 'fuel'],
@@ -77,10 +77,10 @@ export const NATURAL_ABUNDANCES: Material[] = [
     category: 'natural-abundance',
     description: 'Natural iron isotopic composition',
     composition: [
-      { nuclideId: 'Fe-56', proportion: 91.754 },
-      { nuclideId: 'Fe-54', proportion: 5.845 },
-      { nuclideId: 'Fe-57', proportion: 2.119 },
-      { nuclideId: 'Fe-58', proportion: 0.282 },
+      { nuclideId: 'Fe-56', proportion: 91.75 },
+      { nuclideId: 'Fe-54', proportion: 5.85 },
+      { nuclideId: 'Fe-57', proportion: 2.12 },
+      { nuclideId: 'Fe-58', proportion: 0.28 },
     ],
     source: 'IUPAC 2016 atomic weights',
     tags: ['iron', 'natural', 'steel'],
@@ -118,10 +118,10 @@ export const NATURAL_ABUNDANCES: Material[] = [
     category: 'natural-abundance',
     description: 'Natural chromium isotopic composition',
     composition: [
-      { nuclideId: 'Cr-52', proportion: 83.789 },
-      { nuclideId: 'Cr-53', proportion: 9.501 },
-      { nuclideId: 'Cr-50', proportion: 4.345 },
-      { nuclideId: 'Cr-54', proportion: 2.365 },
+      { nuclideId: 'Cr-52', proportion: 83.79 },
+      { nuclideId: 'Cr-53', proportion: 9.50 },
+      { nuclideId: 'Cr-50', proportion: 4.35 },
+      { nuclideId: 'Cr-54', proportion: 2.37 },
     ],
     source: 'IUPAC 2016 atomic weights',
     tags: ['chromium', 'natural', 'steel'],
@@ -136,6 +136,27 @@ export const NATURAL_ABUNDANCES: Material[] = [
     ],
     source: 'IUPAC 2016 atomic weights',
     tags: ['aluminum', 'natural', 'monoisotopic'],
+  },
+  {
+    id: 'natural-air',
+    name: 'Natural Air',
+    category: 'natural-abundance',
+    description: 'Dry atmospheric air composition (N₂ 78%, O₂ 21%, Ar 0.93%)',
+    composition: [
+      // Nitrogen (78.08% by volume, ~75.5% by mass)
+      { nuclideId: 'N-14', proportion: 75.07 },
+      { nuclideId: 'N-15', proportion: 0.27 },
+      // Oxygen (20.95% by volume, ~23.1% by mass)
+      { nuclideId: 'O-16', proportion: 23.01 },
+      { nuclideId: 'O-18', proportion: 0.05 },
+      { nuclideId: 'O-17', proportion: 0.01 },
+      // Argon (0.93% by volume, ~1.3% by mass)
+      { nuclideId: 'Ar-40', proportion: 1.29 },
+      // Trace components below 0.01% omitted for simplicity
+      // (Ar-36: 0.004%, Ar-38: 0.001%, CO2: 0.04%)
+    ],
+    source: 'CRC Handbook of Chemistry and Physics',
+    tags: ['air', 'atmosphere', 'natural', 'nitrogen', 'oxygen', 'argon'],
   },
 ];
 
@@ -265,14 +286,13 @@ export const COMPOUNDS: Material[] = [
     category: 'compound',
     description: 'Lithium aluminum hydride - common LENR fuel additive',
     composition: [
-      // Lithium (1 atom per formula unit)
-      { nuclideId: 'Li-7', proportion: 7.88 },   // ~16.6% of mass, 92.41% Li-7
-      { nuclideId: 'Li-6', proportion: 0.65 },   // 7.59% Li-6
       // Aluminum (1 atom per formula unit, ~71.1% of mass)
       { nuclideId: 'Al-27', proportion: 71.10 },
       // Hydrogen (4 atoms per formula unit, ~10.6% of mass)
       { nuclideId: 'H-1', proportion: 10.59 },
-      { nuclideId: 'D', proportion: 0.001 },     // Natural deuterium trace
+      // Lithium (1 atom per formula unit, ~18.3% of mass)
+      { nuclideId: 'Li-7', proportion: 16.93 },
+      { nuclideId: 'Li-6', proportion: 1.38 },
     ],
     source: 'Stoichiometric calculation with natural isotopes',
     tags: ['hydride', 'lithium', 'aluminum', 'hydrogen', 'parkhomov', 'fuel'],
@@ -289,8 +309,7 @@ export const COMPOUNDS: Material[] = [
       { nuclideId: 'B-11', proportion: 22.91 },
       { nuclideId: 'B-10', proportion: 5.69 },
       // Hydrogen (4 atoms, ~10.6% of mass)
-      { nuclideId: 'H-1', proportion: 10.59 },
-      { nuclideId: 'D', proportion: 0.001 },
+      { nuclideId: 'H-1', proportion: 10.60 },
     ],
     source: 'Stoichiometric calculation with natural isotopes',
     tags: ['hydride', 'sodium', 'boron', 'hydrogen', 'fuel'],
@@ -306,8 +325,7 @@ export const COMPOUNDS: Material[] = [
       { nuclideId: 'Mg-25', proportion: 9.23 },
       { nuclideId: 'Mg-26', proportion: 10.15 },
       // Hydrogen (2 atoms, ~7.7% of mass)
-      { nuclideId: 'H-1', proportion: 7.69 },
-      { nuclideId: 'D', proportion: 0.001 },
+      { nuclideId: 'H-1', proportion: 7.70 },
     ],
     source: 'Stoichiometric calculation with natural isotopes',
     tags: ['hydride', 'magnesium', 'hydrogen', 'storage'],
@@ -377,9 +395,8 @@ export const LENR_EXPERIMENTS: LENRExperiment[] = [
       { nuclideId: 'Ni-61', proportion: 1.13 },
       { nuclideId: 'Ni-62', proportion: 3.60 },
       { nuclideId: 'Ni-64', proportion: 0.92 },
-      // Hydrogen gas loading
-      { nuclideId: 'H-1', proportion: 0.97 },
-      { nuclideId: 'D', proportion: 0.001 },
+      // Hydrogen gas loading (~1% by mass)
+      { nuclideId: 'H-1', proportion: 0.98 },
     ],
     citation: 'Focardi, S., et al. (1998). "Large excess heat production in Ni-H systems"',
     experimentType: 'Ni-H',
@@ -402,9 +419,8 @@ export const LENR_EXPERIMENTS: LENRExperiment[] = [
       { nuclideId: 'Ni-61', proportion: 0.51 },
       { nuclideId: 'Ni-62', proportion: 1.62 },
       { nuclideId: 'Ni-64', proportion: 0.41 },
-      // Hydrogen loading
-      { nuclideId: 'H-1', proportion: 0.99 },
-      { nuclideId: 'D', proportion: 0.001 },
+      // Hydrogen loading (~1% by mass)
+      { nuclideId: 'H-1', proportion: 1.00 },
     ],
     citation: 'Celani, F., et al. (2012). ICCF-17 Proceedings',
     experimentType: 'Cu-Ni-H',
