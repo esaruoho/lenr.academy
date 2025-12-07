@@ -138,6 +138,9 @@ export default defineConfig({
     'import.meta.env.VITE_APP_VERSION': JSON.stringify(getVersion()),
     'import.meta.env.VITE_BUILD_TIME': JSON.stringify(getBuildTime()),
   },
+  server: {
+    host: '0.0.0.0',
+  },
   build: {
     // Generate source maps for production builds
     // This helps Sentry provide readable stack traces

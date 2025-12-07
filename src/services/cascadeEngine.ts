@@ -1,6 +1,7 @@
 import type { Database } from 'sql.js';
 import type {
   CascadeParameters,
+  CascadeParametersV2,
   CascadeResults,
   CascadeReaction,
 } from '../types';
@@ -79,12 +80,12 @@ function buildNuclideId(E: string, A: number): string {
  * 3. Return complete reaction tree and statistics
  *
  * @param db - SQLite database instance
- * @param params - Cascade parameters
- * @returns Cascade simulation results
+ * @param params - Cascade parameters (supports weighted mode via CascadeParametersV2)
+ * @returns Cascade simulation results with optional weighted fuel configuration
  */
 export async function runCascadeSimulation(
   db: Database,
-  params: CascadeParameters
+  params: CascadeParameters | CascadeParametersV2
 ): Promise<CascadeResults> {
   const startTime = performance.now();
 
@@ -240,6 +241,11 @@ export async function runCascadeSimulation(
 
   const executionTime = performance.now() - startTime;
 
+  // Extract weighted mode fields if available (Issue #96)
+  const v2Params = params as CascadeParametersV2;
+  const weightedFuel = v2Params.weightedFuel;
+  const useWeightedMode = v2Params.useWeightedMode ?? false;
+
   return {
     reactions: allReactions,
     productDistribution,
@@ -249,5 +255,7 @@ export async function runCascadeSimulation(
     loopsExecuted: loopCount,
     executionTime,
     terminationReason,
+    // Include weighted configuration in results for downstream analysis
+    ...(useWeightedMode && weightedFuel ? { weightedFuel, useWeightedMode } : {}),
   };
 }

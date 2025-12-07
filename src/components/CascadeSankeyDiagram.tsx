@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Sankey, Tooltip, ResponsiveContainer, Rectangle } from 'recharts';
-import { Sliders, HelpCircle, X } from 'lucide-react';
+import { Sliders, HelpCircle, X, Scale } from 'lucide-react';
 import type { PathwayAnalysis } from '../services/pathwayAnalyzer';
+import type { WeightedPathwayAnalysis } from '../types';
 import { SankeyErrorBoundary } from './SankeyErrorBoundary';
 
 interface CascadeSankeyDiagramProps {
-  pathways: PathwayAnalysis[];
+  pathways: PathwayAnalysis[] | WeightedPathwayAnalysis[];
   fuelNuclides?: string[];  // Original fuel nuclides for color coding
+  useWeightedMode?: boolean; // Whether weighted data is available (Issue #96)
 }
 
 type NodeType = 'fuel' | 'intermediate' | 'final';
@@ -40,10 +42,25 @@ function parseNuclide(nuclideId: string): { element: string; Z: number; A: numbe
 }
 
 /**
+ * Helper to get frequency value (weighted or regular)
+ */
+function getFrequencyValue(pathway: PathwayAnalysis | WeightedPathwayAnalysis, useWeighted: boolean): number {
+  if (useWeighted && 'weightedFrequency' in pathway) {
+    return pathway.weightedFrequency;
+  }
+  return pathway.frequency;
+}
+
+/**
  * Convert pathways to Sankey data format with color coding
  * Recharts Sankey expects node indices (numbers) for source/target
+ * Supports weighted frequency when available (Issue #96)
  */
-function pathwaysToSankeyData(pathways: PathwayAnalysis[], fuelNuclides: string[] = []) {
+function pathwaysToSankeyData(
+  pathways: PathwayAnalysis[] | WeightedPathwayAnalysis[],
+  fuelNuclides: string[] = [],
+  useWeighted: boolean = false
+) {
   const nodeMap = new Map<string, number>();
   const nodes: EnhancedNode[] = [];
   const links: Array<{ source: number; target: number; value: number; pathway: PathwayAnalysis }> = [];
@@ -64,7 +81,7 @@ function pathwaysToSankeyData(pathways: PathwayAnalysis[], fuelNuclides: string[
   // Track which nodes have outgoing edges (to identify final products)
   const hasOutgoingEdges = new Set<string>();
   pathways.forEach((pathway) => {
-    pathway.inputs.forEach((input) => hasOutgoingEdges.add(input));
+    pathway.inputs.forEach((input: string) => hasOutgoingEdges.add(input));
   });
 
   // Sort pathways to minimize crossings in Sankey diagram
@@ -155,7 +172,9 @@ function pathwaysToSankeyData(pathways: PathwayAnalysis[], fuelNuclides: string[
     // For two-to-two reactions (A + B → C + D), we create all possible links
     const numInputs = pathway.inputs.length;
     const numOutputs = pathway.outputs.length;
-    const valuePerLink = pathway.frequency / Math.max(numInputs, numOutputs);
+    // Use weighted frequency when available (Issue #96)
+    const freqValue = getFrequencyValue(pathway, useWeighted);
+    const valuePerLink = freqValue / Math.max(numInputs, numOutputs);
 
     // Create links from each input to corresponding outputs
     for (let i = 0; i < Math.max(numInputs, numOutputs); i++) {
@@ -187,13 +206,14 @@ function pathwaysToSankeyData(pathways: PathwayAnalysis[], fuelNuclides: string[
   });
 
   // Convert aggregated links to array
-  // Use the most frequent pathway for tooltip display
-  linkMap.forEach(({ source, target, value, pathways }) => {
+  // Use the most frequent pathway for tooltip display (considers weighted frequency)
+  linkMap.forEach(({ source, target, value, pathways: linkPathways }) => {
     links.push({
       source,
       target,
       value,
-      pathway: pathways.sort((a, b) => b.frequency - a.frequency)[0], // Show most frequent pathway in tooltip
+      // Show most frequent (or weighted) pathway in tooltip
+      pathway: linkPathways.sort((a, b) => getFrequencyValue(b, useWeighted) - getFrequencyValue(a, useWeighted))[0],
     });
   });
 
@@ -209,17 +229,22 @@ function pathwaysToSankeyData(pathways: PathwayAnalysis[], fuelNuclides: string[
  * Shows flow of cascade reactions from fuel nuclides through intermediates to products.
  * Width of flows represents pathway frequency.
  */
-export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [] }: CascadeSankeyDiagramProps) {
+export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useWeightedMode = false }: CascadeSankeyDiagramProps) {
   const [topN, setTopN] = useState(15);
   const [feedbackOnly, setFeedbackOnly] = useState(false);
   const [minFrequency, setMinFrequency] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
+  // Toggle for weighted vs raw view when weighted data is available (Issue #96)
+  const [showWeightedView, setShowWeightedView] = useState(useWeightedMode);
   const [showGuide, setShowGuide] = useState(() => {
     // Show guide on first visit
     const hasSeenGuide = localStorage.getItem('cascade-sankey-guide-seen');
     return !hasSeenGuide;
   });
+
+  // Determine if weighted data is actually available
+  const hasWeightedData = pathways.length > 0 && 'weightedFrequency' in pathways[0];
 
   // Safety: Clamp topN to max of 30 to prevent stack overflow
   // Note: Even 30 pathways can create 60+ nodes and links which strains Recharts
@@ -249,17 +274,20 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [] }: Ca
   }
 
   // Sort by frequency (descending) to ensure "Top N" shows the most frequent
-  filteredPathways.sort((a, b) => b.frequency - a.frequency);
+  // Use weighted frequency when in weighted view mode (Issue #96)
+  const useWeighted = showWeightedView && hasWeightedData;
+  filteredPathways.sort((a, b) => getFrequencyValue(b, useWeighted) - getFrequencyValue(a, useWeighted));
 
   // Limit to top N (using safe clamped value)
   const beforeTopNLimit = filteredPathways.length;
   filteredPathways = filteredPathways.slice(0, safeTopN);
 
   // Convert to Sankey format with color coding
+  // Pass weighted mode flag for flow width calculation (Issue #96)
   let sankeyData;
   let nodeCountExceeded = false;
   try {
-    sankeyData = pathwaysToSankeyData(filteredPathways, fuelNuclides);
+    sankeyData = pathwaysToSankeyData(filteredPathways, fuelNuclides, useWeighted);
 
     // Additional safety check: limit total node count to prevent stack overflow
     // Recharts Sankey can overflow with >50 nodes even with good pathway limits
@@ -273,7 +301,7 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [] }: Ca
 
       while (attempts < 5 && sankeyData.nodes.length > MAX_NODES && reducedPathways > 5) {
         const testPathways = filteredPathways.slice(0, reducedPathways);
-        sankeyData = pathwaysToSankeyData(testPathways, fuelNuclides);
+        sankeyData = pathwaysToSankeyData(testPathways, fuelNuclides, useWeighted);
 
         if (sankeyData.nodes.length <= MAX_NODES) {
           filteredPathways = testPathways;
@@ -334,9 +362,14 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [] }: Ca
       Z
     `;
 
-    const pathway = linkData.pathway as PathwayAnalysis;
+    const pathway = linkData.pathway as PathwayAnalysis | WeightedPathwayAnalysis;
+    // Build tooltip with weighted info if available (Issue #96)
+    let freqText = `Frequency: ×${pathway.frequency}`;
+    if (useWeighted && 'weightedFrequency' in pathway) {
+      freqText = `Weighted: ×${pathway.weightedFrequency.toFixed(2)} (raw: ×${pathway.frequency})`;
+    }
     const tooltipText = pathway ?
-      `${pathway.pathway}\nType: ${pathway.type === 'fusion' ? 'Fusion' : 'Two-to-Two'}\nFrequency: ×${pathway.frequency}\nAvg Energy: ${pathway.avgEnergy.toFixed(2)} MeV${pathway.isFeedback ? '\n✓ Feedback Loop' : ''}`
+      `${pathway.pathway}\nType: ${pathway.type === 'fusion' ? 'Fusion' : 'Two-to-Two'}\n${freqText}\nAvg Energy: ${pathway.avgEnergy.toFixed(2)} MeV${pathway.isFeedback ? '\n✓ Feedback Loop' : ''}`
       : '';
 
     return (
@@ -363,14 +396,15 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [] }: Ca
     );
   };
 
-  // Custom tooltip
+  // Custom tooltip with weighted frequency support (Issue #96)
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
 
     const data = payload[0].payload;
     if (!data.pathway) return null;
 
-    const pathway = data.pathway as PathwayAnalysis;
+    const pathway = data.pathway as PathwayAnalysis | WeightedPathwayAnalysis;
+    const isWeighted = useWeighted && 'weightedFrequency' in pathway;
 
     return (
       <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-3 shadow-lg">
@@ -382,9 +416,21 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [] }: Ca
               {pathway.type === 'fusion' ? 'Fusion' : 'Two-to-Two'}
             </span>
           </p>
-          <p>
-            <span className="font-medium">Frequency:</span> ×{pathway.frequency}
-          </p>
+          {isWeighted ? (
+            <>
+              <p>
+                <span className="font-medium">Weighted Frequency:</span>{' '}
+                <span className="text-purple-600">×{(pathway as WeightedPathwayAnalysis).weightedFrequency.toFixed(2)}</span>
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Raw frequency: ×{pathway.frequency}
+              </p>
+            </>
+          ) : (
+            <p>
+              <span className="font-medium">Frequency:</span> ×{pathway.frequency}
+            </p>
+          )}
           <p>
             <span className="font-medium">Avg Energy:</span> {pathway.avgEnergy.toFixed(2)} MeV
           </p>
@@ -482,13 +528,30 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [] }: Ca
             </button>
           )}
         </div>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-        >
-          <Sliders className="w-4 h-4" />
-          {showFilters ? 'Hide' : 'Show'} Filters
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Weighted view toggle (Issue #96) */}
+          {hasWeightedData && (
+            <button
+              onClick={() => setShowWeightedView(!showWeightedView)}
+              className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg transition-colors ${
+                showWeightedView
+                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+              }`}
+              title={showWeightedView ? 'Switch to raw frequencies' : 'Switch to weighted frequencies'}
+            >
+              <Scale className="w-4 h-4" />
+              {showWeightedView ? 'Weighted' : 'Raw'}
+            </button>
+          )}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <Sliders className="w-4 h-4" />
+            {showFilters ? 'Hide' : 'Show'} Filters
+          </button>
+        </div>
       </div>
 
       {/* Filter Controls */}
@@ -567,7 +630,13 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [] }: Ca
         <p>
           Showing <strong>{filteredPathways.length}</strong> of <strong>{totalPathways}</strong> total pathways
           {beforeTopNLimit > safeTopN && (
-            <span className="text-gray-500"> (top {safeTopN} by frequency)</span>
+            <span className="text-gray-500"> (top {safeTopN} by {useWeighted ? 'weighted ' : ''}frequency)</span>
+          )}
+          {useWeighted && (
+            <span className="ml-2 text-purple-600 dark:text-purple-400 font-medium">
+              <Scale className="w-3 h-3 inline mr-0.5" />
+              Weighted view
+            </span>
           )}
         </p>
         {(minFrequency > 1 || feedbackOnly) && (
@@ -725,8 +794,11 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [] }: Ca
           </div>
         </div>
         <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 space-y-1">
-          <p>💡 <strong>Flow width</strong> represents how often each reaction pathway occurs</p>
+          <p>💡 <strong>Flow width</strong> represents {useWeighted ? 'weighted frequency (fuel proportions applied)' : 'how often each reaction pathway occurs'}</p>
           <p>💡 <strong>Hover</strong> over flows to see detailed reaction information</p>
+          {hasWeightedData && (
+            <p>💡 Use the <strong>{showWeightedView ? 'Weighted' : 'Raw'}</strong> button to toggle between weighted and raw frequencies</p>
+          )}
         </div>
       </div>
     </div>
