@@ -6,7 +6,10 @@
  * - Detects feedback loops (products that become inputs)
  * - Calculates frequency, energy, and rarity metrics
  * - Ranks pathways for pattern discovery
+ * - Calculates weighted statistics based on fuel proportions (Issue #96)
  */
+
+import type { WeightedNuclide, WeightedPathwayAnalysis } from '../types';
 
 export interface PathwayAnalysis {
   pathway: string;           // Human-readable: "H-1 + Li-7 → He-4"
@@ -233,5 +236,133 @@ export function getPathwayStats(pathways: PathwayAnalysis[]): PathwayStats {
     avgEnergy,
     mostCommon,
     highestEnergy,
+  };
+}
+
+// ============================================================================
+// Weighted Pathway Analysis (Issue #96)
+// ============================================================================
+
+/**
+ * Calculate weighted pathway statistics based on fuel proportions
+ *
+ * The weighted frequency is calculated as:
+ *   weightedFrequency = frequency * P(input1) * P(input2)
+ *
+ * Where P(inputN) is the proportion of that nuclide in the fuel mixture (0-1).
+ * This represents the probability of both reactants being available for the reaction.
+ *
+ * @param pathways - Base pathway analysis from analyzePathways()
+ * @param weightedFuel - Fuel nuclides with proportions (0-100 scale)
+ * @returns Extended pathway analysis with weighted statistics
+ */
+export function analyzeWeightedPathways(
+  pathways: PathwayAnalysis[],
+  weightedFuel: WeightedNuclide[]
+): WeightedPathwayAnalysis[] {
+  if (pathways.length === 0 || weightedFuel.length === 0) {
+    return [];
+  }
+
+  // Build lookup map for proportions (convert from 0-100 to 0-1 scale)
+  const proportionMap = new Map<string, number>();
+  for (const fuel of weightedFuel) {
+    proportionMap.set(fuel.nuclideId, fuel.proportion / 100);
+  }
+
+  // Calculate weighted statistics for each pathway
+  const weightedPathways: WeightedPathwayAnalysis[] = pathways.map((pathway) => {
+    // Calculate input probability (product of input proportions)
+    // For inputs not in the fuel list, use 1.0 (assumes they're from feedback)
+    const inputContributions: Record<string, number> = {};
+    let inputProbability = 1.0;
+
+    for (const input of pathway.inputs) {
+      const proportion = proportionMap.get(input);
+      if (proportion !== undefined) {
+        inputProbability *= proportion;
+        inputContributions[input] = proportion * 100; // Store as percentage
+      } else {
+        // Input came from a previous reaction (feedback product)
+        // Use 1.0 as it's available from the cascade
+        inputContributions[input] = 100; // 100% available from cascade
+      }
+    }
+
+    // Calculate weighted frequency and energy
+    const weightedFrequency = pathway.frequency * inputProbability;
+    const weightedTotalEnergy = pathway.totalEnergy * inputProbability;
+
+    return {
+      // Copy base pathway fields
+      pathway: pathway.pathway,
+      type: pathway.type,
+      inputs: pathway.inputs,
+      outputs: pathway.outputs,
+      frequency: pathway.frequency,
+      avgEnergy: pathway.avgEnergy,
+      totalEnergy: pathway.totalEnergy,
+      loops: pathway.loops,
+      isFeedback: pathway.isFeedback,
+      rarityScore: pathway.rarityScore,
+
+      // Add weighted statistics
+      weightedFrequency,
+      weightedTotalEnergy,
+      inputContributions,
+    };
+  });
+
+  // Recalculate rarity scores based on weighted frequencies
+  const maxWeightedFrequency = Math.max(...weightedPathways.map((p) => p.weightedFrequency));
+  if (maxWeightedFrequency > 0) {
+    for (const pathway of weightedPathways) {
+      pathway.rarityScore = (pathway.weightedFrequency / maxWeightedFrequency) * 100;
+    }
+  }
+
+  // Sort by weighted frequency (descending)
+  weightedPathways.sort((a, b) => b.weightedFrequency - a.weightedFrequency);
+
+  return weightedPathways;
+}
+
+/**
+ * Get statistics about weighted pathways
+ */
+export interface WeightedPathwayStats extends PathwayStats {
+  weightedTotalReactions: number;
+  weightedAvgFrequency: number;
+  mostCommonWeighted: WeightedPathwayAnalysis | null;
+}
+
+export function getWeightedPathwayStats(
+  pathways: WeightedPathwayAnalysis[]
+): WeightedPathwayStats {
+  const baseStats = getPathwayStats(pathways);
+
+  if (pathways.length === 0) {
+    return {
+      ...baseStats,
+      weightedTotalReactions: 0,
+      weightedAvgFrequency: 0,
+      mostCommonWeighted: null,
+    };
+  }
+
+  const weightedTotalReactions = pathways.reduce((sum, p) => sum + p.weightedFrequency, 0);
+  const weightedAvgFrequency = weightedTotalReactions / pathways.length;
+
+  // Most common weighted pathway
+  const mostCommonWeighted = pathways.reduce(
+    (max, p) => (p.weightedFrequency > max.weightedFrequency ? p : max),
+    pathways[0]
+  );
+
+  return {
+    ...baseStats,
+    weightedTotalReactions,
+    weightedAvgFrequency,
+    mostCommonWeighted,
   };
 }

@@ -6,13 +6,13 @@
  */
 
 import initSqlJs, { Database as SqlJsDatabase } from 'sql.js';
-import type { CascadeParameters, CascadeResults } from '../types';
+import type { CascadeParameters, CascadeParametersV2, CascadeResults } from '../types';
 import { applyFeedbackRules, shouldAllowDimerReaction } from '../services/cascadeFeedbackRules';
 
 // Message types
 export interface CascadeWorkerRequest {
   type: 'run';
-  params: CascadeParameters;
+  params: CascadeParameters | CascadeParametersV2;
   dbBuffer: ArrayBuffer;
 }
 
@@ -97,8 +97,9 @@ function buildNuclideId(E: string, A: number): string {
 
 /**
  * Run cascade simulation with progress updates
+ * Supports weighted mode via CascadeParametersV2
  */
-async function runCascadeWithProgress(params: CascadeParameters): Promise<CascadeResults> {
+async function runCascadeWithProgress(params: CascadeParameters | CascadeParametersV2): Promise<CascadeResults> {
   if (!db) {
     throw new Error('Database not initialized');
   }
@@ -311,6 +312,11 @@ async function runCascadeWithProgress(params: CascadeParameters): Promise<Cascad
     newReactionsCount: -3, // Special value for serialization
   } as CascadeProgressMessage);
 
+  // Extract weighted mode fields if available (Issue #96)
+  const v2Params = params as CascadeParametersV2;
+  const weightedFuel = v2Params.weightedFuel;
+  const useWeightedMode = v2Params.useWeightedMode ?? false;
+
   return {
     reactions: allReactions,
     productDistribution,
@@ -320,6 +326,8 @@ async function runCascadeWithProgress(params: CascadeParameters): Promise<Cascad
     loopsExecuted: loopCount,
     executionTime,
     terminationReason,
+    // Include weighted configuration in results for downstream analysis
+    ...(useWeightedMode && weightedFuel ? { weightedFuel, useWeightedMode } : {}),
   };
 }
 

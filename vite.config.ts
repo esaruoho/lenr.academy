@@ -138,9 +138,21 @@ export default defineConfig({
     'import.meta.env.VITE_APP_VERSION': JSON.stringify(getVersion()),
     'import.meta.env.VITE_BUILD_TIME': JSON.stringify(getBuildTime()),
   },
+  server: {
+    host: '0.0.0.0',
+  },
   build: {
     // Generate source maps for production builds
     // This helps Sentry provide readable stack traces
     sourcemap: true,
+
+    // Explicit browser targets for Safari/iOS compatibility
+    // Addresses issue #109: "Importing a module script failed" on iOS 18.7
+    target: ['es2020', 'safari14'],
+
+    // Enable module preload polyfill for better Safari compatibility
+    modulePreload: {
+      polyfill: true,
+    },
   },
 })
