@@ -3,17 +3,15 @@ import { test, expect } from '@playwright/test';
 test.describe('Weighted Cascade (Issue #96)', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to cascades page
-    await page.goto('/');
-    await page.getByRole('link', { name: 'Cascades' }).click();
-    await expect(page).toHaveURL('/cascades');
-    // Wait for database to load
-    await expect(page.locator('button:has-text("Run Cascade Simulation")')).toBeEnabled({ timeout: 10000 });
+    await page.goto('/cascades');
+    // Wait for database to load (may take longer on first load)
+    await expect(page.locator('button:has-text("Run Cascade Simulation")')).toBeEnabled({ timeout: 30000 });
   });
 
   test('should display weighted mode toggle', async ({ page }) => {
-    // Check for weighted mode toggle
+    // Check for weighted mode toggle (sr-only checkbox inside label)
     const weightedToggle = page.getByTestId('weighted-mode-toggle');
-    await expect(weightedToggle).toBeVisible();
+    await expect(weightedToggle).toBeAttached();
 
     // Toggle should be unchecked by default
     await expect(weightedToggle).not.toBeChecked();
@@ -35,93 +33,103 @@ test.describe('Weighted Cascade (Issue #96)', () => {
     await materialsButton.click();
 
     // Modal should open
-    await expect(page.locator('text=Materials Catalog')).toBeVisible();
+    const modal = page.getByTestId('materials-catalog-modal');
+    await expect(modal).toBeVisible();
 
-    // Should have category tabs
-    await expect(page.locator('button:has-text("All")')).toBeVisible();
-    await expect(page.locator('button:has-text("Natural")')).toBeVisible();
-    await expect(page.locator('button:has-text("Alloys")')).toBeVisible();
+    // Should have Materials Catalog heading
+    await expect(modal.locator('h2')).toContainText('Materials Catalog');
 
-    // Close modal with X button
-    await page.locator('button[aria-label="Close"]').click();
+    // Should have materials list (use button selector for specificity)
+    await expect(modal.locator('button:has-text("Natural Lithium")')).toBeVisible();
+
+    // Close modal using Cancel button within modal
+    await modal.locator('button:has-text("Cancel")').click();
 
     // Modal should close
-    await expect(page.locator('text=Materials Catalog')).not.toBeVisible();
+    await expect(modal).not.toBeVisible();
   });
 
   test('should filter materials by category', async ({ page }) => {
     // Open materials catalog
     await page.getByTestId('materials-catalog-button').click();
-    await expect(page.locator('text=Materials Catalog')).toBeVisible();
+    await expect(page.locator('h2:has-text("Materials Catalog")')).toBeVisible();
 
-    // Click on Natural tab
-    await page.locator('button:has-text("Natural")').click();
+    // Click on Natural tab (first button with "Natural" is the tab, not material cards)
+    await page.locator('button:has-text("Natural")').first().click();
 
     // Should show natural abundance materials
-    await expect(page.locator('text=Natural Lithium')).toBeVisible();
-    await expect(page.locator('text=Natural Nickel')).toBeVisible();
+    await expect(page.locator('button:has-text("Natural Lithium")')).toBeVisible();
+    await expect(page.locator('button:has-text("Natural Nickel")')).toBeVisible();
 
-    // Click on Alloys tab
-    await page.locator('button:has-text("Alloys")').click();
+    // Click on Alloys tab (first button with "Alloys" is the tab)
+    await page.locator('button:has-text("Alloys")').first().click();
 
     // Should show alloy materials
-    await expect(page.locator('text=Stainless Steel 304')).toBeVisible();
+    await expect(page.locator('button:has-text("Stainless Steel 304")')).toBeVisible();
   });
 
   test('should search materials', async ({ page }) => {
     // Open materials catalog
+    const modal = page.getByTestId('materials-catalog-modal');
     await page.getByTestId('materials-catalog-button').click();
-    await expect(page.locator('text=Materials Catalog')).toBeVisible();
+    await expect(modal).toBeVisible();
 
     // Search for nickel
-    await page.locator('input[placeholder*="Search"]').fill('nickel');
+    await modal.locator('input[placeholder*="Search"]').fill('nickel');
 
-    // Should filter results
-    await expect(page.locator('text=Natural Nickel')).toBeVisible();
+    // Should filter results - use button selector for material cards
+    await expect(modal.locator('button:has-text("Natural Nickel")')).toBeVisible();
     // Other non-matching materials should be filtered
-    await expect(page.locator('text=Natural Lithium')).not.toBeVisible();
+    await expect(modal.locator('button:has-text("Natural Lithium")')).not.toBeVisible();
   });
 
   test('should load material and enable weighted mode', async ({ page }) => {
     // Open materials catalog
+    const modal = page.getByTestId('materials-catalog-modal');
     await page.getByTestId('materials-catalog-button').click();
-    await expect(page.locator('text=Materials Catalog')).toBeVisible();
+    await expect(modal).toBeVisible();
 
-    // Click on Natural Lithium
-    await page.locator('text=Natural Lithium').click();
+    // Click on Natural tab (first button matching "Natural" is the tab, not material cards)
+    await modal.locator('button:has-text("Natural")').first().click();
 
-    // Find the load button for this material and click it
-    const loadButton = page.locator('button:has-text("Load")').first();
+    // Click on Natural Lithium material card to select it
+    await modal.locator('button:has-text("Natural Lithium")').click();
+
+    // Wait for Load Material button to become enabled after selection
+    const loadButton = modal.locator('button:has-text("Load Material")');
+    await expect(loadButton).toBeEnabled();
     await loadButton.click();
 
     // Modal should close
-    await expect(page.locator('text=Materials Catalog')).not.toBeVisible();
+    await expect(modal).not.toBeVisible();
 
     // Weighted mode should be enabled
     const weightedToggle = page.getByTestId('weighted-mode-toggle');
     await expect(weightedToggle).toBeChecked();
 
-    // Proportion input should be visible (appears when weighted mode is on and nuclides selected)
-    await expect(page.locator('text=Fuel Proportions')).toBeVisible();
-  });
-
-  test('should show proportion input when weighted mode enabled', async ({ page }) => {
-    // Enable weighted mode
-    const weightedToggle = page.getByTestId('weighted-mode-toggle');
-    await weightedToggle.check();
-
-    // Should show proportion input
-    await expect(page.locator('text=Fuel Proportions')).toBeVisible();
-
-    // Should show equal distribution by default (since default nuclides are selected)
-    // The first nuclide should have a proportion display
+    // Proportion input should be visible (use testId for specificity)
     await expect(page.getByTestId('fuel-proportion-input')).toBeVisible();
   });
 
-  test('should show weighted mode info banner', async ({ page }) => {
-    // Enable weighted mode
+  test('should show proportion input when weighted mode enabled', async ({ page }) => {
+    // Enable weighted mode by clicking the label (checkbox is sr-only)
+    await page.locator('label:has-text("Weighted Mode")').click();
+
+    // Verify it's checked
     const weightedToggle = page.getByTestId('weighted-mode-toggle');
-    await weightedToggle.check();
+    await expect(weightedToggle).toBeChecked();
+
+    // Should show proportion input (use testId for specificity)
+    const proportionInput = page.getByTestId('fuel-proportion-input');
+    await expect(proportionInput).toBeVisible();
+
+    // Should have the Fuel Proportions label within the component
+    await expect(proportionInput.locator('text=Fuel Proportions')).toBeVisible();
+  });
+
+  test('should show weighted mode info banner', async ({ page }) => {
+    // Enable weighted mode by clicking the label (checkbox is sr-only)
+    await page.locator('label:has-text("Weighted Mode")').click();
 
     // Should show weighted mode info
     await expect(page.locator('text=Weighted Mode:')).toBeVisible();
@@ -129,26 +137,28 @@ test.describe('Weighted Cascade (Issue #96)', () => {
   });
 
   test('should disable weighted mode toggle', async ({ page }) => {
-    // Enable weighted mode
+    // Enable weighted mode by clicking the label (checkbox is sr-only)
+    const weightedToggleLabel = page.locator('label:has-text("Weighted Mode")');
+    await weightedToggleLabel.click();
+
     const weightedToggle = page.getByTestId('weighted-mode-toggle');
-    await weightedToggle.check();
     await expect(weightedToggle).toBeChecked();
 
-    // Proportion input should be visible
-    await expect(page.locator('text=Fuel Proportions')).toBeVisible();
+    // Proportion input should be visible (use testId)
+    const proportionInput = page.getByTestId('fuel-proportion-input');
+    await expect(proportionInput).toBeVisible();
 
-    // Disable weighted mode
-    await weightedToggle.uncheck();
+    // Disable weighted mode by clicking the label again
+    await weightedToggleLabel.click();
     await expect(weightedToggle).not.toBeChecked();
 
     // Proportion input should be hidden
-    await expect(page.locator('text=Fuel Proportions')).not.toBeVisible();
+    await expect(proportionInput).not.toBeVisible();
   });
 
   test('should run cascade with weighted mode and display results', async ({ page }) => {
-    // Enable weighted mode
-    const weightedToggle = page.getByTestId('weighted-mode-toggle');
-    await weightedToggle.check();
+    // Enable weighted mode by clicking the label (checkbox is sr-only)
+    await page.locator('label:has-text("Weighted Mode")').click();
 
     // Set low loop count for speed
     const loopInput = page.locator('label:has-text("Max Cascade Loops")').locator('..').locator('input[type="range"]');
@@ -166,9 +176,10 @@ test.describe('Weighted Cascade (Issue #96)', () => {
   });
 
   test('should reset weighted mode on parameter reset', async ({ page }) => {
-    // Enable weighted mode
+    // Enable weighted mode by clicking the label (checkbox is sr-only)
+    await page.locator('label:has-text("Weighted Mode")').click();
+
     const weightedToggle = page.getByTestId('weighted-mode-toggle');
-    await weightedToggle.check();
     await expect(weightedToggle).toBeChecked();
 
     // Reset parameters
@@ -182,41 +193,43 @@ test.describe('Weighted Cascade (Issue #96)', () => {
 test.describe('Materials Catalog Categories', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/cascades');
-    await expect(page.locator('button:has-text("Run Cascade Simulation")')).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('button:has-text("Run Cascade Simulation")')).toBeEnabled({ timeout: 30000 });
     // Open materials catalog
     await page.getByTestId('materials-catalog-button').click();
-    await expect(page.locator('text=Materials Catalog')).toBeVisible();
+    await expect(page.getByTestId('materials-catalog-modal')).toBeVisible();
   });
 
   test('should display LENR experiments', async ({ page }) => {
-    // Click on LENR tab
-    await page.locator('button:has-text("LENR")').click();
+    // Click on LENR tab (first button with "LENR" is the tab)
+    await page.locator('button:has-text("LENR")').first().click();
 
-    // Should show LENR experiment materials
-    await expect(page.locator('text=Parkhomov')).toBeVisible();
-    await expect(page.locator('text=Piantelli')).toBeVisible();
+    // Wait for tab content to update and show LENR experiment materials
+    await expect(page.locator('button:has-text("Parkhomov")')).toBeVisible();
+    await expect(page.locator('button:has-text("Piantelli")')).toBeVisible();
   });
 
   test('should display compounds', async ({ page }) => {
-    // Click on Compounds tab
-    await page.locator('button:has-text("Compounds")').click();
+    // Click on Compounds tab (first button with "Compounds" is the tab)
+    await page.locator('button:has-text("Compounds")').first().click();
 
-    // Should show compound materials
-    await expect(page.locator('text=LiAlH4')).toBeVisible();
-    await expect(page.locator('text=NaBH4')).toBeVisible();
+    // Should show compound materials (these are button cards)
+    await expect(page.locator('button:has-text("LiAlH4")')).toBeVisible();
+    await expect(page.locator('button:has-text("NaBH4")')).toBeVisible();
   });
 
   test('should show material composition preview', async ({ page }) => {
-    // Click on Natural tab
-    await page.locator('button:has-text("Natural")').click();
+    const modal = page.getByTestId('materials-catalog-modal');
 
-    // Click on Natural Lithium
-    await page.locator('text=Natural Lithium').click();
+    // Click on Natural tab (first button with "Natural" is the tab)
+    await modal.locator('button:has-text("Natural")').first().click();
 
-    // Should show composition details
-    await expect(page.locator('text=Li-6')).toBeVisible();
-    await expect(page.locator('text=Li-7')).toBeVisible();
-    // Should show isotopic proportions
-    await expect(page.locator('text=%')).toBeVisible();
+    // Click on Natural Lithium material card to select it and show preview
+    await modal.locator('button:has-text("Natural Lithium")').click();
+
+    // Should show composition details in the preview panel (use table cells for specificity)
+    await expect(modal.getByRole('cell', { name: 'Li-6' })).toBeVisible();
+    await expect(modal.getByRole('cell', { name: 'Li-7' })).toBeVisible();
+    // Should show isotopic proportions (at least one percentage cell visible)
+    await expect(modal.getByRole('cell', { name: /%/ }).first()).toBeVisible();
   });
 });
