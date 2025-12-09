@@ -230,20 +230,22 @@ export interface CascadeReaction {
   MeV: number;                       // Energy released/absorbed
   loop: number;                      // Which iteration produced this reaction (0 = initial)
   neutrino: NeutrinoType;            // Neutrino involvement
+  weight?: number;                   // Weighted probability (0-1) based on fuel proportions
 }
 
 export interface CascadeResults {
   reactions: CascadeReaction[];                    // All reactions in cascade
-  productDistribution: Map<string, number>;        // Nuclide ID → count of appearances
+  productDistribution: Map<string, number>;        // Nuclide ID → count (unweighted) or weighted sum
   nuclides: Nuclide[];                             // All nuclides involved
   elements: Element[];                             // All elements involved
-  totalEnergy: number;                             // Sum of all MeV values
+  totalEnergy: number;                             // Sum of all MeV values (unweighted)
   loopsExecuted: number;                           // Actual loops run (may be < maxLoops)
   executionTime: number;                           // Time in milliseconds
   terminationReason: 'max_loops' | 'no_new_products' | 'max_nuclides'; // Why cascade stopped
   // Weighted mode fields (Issue #96)
   weightedFuel?: WeightedNuclide[];                // Fuel proportions used (if weighted mode)
   useWeightedMode?: boolean;                       // Whether weighted analysis should be applied
+  weightedEnergy?: number;                         // Weighted sum of MeV values (only in weighted mode)
 }
 
 // Decay chain types for multi-generation radioactive decay visualization
