@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { X, Search, Beaker, Factory, FlaskConical, Atom, Save, Trash2, ChevronRight, User, Plus, Layers } from 'lucide-react';
+import { X, Search, Beaker, Factory, FlaskConical, Atom, Save, Trash2, ChevronRight, ChevronLeft, User, Plus, Layers } from 'lucide-react';
 import type { Material, MaterialCategory, WeightedNuclide } from '../types';
 import {
   getAllMaterials,
@@ -53,6 +53,9 @@ export default function MaterialsCatalog({
   const [blendMode, setBlendMode] = useState(false);
   const [blendMaterials, setBlendMaterials] = useState<Material[]>([]);
 
+  // Refresh trigger to force re-render when materials change (e.g., after delete)
+  const [refreshKey, setRefreshKey] = useState(0);
+
   // Filter materials based on tab and search
   const filteredMaterials = useMemo(() => {
     let materials = searchQuery.trim()
@@ -64,7 +67,7 @@ export default function MaterialsCatalog({
     }
 
     return materials;
-  }, [activeTab, searchQuery]);
+  }, [activeTab, searchQuery, refreshKey]);
 
   // Get icon for category
   const getCategoryIcon = (category: MaterialCategory) => {
@@ -155,7 +158,8 @@ export default function MaterialsCatalog({
     setShowSaveDialog(false);
     setSaveName('');
     setSaveDescription('');
-    // Refresh to show new material
+    // Trigger re-render and switch to custom tab to show new material
+    setRefreshKey((k) => k + 1);
     setActiveTab('custom');
   };
 
@@ -167,6 +171,8 @@ export default function MaterialsCatalog({
       if (selectedMaterial?.id === id) {
         setSelectedMaterial(null);
       }
+      // Trigger re-render to update the materials list
+      setRefreshKey((k) => k + 1);
     }
   };
 
@@ -187,27 +193,27 @@ export default function MaterialsCatalog({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <div className="flex items-start justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="min-w-0 flex-1 pr-2">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                 Materials Catalog
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1">
                 Select a material or save your current fuel mixture
               </p>
             </div>
             <button
               onClick={onClose}
               aria-label="Close"
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Search and Actions */}
-          <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex gap-3 mb-3">
+          <div className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col xs:flex-row gap-2 xs:gap-3 mb-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -222,7 +228,7 @@ export default function MaterialsCatalog({
               {currentFuel && currentFuel.length > 0 && (
                 <button
                   onClick={() => setShowSaveDialog(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors whitespace-nowrap"
                   data-testid="save-custom-material-button"
                 >
                   <Save className="w-4 h-4" />
@@ -302,43 +308,51 @@ export default function MaterialsCatalog({
             )}
           </div>
 
-          {/* Tabs */}
-          <div className="flex flex-wrap border-b border-gray-200 dark:border-gray-700">
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              const count = tab.key === 'all'
-                ? getAllMaterials().length
-                : tab.key === 'custom'
-                  ? getCustomMaterials().length
-                  : getAllMaterials().filter((m) => m.category === tab.key).length;
+          {/* Tabs - always visible, hidden on mobile when viewing details */}
+          <div className={`
+            overflow-x-auto border-b border-gray-200 dark:border-gray-700 scrollbar-hide flex-shrink-0
+            ${selectedMaterial ? 'hidden sm:block' : 'block'}
+          `}>
+            <div className="flex">
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                const count = tab.key === 'all'
+                  ? getAllMaterials().length
+                  : tab.key === 'custom'
+                    ? getCustomMaterials().length
+                    : getAllMaterials().filter((m) => m.category === tab.key).length;
 
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`
-                    flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors
-                    ${activeTab === tab.key
-                      ? 'border-primary-600 text-primary-600 dark:text-primary-400'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600'
-                    }
-                  `}
-                  data-testid={`materials-tab-${tab.key}`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                  <span className="text-xs bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded-full">
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`
+                      flex items-center gap-1.5 px-3 sm:px-4 py-2.5 sm:py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors
+                      ${activeTab === tab.key
+                        ? 'border-primary-600 text-primary-600 dark:text-primary-400'
+                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600'
+                      }
+                    `}
+                    data-testid={`materials-tab-${tab.key}`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.label}
+                    <span className="text-xs bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded-full">
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Content Area */}
-          <div className="flex flex-1 overflow-hidden">
-            {/* Materials List */}
-            <div className="w-1/2 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
+          <div className="flex flex-1 overflow-hidden min-h-0">
+            {/* Materials List - hidden on mobile when material is selected */}
+            <div className={`
+              w-full sm:w-1/2 sm:border-r border-gray-200 dark:border-gray-700 overflow-y-auto
+              ${selectedMaterial ? 'hidden sm:block' : 'block'}
+            `}>
               {filteredMaterials.length === 0 ? (
                 <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                   {searchQuery
@@ -354,7 +368,7 @@ export default function MaterialsCatalog({
                         key={material.id}
                         onClick={() => setSelectedMaterial(material)}
                         className={`
-                          w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors
+                          w-full p-3 sm:p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors
                           ${selectedMaterial?.id === material.id
                             ? 'bg-primary-50 dark:bg-primary-900/20 border-l-4 border-primary-500'
                             : inBlend
@@ -365,16 +379,16 @@ export default function MaterialsCatalog({
                         data-testid={`material-item-${material.id}`}
                       >
                         <div className="flex items-start justify-between">
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className={`p-1 rounded ${getCategoryColor(material.category)}`}>
+                              <span className={`p-1 rounded flex-shrink-0 ${getCategoryColor(material.category)}`}>
                                 {getCategoryIcon(material.category)}
                               </span>
-                              <span className="font-medium text-gray-900 dark:text-white">
+                              <span className="font-medium text-gray-900 dark:text-white truncate">
                                 {material.name}
                               </span>
                               {inBlend && (
-                                <span className="text-xs px-1.5 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">
+                                <span className="text-xs px-1.5 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded flex-shrink-0">
                                   In blend
                                 </span>
                               )}
@@ -382,7 +396,7 @@ export default function MaterialsCatalog({
                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
                               {material.description}
                             </p>
-                            <div className="flex gap-1 mt-2">
+                            <div className="flex flex-wrap gap-1 mt-2">
                               {material.tags?.slice(0, 3).map((tag) => (
                                 <span
                                   key={tag}
@@ -393,7 +407,7 @@ export default function MaterialsCatalog({
                               ))}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                             {material.isCustom && (
                               <button
                                 onClick={(e) => handleDeleteCustom(material.id, e)}
@@ -413,10 +427,22 @@ export default function MaterialsCatalog({
               )}
             </div>
 
-            {/* Material Details */}
-            <div className="w-1/2 overflow-y-auto p-4">
+            {/* Material Details - full width on mobile when selected */}
+            <div className={`
+              w-full sm:w-1/2 overflow-y-auto p-3 sm:p-4
+              ${selectedMaterial ? 'block' : 'hidden sm:block'}
+            `}>
               {selectedMaterial ? (
                 <div>
+                  {/* Back button - mobile only */}
+                  <button
+                    onClick={() => setSelectedMaterial(null)}
+                    className="sm:hidden flex items-center gap-1 text-sm text-primary-600 dark:text-primary-400 mb-3 -ml-1"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Back to list
+                  </button>
+
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                     {selectedMaterial.name}
                   </h3>
@@ -471,7 +497,7 @@ export default function MaterialsCatalog({
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Composition ({selectedMaterial.composition.length} nuclides)
                     </h4>
-                    <div className="max-h-80 overflow-y-auto overscroll-contain border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div className="overflow-y-auto overscroll-contain border border-gray-200 dark:border-gray-700 rounded-lg sm:max-h-80">
                       <table className="w-full text-sm">
                         <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
                           <tr>
@@ -511,14 +537,14 @@ export default function MaterialsCatalog({
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              {filteredMaterials.length} materials available
+          <div className="flex items-center justify-between gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+            <div className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+              {filteredMaterials.length} materials
             </div>
             <div className="flex gap-2">
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Cancel
               </button>
@@ -527,30 +553,30 @@ export default function MaterialsCatalog({
                   <button
                     onClick={handleAddToBlend}
                     disabled={!selectedMaterial || isInBlend(selectedMaterial?.id || '')}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors whitespace-nowrap"
                     data-testid="add-to-blend-button"
                   >
                     <Plus className="w-4 h-4" />
-                    Add to Blend
+                    <span className="hidden xs:inline">Add</span>
                   </button>
                   <button
                     onClick={handleApplyBlend}
                     disabled={blendMaterials.length === 0}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-3 sm:px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors whitespace-nowrap"
                     data-testid="apply-blend-button"
                   >
                     <Layers className="w-4 h-4" />
-                    Apply Blend ({blendMaterials.length})
+                    <span className="hidden xs:inline">Blend</span> ({blendMaterials.length})
                   </button>
                 </>
               ) : (
                 <button
                   onClick={handleSelect}
                   disabled={!selectedMaterial}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
+                  className="px-3 sm:px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
                   data-testid="load-material-button"
                 >
-                  Load Material
+                  Load
                 </button>
               )}
             </div>
