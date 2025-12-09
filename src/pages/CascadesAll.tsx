@@ -94,7 +94,10 @@ export default function CascadesAll() {
   }, [db, hasRestoredFromContext, getCascadeState])
 
   // Sync weighted fuel with fuel nuclides
+  // Skip during initial state restoration to preserve saved proportions
   useEffect(() => {
+    if (!hasRestoredFromContext) return
+
     if (fuelNuclides.length === 0) {
       setWeightedFuel([])
       return
@@ -128,7 +131,7 @@ export default function CascadesAll() {
 
       return updated
     })
-  }, [fuelNuclides])
+  }, [fuelNuclides, hasRestoredFromContext])
 
   // Save state to context whenever it changes
   useEffect(() => {
@@ -309,9 +312,9 @@ export default function CascadesAll() {
       </div>
 
       <div className="card p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Fuel Nuclides</h2>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             {/* Weighted Mode Toggle */}
             <label className="flex items-center gap-2 cursor-pointer">
               <div className="relative">
@@ -332,7 +335,8 @@ export default function CascadesAll() {
               </div>
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                 <Scale className="w-4 h-4" />
-                Weighted Mode
+                <span className="xs:hidden">Weighted</span>
+                <span className="hidden xs:inline">Weighted Mode</span>
               </span>
             </label>
             {/* Materials Catalog Button */}
