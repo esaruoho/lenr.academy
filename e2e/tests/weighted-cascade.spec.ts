@@ -95,8 +95,8 @@ test.describe('Weighted Cascade (Issue #96)', () => {
     // Click on Natural Lithium material card to select it
     await modal.locator('button:has-text("Natural Lithium")').click();
 
-    // Wait for Load Material button to become enabled after selection
-    const loadButton = modal.locator('button:has-text("Load Material")');
+    // Wait for Load button to become enabled after selection
+    const loadButton = modal.getByTestId('load-material-button');
     await expect(loadButton).toBeEnabled();
     await loadButton.click();
 
