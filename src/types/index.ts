@@ -230,17 +230,22 @@ export interface CascadeReaction {
   MeV: number;                       // Energy released/absorbed
   loop: number;                      // Which iteration produced this reaction (0 = initial)
   neutrino: NeutrinoType;            // Neutrino involvement
+  weight?: number;                   // Weighted probability (0-1) based on fuel proportions
 }
 
 export interface CascadeResults {
   reactions: CascadeReaction[];                    // All reactions in cascade
-  productDistribution: Map<string, number>;        // Nuclide ID → count of appearances
+  productDistribution: Map<string, number>;        // Nuclide ID → count (unweighted) or weighted sum
   nuclides: Nuclide[];                             // All nuclides involved
   elements: Element[];                             // All elements involved
-  totalEnergy: number;                             // Sum of all MeV values
+  totalEnergy: number;                             // Sum of all MeV values (unweighted)
   loopsExecuted: number;                           // Actual loops run (may be < maxLoops)
   executionTime: number;                           // Time in milliseconds
   terminationReason: 'max_loops' | 'no_new_products' | 'max_nuclides'; // Why cascade stopped
+  // Weighted mode fields (Issue #96)
+  weightedFuel?: WeightedNuclide[];                // Fuel proportions used (if weighted mode)
+  useWeightedMode?: boolean;                       // Whether weighted analysis should be applied
+  weightedEnergy?: number;                         // Weighted sum of MeV values (only in weighted mode)
 }
 
 // Decay chain types for multi-generation radioactive decay visualization
@@ -323,6 +328,11 @@ export interface CascadePageState {
   // Fuel nuclides
   fuelNuclides: string[];
 
+  // Weighted fuel proportions (Issue #96)
+  weightedFuel?: WeightedNuclide[];
+  proportionFormat?: ProportionFormat;
+  useWeightedMode?: boolean;
+
   // Simulation results (optional - only present after running simulation)
   results?: CascadeResults;
 
@@ -336,4 +346,141 @@ export interface AllQueryStates {
   twotwo?: QueryPageState;
   cascade?: CascadePageState;
   version?: number;  // For future migration if state structure changes
+}
+
+// ============================================================================
+// Weighted Fuel Proportions Types (Issue #96)
+// ============================================================================
+
+/**
+ * How the proportion was set - manual input, from a material, or natural abundance
+ */
+export type ProportionSourceType = 'manual' | 'material' | 'natural';
+
+/**
+ * Input format for specifying proportions
+ */
+export type ProportionFormat = 'percentage' | 'atomic-ratio' | 'mass-ratio';
+
+/**
+ * A fuel nuclide with its proportion in the mixture
+ */
+export interface WeightedNuclide {
+  nuclideId: string;                    // e.g., "Li-7", "Ni-58", "H-1"
+  proportion: number;                   // 0-100 percentage (normalized internally)
+  sourceType?: ProportionSourceType;    // How this proportion was set
+}
+
+/**
+ * Extended cascade parameters with weighted fuel support
+ */
+export interface CascadeParametersV2 extends CascadeParameters {
+  weightedFuel?: WeightedNuclide[];     // Proportional fuel input
+  proportionFormat?: ProportionFormat;  // How proportions were entered
+  useWeightedMode?: boolean;            // Toggle weighted vs equal-weight mode
+  monteCarloIterations?: number;        // For Monte Carlo sampling (default: 1000)
+}
+
+/**
+ * Pathway analysis with weighted statistics
+ * Mirrors PathwayAnalysis from pathwayAnalyzer.ts with additional weighted fields
+ */
+export interface WeightedPathwayAnalysis {
+  // Base pathway fields (mirrors PathwayAnalysis)
+  pathway: string;                      // Human-readable: "H-1 + Li-7 → He-4"
+  type: 'fusion' | 'twotwo';
+  inputs: string[];
+  outputs: string[];
+  frequency: number;                    // Raw count of occurrences
+  avgEnergy: number;                    // Average MeV per occurrence
+  totalEnergy: number;                  // Total MeV across all occurrences
+  loops: number[];                      // Which loop numbers this pathway appears in
+  isFeedback: boolean;                  // Does an output become an input later?
+  rarityScore: number;                  // 0-100, where 100 = most common pathway
+
+  // Weighted statistics
+  weightedFrequency: number;            // Frequency adjusted by input proportions
+  weightedTotalEnergy: number;          // Energy weighted by proportions
+  inputContributions: Record<string, number>;  // Which fuel nuclides contributed and by how much
+}
+
+/**
+ * Monte Carlo sampling statistics
+ */
+export interface SamplingStats {
+  iterations: number;                   // Number of Monte Carlo iterations run
+  convergenceMetric: number;            // Statistical convergence measure (0-1)
+}
+
+/**
+ * Extended cascade results with weighted pathway analysis
+ */
+export interface CascadeResultsV2 extends CascadeResults {
+  weightedPathways?: WeightedPathwayAnalysis[];  // Pathway analysis with weighted stats
+  proportionNormalized?: WeightedNuclide[];      // Actual proportions used (normalized)
+  samplingStats?: SamplingStats;                 // Monte Carlo sampling statistics
+}
+
+// ============================================================================
+// Materials Catalog Types (Issue #96)
+// ============================================================================
+
+/**
+ * Category of material in the catalog
+ */
+export type MaterialCategory =
+  | 'natural-abundance'   // Natural isotopic abundances for an element
+  | 'alloy'               // Metal alloys (stainless steel, bronze, etc.)
+  | 'compound'            // Chemical compounds (LiAlH4, NaBH4, etc.)
+  | 'lenr-experiment'     // Historical LENR experiment fuel compositions
+  | 'custom';             // User-defined custom mixtures
+
+/**
+ * A single nuclide component in a material composition
+ */
+export interface MaterialComposition {
+  nuclideId: string;                    // e.g., "Li-7", "Fe-56"
+  proportion: number;                   // Percentage (0-100)
+}
+
+/**
+ * A material definition for the catalog
+ */
+export interface Material {
+  id: string;                           // Unique identifier
+  name: string;                         // Display name (e.g., "Natural Lithium")
+  category: MaterialCategory;
+  description: string;                  // Brief description
+  composition: MaterialComposition[];   // Nuclide proportions
+  source?: string;                      // Citation or reference URL
+  isCustom?: boolean;                   // True if user-created
+  createdAt?: number;                   // Timestamp for custom materials
+  tags?: string[];                      // Search tags
+}
+
+/**
+ * Extended material type for historical LENR experiments
+ */
+export interface LENRExperiment extends Material {
+  researcher: string;                   // Primary researcher name
+  year?: number;                        // Year of experiment
+  citation?: string;                    // Full citation or DOI
+  experimentType?: string;              // Type of experiment (e.g., "Ni-H", "Pd-D")
+}
+
+/**
+ * Extended cascade page state with weighted fuel support
+ */
+export interface CascadePageStateV2 extends CascadePageState {
+  // Weighted fuel proportions
+  weightedFuel?: WeightedNuclide[];
+  proportionFormat?: ProportionFormat;
+  useWeightedMode?: boolean;
+  monteCarloIterations?: number;
+
+  // Materials catalog state
+  selectedMaterialId?: string;          // Currently selected material
+
+  // Extended results
+  results?: CascadeResultsV2;
 }

@@ -1,6 +1,7 @@
 import type { Database } from 'sql.js';
 import type {
   CascadeParameters,
+  CascadeParametersV2,
   CascadeResults,
   CascadeReaction,
 } from '../types';
@@ -79,12 +80,44 @@ function buildNuclideId(E: string, A: number): string {
  * 3. Return complete reaction tree and statistics
  *
  * @param db - SQLite database instance
- * @param params - Cascade parameters
- * @returns Cascade simulation results
+ * @param params - Cascade parameters (supports weighted mode via CascadeParametersV2)
+ * @returns Cascade simulation results with optional weighted fuel configuration
  */
+/**
+ * Calculate reaction weight based on input nuclide proportions
+ *
+ * For a reaction with inputs A + B:
+ * - Weight = P(A) * P(B) for different nuclides
+ * - Weight = P(A)^2 for same nuclide (A + A)
+ *
+ * Proportions are normalized to 0-1 range (from 0-100 percentage)
+ *
+ * @param inputs - Array of input nuclide IDs [input1, input2]
+ * @param proportionMap - Map of nuclide ID to proportion (0-100)
+ * @returns Weight value (0-1 range)
+ */
+export function calculateReactionWeight(
+  inputs: string[],
+  proportionMap: Map<string, number>
+): number {
+  const [input1, input2] = inputs;
+  const p1 = (proportionMap.get(input1) ?? 0) / 100;
+  const p2 = (proportionMap.get(input2) ?? 0) / 100;
+
+  // If either input has 0 proportion, the reaction has 0 weight
+  if (p1 === 0 || p2 === 0) {
+    return 0;
+  }
+
+  // For A + A reactions, probability is proportional to p^2
+  // For A + B reactions, probability is proportional to p1 * p2 * 2 (combinatorial factor)
+  // We normalize later, so we can simplify to just p1 * p2
+  return p1 * p2;
+}
+
 export async function runCascadeSimulation(
   db: Database,
-  params: CascadeParameters
+  params: CascadeParameters | CascadeParametersV2
 ): Promise<CascadeResults> {
   const startTime = performance.now();
 
@@ -92,6 +125,28 @@ export async function runCascadeSimulation(
   const fuelNuclideIds = parseFuelNuclides(params.fuelNuclides);
   if (fuelNuclideIds.length === 0) {
     throw new Error('No valid fuel nuclides provided');
+  }
+
+  // Extract weighted mode fields if available (Issue #96)
+  const v2Params = params as CascadeParametersV2;
+  const weightedFuel = v2Params.weightedFuel;
+  const useWeightedMode = v2Params.useWeightedMode ?? false;
+
+  // Build proportion map for weighted calculations
+  // This tracks the current proportion of each nuclide in the system
+  const proportionMap = new Map<string, number>();
+
+  if (useWeightedMode && weightedFuel && weightedFuel.length > 0) {
+    // Use provided proportions
+    for (const wn of weightedFuel) {
+      proportionMap.set(wn.nuclideId, wn.proportion);
+    }
+  } else {
+    // Equal proportions for all fuel nuclides
+    const equalProportion = 100 / fuelNuclideIds.length;
+    for (const nuclideId of fuelNuclideIds) {
+      proportionMap.set(nuclideId, equalProportion);
+    }
   }
 
   // Track all reactions and nuclides
@@ -139,6 +194,10 @@ export async function runCascadeSimulation(
 
       // Only include if both inputs are in active pool AND output is new
       if (activeNuclides.has(input1) && activeNuclides.has(input2) && !activeNuclides.has(output)) {
+        const weight = useWeightedMode
+          ? calculateReactionWeight([input1, input2], proportionMap)
+          : 1;
+
         allReactions.push({
           type: 'fusion',
           inputs: [input1, input2],
@@ -146,11 +205,12 @@ export async function runCascadeSimulation(
           MeV: reaction.MeV,
           loop: loopCount,
           neutrino: reaction.neutrino,
+          ...(useWeightedMode ? { weight } : {}),
         });
 
-        // Track product
+        // Track product with weight
         newProducts.add(output);
-        productDistribution.set(output, (productDistribution.get(output) || 0) + 1);
+        productDistribution.set(output, (productDistribution.get(output) || 0) + weight);
       }
     }
 
@@ -171,6 +231,10 @@ export async function runCascadeSimulation(
       // Only include if both inputs are in active pool AND at least one output is new
       const hasNewOutput = !activeNuclides.has(output1) || !activeNuclides.has(output2);
       if (activeNuclides.has(input1) && activeNuclides.has(input2) && hasNewOutput) {
+        const weight = useWeightedMode
+          ? calculateReactionWeight([input1, input2], proportionMap)
+          : 1;
+
         allReactions.push({
           type: 'twotwo',
           inputs: [input1, input2],
@@ -178,13 +242,14 @@ export async function runCascadeSimulation(
           MeV: reaction.MeV,
           loop: loopCount,
           neutrino: reaction.neutrino,
+          ...(useWeightedMode ? { weight } : {}),
         });
 
-        // Track products
+        // Track products with weight
         newProducts.add(output1);
         newProducts.add(output2);
-        productDistribution.set(output1, (productDistribution.get(output1) || 0) + 1);
-        productDistribution.set(output2, (productDistribution.get(output2) || 0) + 1);
+        productDistribution.set(output1, (productDistribution.get(output1) || 0) + weight);
+        productDistribution.set(output2, (productDistribution.get(output2) || 0) + weight);
       }
     }
 
@@ -198,9 +263,19 @@ export async function runCascadeSimulation(
     }
 
     // Feedback: add new products to active pool
+    // For weighted mode, new products start with a small proportion based on their production weight
     for (const product of newProducts) {
       activeNuclides.add(product);
       processedNuclides.add(product);
+
+      // In weighted mode, assign a small initial proportion to new products
+      // This allows them to participate in subsequent reactions
+      if (useWeightedMode && !proportionMap.has(product)) {
+        // Use the product's distribution weight as its proportion
+        // Normalize so all products together contribute a fraction of the total
+        const productWeight = productDistribution.get(product) || 0;
+        proportionMap.set(product, productWeight * 10); // Scale factor for visibility
+      }
     }
 
     loopCount++;
@@ -211,8 +286,13 @@ export async function runCascadeSimulation(
     terminationReason = 'max_loops';
   }
 
-  // Calculate total energy
+  // Calculate total energy (unweighted sum)
   const totalEnergy = allReactions.reduce((sum, r) => sum + r.MeV, 0);
+
+  // Calculate weighted energy if in weighted mode
+  const weightedEnergy = useWeightedMode
+    ? allReactions.reduce((sum, r) => sum + r.MeV * (r.weight ?? 1), 0)
+    : undefined;
 
   // Collect all unique nuclides and elements involved
   const nuclideIds = new Set<string>();
@@ -249,5 +329,11 @@ export async function runCascadeSimulation(
     loopsExecuted: loopCount,
     executionTime,
     terminationReason,
+    // Include weighted configuration and results
+    ...(useWeightedMode && weightedFuel ? {
+      weightedFuel,
+      useWeightedMode,
+      weightedEnergy,
+    } : {}),
   };
 }

@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react'
-import { Play, Settings, AlertCircle, CheckCircle, XCircle, Loader2, Download } from 'lucide-react'
+import { Play, Settings, AlertCircle, CheckCircle, XCircle, Loader2, Download, Scale, BookOpen } from 'lucide-react'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useQueryState } from '../contexts/QueryStateContext'
 import { useCascadeWorker } from '../hooks/useCascadeWorker'
 import CascadeProgressCard from '../components/CascadeProgressCard'
 import CascadeTabs from '../components/CascadeTabs'
 import PeriodicTableSelector from '../components/PeriodicTableSelector'
+import ProportionInput from '../components/ProportionInput'
+import MaterialsCatalog from '../components/MaterialsCatalog'
 import { getAllElements } from '../services/queryService'
-import type { CascadeResults, Element } from '../types'
+import { createEqualProportions } from '../services/proportionService'
+import type { CascadeResults, Element, WeightedNuclide, ProportionFormat } from '../types'
 
 export default function CascadesAll() {
   const { db } = useDatabase()
@@ -37,6 +40,12 @@ export default function CascadesAll() {
   const [results, setResults] = useState<CascadeResults | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // Weighted mode state (Issue #96)
+  const [useWeightedMode, setUseWeightedMode] = useState(false)
+  const [weightedFuel, setWeightedFuel] = useState<WeightedNuclide[]>([])
+  const [proportionFormat, setProportionFormat] = useState<ProportionFormat>('percentage')
+  const [showMaterialsCatalog, setShowMaterialsCatalog] = useState(false)
+
   // Load available elements and restore state when database is ready
   useEffect(() => {
     if (db) {
@@ -63,6 +72,17 @@ export default function CascadesAll() {
           setSliderMaxLoops(savedState.maxLoops)
           setFuelNuclides(savedState.fuelNuclides)
 
+          // Restore weighted mode state (Issue #96)
+          if (savedState.weightedFuel) {
+            setWeightedFuel(savedState.weightedFuel)
+          }
+          if (savedState.proportionFormat) {
+            setProportionFormat(savedState.proportionFormat)
+          }
+          if (savedState.useWeightedMode !== undefined) {
+            setUseWeightedMode(savedState.useWeightedMode)
+          }
+
           // Restore simulation results if available
           if (savedState.results) {
             setResults(savedState.results)
@@ -72,6 +92,46 @@ export default function CascadesAll() {
       }
     }
   }, [db, hasRestoredFromContext, getCascadeState])
+
+  // Sync weighted fuel with fuel nuclides
+  // Skip during initial state restoration to preserve saved proportions
+  useEffect(() => {
+    if (!hasRestoredFromContext) return
+
+    if (fuelNuclides.length === 0) {
+      setWeightedFuel([])
+      return
+    }
+
+    // When fuel nuclides change, update weighted fuel to include new nuclides
+    // and remove any that are no longer selected
+    setWeightedFuel((prev) => {
+      const existingMap = new Map(prev.map((n) => [n.nuclideId, n]))
+
+      // Keep existing proportions for nuclides that are still selected
+      const updated: WeightedNuclide[] = []
+      for (const id of fuelNuclides) {
+        if (existingMap.has(id)) {
+          updated.push(existingMap.get(id)!)
+        } else {
+          // New nuclide - give it equal proportion
+          updated.push({
+            nuclideId: id,
+            proportion: 100 / fuelNuclides.length,
+            sourceType: 'manual',
+          })
+        }
+      }
+
+      // If proportions don't make sense anymore, redistribute equally
+      const total = updated.reduce((sum, n) => sum + n.proportion, 0)
+      if (total === 0 || updated.length !== prev.length) {
+        return createEqualProportions(fuelNuclides, 'manual')
+      }
+
+      return updated
+    })
+  }, [fuelNuclides, hasRestoredFromContext])
 
   // Save state to context whenever it changes
   useEffect(() => {
@@ -90,6 +150,10 @@ export default function CascadesAll() {
       excludeBoiledOff: params.excludeBoiledOff,
       fuelNuclides,
       results: results || undefined,
+      // Weighted mode state (Issue #96)
+      weightedFuel: weightedFuel.length > 0 ? weightedFuel : undefined,
+      proportionFormat,
+      useWeightedMode,
     })
   }, [
     hasRestoredFromContext,
@@ -105,6 +169,9 @@ export default function CascadesAll() {
     params.excludeBoiledOff,
     fuelNuclides,
     results,
+    weightedFuel,
+    proportionFormat,
+    useWeightedMode,
     updateCascadeState,
   ])
 
@@ -126,10 +193,15 @@ export default function CascadesAll() {
       // Export database to ArrayBuffer for worker
       const dbBuffer = db.export().buffer
 
-      // Run cascade in worker
+      // Run cascade in worker (with weighted mode support - Issue #96)
       const cascadeResults = await runCascade({
         fuelNuclides: fuelNuclides,
         ...params,
+        // Include weighted fuel configuration when enabled
+        ...(useWeightedMode && weightedFuel.length > 0 ? {
+          weightedFuel,
+          useWeightedMode: true,
+        } : {}),
       }, dbBuffer as ArrayBuffer)
 
       setResults(cascadeResults)
@@ -158,6 +230,19 @@ export default function CascadesAll() {
     setFuelNuclides(['H-1', 'Li-7', 'Al-27', 'N-14', 'Ni-58', 'Ni-60', 'Ni-62', 'B-10', 'B-11'])
     setResults(null)
     setError(null)
+    // Reset weighted mode state
+    setUseWeightedMode(false)
+    setWeightedFuel([])
+    setProportionFormat('percentage')
+  }
+
+  // Handle material selection from catalog
+  const handleMaterialSelect = (nuclides: WeightedNuclide[]) => {
+    // Extract unique nuclide IDs and update fuel selection
+    const nuclideIds = nuclides.map((n) => n.nuclideId)
+    setFuelNuclides(nuclideIds)
+    setWeightedFuel(nuclides)
+    setUseWeightedMode(true) // Enable weighted mode when loading a material
   }
 
   const handleDownloadCSV = () => {
@@ -227,7 +312,46 @@ export default function CascadesAll() {
       </div>
 
       <div className="card p-6 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Fuel Nuclides</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Fuel Nuclides</h2>
+          <div className="flex items-center gap-3 sm:gap-4">
+            {/* Weighted Mode Toggle */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={useWeightedMode}
+                  onChange={(e) => setUseWeightedMode(e.target.checked)}
+                  className="sr-only"
+                  data-testid="weighted-mode-toggle"
+                />
+                <div className={`w-10 h-6 rounded-full transition-colors ${
+                  useWeightedMode ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'
+                }`}>
+                  <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                    useWeightedMode ? 'translate-x-4' : ''
+                  }`} />
+                </div>
+              </div>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                <Scale className="w-4 h-4" />
+                <span className="xs:hidden">Weighted</span>
+                <span className="hidden xs:inline">Weighted Mode</span>
+              </span>
+            </label>
+            {/* Materials Catalog Button */}
+            <button
+              type="button"
+              onClick={() => setShowMaterialsCatalog(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              data-testid="materials-catalog-button"
+            >
+              <BookOpen className="w-4 h-4" />
+              Materials
+            </button>
+          </div>
+        </div>
+
         <PeriodicTableSelector
           label="Select specific isotopes for your fuel mixture"
           availableElements={availableElements}
@@ -239,6 +363,36 @@ export default function CascadesAll() {
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
           Click on elements to select specific isotopes. Color coding indicates natural abundance.
         </p>
+
+        {/* Weighted Proportions Input (shown when weighted mode is enabled) */}
+        {useWeightedMode && fuelNuclides.length > 0 && (
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <ProportionInput
+              nuclideIds={fuelNuclides}
+              weightedNuclides={weightedFuel}
+              onProportionsChange={setWeightedFuel}
+              format={proportionFormat}
+              onFormatChange={setProportionFormat}
+              db={db}
+              showFormatSelector={true}
+              testId="fuel-proportion-input"
+            />
+          </div>
+        )}
+
+        {/* Weighted Mode Info */}
+        {useWeightedMode && (
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-start gap-2">
+              <Scale className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-blue-700 dark:text-blue-300">
+                <strong>Weighted Mode:</strong> Pathway frequencies will be weighted by fuel proportions
+                using a hybrid deterministic/Monte Carlo approach. Results reflect the probability
+                of reactions occurring based on relative abundances.
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="card p-6 mb-6">
@@ -520,6 +674,14 @@ export default function CascadesAll() {
           </ol>
         </div>
       )}
+
+      {/* Materials Catalog Modal */}
+      <MaterialsCatalog
+        isOpen={showMaterialsCatalog}
+        onClose={() => setShowMaterialsCatalog(false)}
+        onSelectMaterial={handleMaterialSelect}
+        currentFuel={weightedFuel}
+      />
     </div>
   )
 }
