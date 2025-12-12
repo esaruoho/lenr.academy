@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Radiation } from 'lucide-react'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useLayout } from '../contexts/LayoutContext'
@@ -131,6 +132,7 @@ function getDaughterNuclide(Z: number, A: number, E: string, decayMode: string):
 }
 
 export default function ShowElementData() {
+  const { t } = useTranslation()
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const { openSidebar, setMobileHeaderHidden } = useLayout()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -701,10 +703,10 @@ export default function ShowElementData() {
 
   // Define tabs with counts (showing filtered counts)
   const tabs: Tab[] = [
-    { id: 'integrated', label: 'Integrated' },
-    { id: 'elements', label: 'Elements', count: filteredElements.length },
-    { id: 'nuclides', label: 'Nuclides', count: filteredNuclides.length },
-    { id: 'decays', label: 'Decays', count: filteredDecays.length }
+    { id: 'integrated', label: t('elements.integrated') },
+    { id: 'elements', label: t('elements.element'), count: filteredElements.length },
+    { id: 'nuclides', label: t('elements.nuclides'), count: filteredNuclides.length },
+    { id: 'decays', label: t('elements.decays'), count: filteredDecays.length }
   ]
 
   // Initialize from URL params on mount
@@ -1135,38 +1137,38 @@ export default function ShowElementData() {
   const elementsFilterConfigs: FilterConfig[] = [
     {
       key: 'period',
-      label: 'Period',
+      label: t('elements.period'),
       type: 'select',
       options: Array.from(new Set(allElements.map(el => el.Period)))
         .filter(p => p != null)
         .sort((a, b) => a - b)
-        .map(p => ({ value: p, label: `Period ${p}` })),
-      placeholder: 'All Periods'
+        .map(p => ({ value: p, label: `${t('elements.period')} ${p}` })),
+      placeholder: t('common.select')
     },
     {
       key: 'group',
-      label: 'Group',
+      label: t('elements.group'),
       type: 'select',
       options: Array.from(new Set(allElements.map(el => el.Group)))
         .filter(g => g != null)
         .sort((a, b) => a - b)
-        .map(g => ({ value: g, label: `Group ${g}` })),
-      placeholder: 'All Groups'
+        .map(g => ({ value: g, label: `${t('elements.group')} ${g}` })),
+      placeholder: t('common.select')
     },
     {
       key: 'magType',
-      label: 'Magnetic Type',
+      label: t('elements.magneticType'),
       type: 'select',
       options: [
-        { value: 'Ferromagnetic', label: 'Ferromagnetic' },
-        { value: 'Paramagnetic', label: 'Paramagnetic' },
-        { value: 'Diamagnetic', label: 'Diamagnetic' }
+        { value: 'Ferromagnetic', label: t('elements.ferromagnetic') },
+        { value: 'Paramagnetic', label: t('elements.paramagnetic') },
+        { value: 'Diamagnetic', label: t('elements.diamagnetic') }
       ],
-      placeholder: 'All Types'
+      placeholder: t('common.select')
     },
     {
       key: 'atomicWeight',
-      label: 'Atomic Weight',
+      label: t('elements.atomicWeight'),
       type: 'range',
       min: 0,
       max: 300,
@@ -1174,7 +1176,7 @@ export default function ShowElementData() {
     },
     {
       key: 'melting',
-      label: 'Melting Point (K)',
+      label: `${t('elements.meltingPoint')} (K)`,
       type: 'range',
       min: 0,
       max: 4000,
@@ -1182,7 +1184,7 @@ export default function ShowElementData() {
     },
     {
       key: 'boiling',
-      label: 'Boiling Point (K)',
+      label: `${t('elements.boilingPoint')} (K)`,
       type: 'range',
       min: 0,
       max: 6000,
@@ -1190,7 +1192,7 @@ export default function ShowElementData() {
     },
     {
       key: 'density',
-      label: 'Density (g/cm³)',
+      label: `${t('elements.densitySTP')}`,
       type: 'range',
       min: 0,
       max: 25,
@@ -1201,32 +1203,32 @@ export default function ShowElementData() {
   const elementsPresets: FilterPreset[] = [
     {
       id: 'ferromagnetic',
-      label: 'Ferromagnetic Elements',
+      label: t('elements.ferromagneticElements'),
       filters: { magType: 'Ferromagnetic' }
     },
     {
       id: 'paramagnetic',
-      label: 'Paramagnetic Elements',
+      label: t('elements.paramagneticElements'),
       filters: { magType: 'Paramagnetic' }
     },
     {
       id: 'diamagnetic',
-      label: 'Diamagnetic Elements',
+      label: t('elements.diamagneticElements'),
       filters: { magType: 'Diamagnetic' }
     },
     {
       id: 'light-elements',
-      label: 'Light Elements (Z ≤ 20)',
+      label: t('elements.lightElements'),
       filters: { atomicWeight: { max: 40 } }
     },
     {
       id: 'transition-metals',
-      label: 'Transition Metals (Period 4, Groups 3-12)',
+      label: t('elements.transitionMetals'),
       filters: { period: 4, group: null }
     },
     {
       id: 'noble-gases',
-      label: 'Noble Gases (Group 18)',
+      label: t('elements.nobleGases'),
       filters: { group: 18 }
     }
   ]
@@ -1234,13 +1236,13 @@ export default function ShowElementData() {
   const nuclidesFilterConfigs: FilterConfig[] = [
     {
       key: 'element',
-      label: 'Element',
+      label: t('elements.element'),
       type: 'element-selector',
       availableElements: allElements
     },
     {
       key: 'zRange',
-      label: 'Atomic Number (Z)',
+      label: t('elements.atomicNumberZ'),
       type: 'range',
       min: 1,
       max: 118,
@@ -1248,7 +1250,7 @@ export default function ShowElementData() {
     },
     {
       key: 'aRange',
-      label: 'Mass Number (A)',
+      label: t('elements.massNumberA'),
       type: 'range',
       min: 1,
       max: 300,
@@ -1256,7 +1258,7 @@ export default function ShowElementData() {
     },
     {
       key: 'bindingEnergy',
-      label: 'Binding Energy (MeV)',
+      label: t('elements.bindingEnergyMeV'),
       type: 'range',
       min: 0,
       max: 2000,
@@ -1264,32 +1266,32 @@ export default function ShowElementData() {
     },
     {
       key: 'nBorF',
-      label: 'Nuclear Type',
+      label: t('elements.nuclearType'),
       type: 'select',
       options: [
-        { value: 'b', label: 'Boson' },
-        { value: 'f', label: 'Fermion' }
+        { value: 'b', label: t('elements.boson') },
+        { value: 'f', label: t('elements.fermion') }
       ],
-      placeholder: 'All Types'
+      placeholder: t('common.select')
     },
     {
       key: 'aBorF',
-      label: 'Atomic Type',
+      label: t('elements.atomicProperties'),
       type: 'select',
       options: [
-        { value: 'b', label: 'Boson' },
-        { value: 'f', label: 'Fermion' }
+        { value: 'b', label: t('elements.boson') },
+        { value: 'f', label: t('elements.fermion') }
       ],
-      placeholder: 'All Types'
+      placeholder: t('common.select')
     },
     {
       key: 'onlyStable',
-      label: 'Stable Only (log₁₀(Half-life) > 9)',
+      label: `${t('elements.stable')} (log₁₀(${t('elements.halfLife')}) > 9)`,
       type: 'toggle'
     },
     {
       key: 'onlyRadioactive',
-      label: 'Radioactive Only',
+      label: t('elements.unstable'),
       type: 'toggle'
     }
   ]
@@ -1297,32 +1299,32 @@ export default function ShowElementData() {
   const nuclidesPresets: FilterPreset[] = [
     {
       id: 'stable-nuclides',
-      label: 'Stable Nuclides',
+      label: `${t('elements.stable')} ${t('elements.nuclides')}`,
       filters: { onlyStable: true }
     },
     {
       id: 'radioactive-nuclides',
-      label: 'Radioactive Nuclides',
+      label: `${t('elements.unstable')} ${t('elements.nuclides')}`,
       filters: { onlyRadioactive: true }
     },
     {
       id: 'nuclear-bosons',
-      label: 'Nuclear Bosons',
+      label: `${t('elements.nuclearType')} ${t('elements.boson')}`,
       filters: { nBorF: 'b' }
     },
     {
       id: 'nuclear-fermions',
-      label: 'Nuclear Fermions',
+      label: `${t('elements.nuclearType')} ${t('elements.fermion')}`,
       filters: { nBorF: 'f' }
     },
     {
       id: 'light-nuclides',
-      label: 'Light Nuclides (Z ≤ 20)',
+      label: t('elements.lightElements'),
       filters: { zRange: { max: 20 } }
     },
     {
       id: 'heavy-nuclides',
-      label: 'Heavy Nuclides (Z > 82)',
+      label: `${t('elements.nuclides')} (Z > 82)`,
       filters: { zRange: { min: 83 } }
     }
   ]
@@ -1333,13 +1335,13 @@ export default function ShowElementData() {
     return [
       {
         key: 'element',
-        label: 'Element',
+        label: t('elements.element'),
         type: 'element-selector',
         availableElements: allElements
       },
       {
         key: 'decayMode',
-        label: 'Decay Mode',
+        label: t('elements.decayMode'),
         type: 'badge-selector',
         colorScheme: 'purple',
         options: getUniqueDecayModes(db).map(m => ({ value: m, label: m })),
@@ -1347,7 +1349,7 @@ export default function ShowElementData() {
       },
       {
         key: 'radiationType',
-        label: 'Radiation Type',
+        label: t('elements.radiationType'),
         type: 'badge-selector',
         colorScheme: 'blue',
         options: getUniqueRadiationTypes(db).map(r => ({ value: r, label: r })),
@@ -1355,7 +1357,7 @@ export default function ShowElementData() {
       },
       {
         key: 'energy',
-        label: 'Energy (keV)',
+        label: t('elements.energyKeV'),
         type: 'range',
         min: 0,
         max: 10000,
@@ -1363,14 +1365,15 @@ export default function ShowElementData() {
       },
       {
         key: 'intensity',
-        label: 'Intensity (%)',
+        label: t('elements.intensityPercent'),
         type: 'range',
         min: 0,
         max: 100,
         step: 0.1
       }
     ]
-  }, [db, allElements])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [db, allElements, t])
 
   const decaysPresets: FilterPreset[] = [
     {
@@ -1395,12 +1398,12 @@ export default function ShowElementData() {
     },
     {
       id: 'high-energy',
-      label: 'High Energy (> 1000 keV)',
+      label: `${t('reactions.energy')} > 1000 keV`,
       filters: { energy: { min: 1000 } }
     },
     {
       id: 'high-intensity',
-      label: 'High Intensity (> 50%)',
+      label: `${t('elements.intensity')} > 50%`,
       filters: { intensity: { min: 50 } }
     }
   ]
@@ -1650,27 +1653,27 @@ export default function ShowElementData() {
             <div className="space-y-6 mt-6">
               <div className="card p-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{element.EName} ({element.E})</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Atomic Number: {element.Z}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('elements.atomicNumber')}: {element.Z}</p>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">Periodic Table</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">{t('elements.periodicTable')}</h3>
                     <dl className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <dt className="text-gray-600 dark:text-gray-400">Atomic Number (Z):</dt>
+                        <dt className="text-gray-600 dark:text-gray-400">{t('elements.atomicNumberZ')}:</dt>
                         <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Z}</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-gray-600 dark:text-gray-400">Period:</dt>
+                        <dt className="text-gray-600 dark:text-gray-400">{t('elements.period')}:</dt>
                         <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Period}</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-gray-600 dark:text-gray-400">Group:</dt>
+                        <dt className="text-gray-600 dark:text-gray-400">{t('elements.group')}:</dt>
                         <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Group}</dd>
                       </div>
                       {typeof element.AWeight === 'number' && !isNaN(element.AWeight) && (
                         <div className="flex justify-between">
-                          <dt className="text-gray-600 dark:text-gray-400">Atomic Weight:</dt>
+                          <dt className="text-gray-600 dark:text-gray-400">{t('elements.atomicWeight')}:</dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">{element.AWeight.toFixed(3)}</dd>
                         </div>
                       )}
@@ -1678,23 +1681,23 @@ export default function ShowElementData() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">Atomic Properties</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">{t('elements.atomicProperties')}</h3>
                     <dl className="space-y-2 text-sm">
                       {element.Valence !== null && element.Valence !== undefined && (
                         <div className="flex justify-between">
-                          <dt className="text-gray-600 dark:text-gray-400">Valence:</dt>
+                          <dt className="text-gray-600 dark:text-gray-400">{t('elements.valence')}:</dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Valence}</dd>
                         </div>
                       )}
                       {element.Negativity !== null && element.Negativity !== undefined && (
                         <div className="flex justify-between">
-                          <dt className="text-gray-600 dark:text-gray-400">Electronegativity:</dt>
+                          <dt className="text-gray-600 dark:text-gray-400">{t('elements.electronegativity')}:</dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Negativity}</dd>
                         </div>
                       )}
                       {element.Affinity !== null && element.Affinity !== undefined && (
                         <div className="flex justify-between">
-                          <dt className="text-gray-600 dark:text-gray-400">Electron Affinity:</dt>
+                          <dt className="text-gray-600 dark:text-gray-400">{t('elements.electronAffinity')}:</dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Affinity} kJ/mol</dd>
                         </div>
                       )}
@@ -1702,17 +1705,17 @@ export default function ShowElementData() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">Ionization</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">{t('elements.ionization')}</h3>
                     <dl className="space-y-2 text-sm">
                       {element.MaxIonNum !== null && element.MaxIonNum !== undefined && (
                         <div className="flex justify-between">
-                          <dt className="text-gray-600 dark:text-gray-400">Max Ion Number:</dt>
+                          <dt className="text-gray-600 dark:text-gray-400">{t('elements.maxIonNumber')}:</dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">{element.MaxIonNum}</dd>
                         </div>
                       )}
                       {typeof element.MaxIonization === 'number' && !isNaN(element.MaxIonization) && (
                         <div className="flex justify-between">
-                          <dt className="text-gray-600 dark:text-gray-400">Max Ionization:</dt>
+                          <dt className="text-gray-600 dark:text-gray-400">{t('elements.maxIonization')}:</dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">{element.MaxIonization.toFixed(1)} kJ/mol</dd>
                         </div>
                       )}
@@ -1723,29 +1726,29 @@ export default function ShowElementData() {
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="card p-6">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">Thermal Properties</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">{t('elements.thermalProperties')}</h3>
                   <dl className="space-y-2 text-sm">
                     {typeof element.Melting === 'number' && !isNaN(element.Melting) && (
                       <div className="flex justify-between">
-                        <dt className="text-gray-600 dark:text-gray-400">Melting Point:</dt>
+                        <dt className="text-gray-600 dark:text-gray-400">{t('elements.meltingPoint')}:</dt>
                         <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Melting.toFixed(2)} K</dd>
                       </div>
                     )}
                     {typeof element.Boiling === 'number' && !isNaN(element.Boiling) && (
                       <div className="flex justify-between">
-                        <dt className="text-gray-600 dark:text-gray-400">Boiling Point:</dt>
+                        <dt className="text-gray-600 dark:text-gray-400">{t('elements.boilingPoint')}:</dt>
                         <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Boiling.toFixed(2)} K</dd>
                       </div>
                     )}
                     {typeof element.SpecHeat === 'number' && !isNaN(element.SpecHeat) && (
                       <div className="flex justify-between">
-                        <dt className="text-gray-600 dark:text-gray-400">Specific Heat:</dt>
+                        <dt className="text-gray-600 dark:text-gray-400">{t('elements.specificHeat')}:</dt>
                         <dd className="font-medium text-gray-900 dark:text-gray-100">{element.SpecHeat.toFixed(2)} J/(g·K)</dd>
                       </div>
                     )}
                     {typeof element.ThermConduct === 'number' && !isNaN(element.ThermConduct) && (
                       <div className="flex justify-between">
-                        <dt className="text-gray-600 dark:text-gray-400">Thermal Conductivity:</dt>
+                        <dt className="text-gray-600 dark:text-gray-400">{t('elements.thermalConductivity')}:</dt>
                         <dd className="font-medium text-gray-900 dark:text-gray-100">{element.ThermConduct.toFixed(2)} W/(m·K)</dd>
                       </div>
                     )}
@@ -1753,17 +1756,17 @@ export default function ShowElementData() {
                 </div>
 
                 <div className="card p-6">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">Physical Properties</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">{t('elements.physicalProperties')}</h3>
                   <dl className="space-y-2 text-sm">
                     {typeof element.STPDensity === 'number' && !isNaN(element.STPDensity) && (
                       <div className="flex justify-between">
-                        <dt className="text-gray-600 dark:text-gray-400">Density (STP):</dt>
+                        <dt className="text-gray-600 dark:text-gray-400">{t('elements.densitySTP')}:</dt>
                         <dd className="font-medium text-gray-900 dark:text-gray-100">{element.STPDensity.toFixed(3)} g/cm³</dd>
                       </div>
                     )}
                     {typeof element.MolarVolume === 'number' && !isNaN(element.MolarVolume) && (
                       <div className="flex justify-between">
-                        <dt className="text-gray-600 dark:text-gray-400">Molar Volume:</dt>
+                        <dt className="text-gray-600 dark:text-gray-400">{t('elements.molarVolume')}:</dt>
                         <dd className="font-medium text-gray-900 dark:text-gray-100">{element.MolarVolume.toFixed(2)} cm³/mol</dd>
                       </div>
                     )}
@@ -1775,7 +1778,7 @@ export default function ShowElementData() {
                     )}
                     {element.MagType && (
                       <div className="flex justify-between">
-                        <dt className="text-gray-600 dark:text-gray-400">Magnetic Type:</dt>
+                        <dt className="text-gray-600 dark:text-gray-400">{t('elements.magneticType')}:</dt>
                         <dd className="font-medium text-gray-900 dark:text-gray-100">{element.MagType}</dd>
                       </div>
                     )}
@@ -1784,36 +1787,36 @@ export default function ShowElementData() {
 
                 {atomicRadii && (
                   <div className="card p-6">
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">Atomic Radii (pm)</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">{t('elements.atomicRadii')}</h3>
                     <dl className="space-y-2 text-sm">
                       {atomicRadii.empirical !== null && (
                         <div className="flex justify-between">
-                          <dt className="text-gray-600 dark:text-gray-400">Empirical:</dt>
+                          <dt className="text-gray-600 dark:text-gray-400">{t('elements.empirical')}:</dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">{atomicRadii.empirical} pm</dd>
                         </div>
                       )}
                       {atomicRadii.calculated !== null && (
                         <div className="flex justify-between">
-                          <dt className="text-gray-600 dark:text-gray-400">Calculated:</dt>
+                          <dt className="text-gray-600 dark:text-gray-400">{t('elements.calculated')}:</dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">{atomicRadii.calculated} pm</dd>
                         </div>
                       )}
                       {atomicRadii.vanDerWaals !== null && (
                         <div className="flex justify-between">
-                          <dt className="text-gray-600 dark:text-gray-400">Van der Waals:</dt>
+                          <dt className="text-gray-600 dark:text-gray-400">{t('elements.vanDerWaals')}:</dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">{atomicRadii.vanDerWaals} pm</dd>
                         </div>
                       )}
                       {atomicRadii.covalent !== null && (
                         <div className="flex justify-between">
-                          <dt className="text-gray-600 dark:text-gray-400">Covalent:</dt>
+                          <dt className="text-gray-600 dark:text-gray-400">{t('elements.covalent')}:</dt>
                           <dd className="font-medium text-gray-900 dark:text-gray-100">{atomicRadii.covalent} pm</dd>
                         </div>
                       )}
                     </dl>
                     <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-800 rounded text-xs text-gray-600 dark:text-gray-400">
-                      <strong>Empirical:</strong> Measured • <strong>Calculated:</strong> Theoretical<br />
-                      <strong>Van der Waals:</strong> Non-bonded • <strong>Covalent:</strong> Bonded atoms
+                      <strong>{t('elements.empirical')}:</strong> Measured • <strong>{t('elements.calculated')}:</strong> Theoretical<br />
+                      <strong>{t('elements.vanDerWaals')}:</strong> Non-bonded • <strong>{t('elements.covalent')}:</strong> Bonded atoms
                     </div>
                   </div>
                 )}
@@ -1824,13 +1827,13 @@ export default function ShowElementData() {
                 <div className="card p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Nuclides ({visibleIsotopes.length} of {isotopes.length} shown)
+                      {t('elements.nuclidesShown', { shown: visibleIsotopes.length, total: isotopes.length })}
                     </h3>
 
                     {/* Toggle for limited-data nuclides (RadioNuclides-only entries) */}
                     <label className={`flex items-center gap-3 ${hasLimitedDataNuclides && !allIsotopesAreLimitedData ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
                       <span className="text-sm text-gray-700 dark:text-gray-300">
-                        Include limited-data nuclides
+                        {t('elements.includeLimitedData')}
                         {allIsotopesAreLimitedData && (
                           <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">(required)</span>
                         )}

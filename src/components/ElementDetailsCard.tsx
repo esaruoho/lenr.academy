@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { Element, AtomicRadiiData } from '../types'
 
 interface ElementDetailsCardProps {
@@ -9,6 +10,7 @@ interface ElementDetailsCardProps {
 }
 
 export default function ElementDetailsCard({ element, atomicRadii, onClose }: ElementDetailsCardProps) {
+  const { t } = useTranslation()
   if (!element) return null
 
   return (
@@ -24,14 +26,14 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
             </Link>
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Atomic Number: {element.Z}
+            {t('elements.atomicNumber')}: {element.Z}
           </p>
         </div>
         {onClose && (
           <button
             onClick={onClose}
             className="p-2 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            title="Close element details"
+            title={t('elements.closeNuclideDetails')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -41,24 +43,24 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">
-            Periodic Table
+            {t('elements.periodicTable')}
           </h3>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-gray-600 dark:text-gray-400">Atomic Number (Z):</dt>
+              <dt className="text-gray-600 dark:text-gray-400">{t('elements.atomicNumberZ')}:</dt>
               <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Z}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-600 dark:text-gray-400">Period:</dt>
+              <dt className="text-gray-600 dark:text-gray-400">{t('elements.period')}:</dt>
               <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Period}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-gray-600 dark:text-gray-400">Group:</dt>
+              <dt className="text-gray-600 dark:text-gray-400">{t('elements.group')}:</dt>
               <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Group}</dd>
             </div>
             {typeof element.AWeight === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Atomic Weight:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.atomicWeight')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">
                   {element.AWeight.toFixed(3)}
                 </dd>
@@ -69,24 +71,24 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
 
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">
-            Atomic Properties
+            {t('elements.atomicProperties')}
           </h3>
           <dl className="space-y-2 text-sm">
             {typeof element.Valence === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Valence:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.valence')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Valence}</dd>
               </div>
             )}
             {typeof element.Negativity === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Electronegativity:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.electronegativity')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">{element.Negativity}</dd>
               </div>
             )}
             {typeof element.Affinity === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Electron Affinity:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.electronAffinity')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">
                   {element.Affinity} kJ/mol
                 </dd>
@@ -97,18 +99,18 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
 
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">
-            Ionization
+            {t('elements.ionization')}
           </h3>
           <dl className="space-y-2 text-sm">
             {typeof element.MaxIonNum === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Max Ion Number:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.maxIonNumber')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">{element.MaxIonNum}</dd>
               </div>
             )}
             {typeof element.MaxIonization === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Max Ionization:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.maxIonization')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">
                   {element.MaxIonization.toFixed(1)} kJ/mol
                 </dd>
@@ -121,12 +123,12 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">
-            Thermal Properties
+            {t('elements.thermalProperties')}
           </h3>
           <dl className="space-y-2 text-sm">
             {typeof element.Melting === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Melting Point:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.meltingPoint')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">
                   {element.Melting.toFixed(2)} K
                 </dd>
@@ -134,7 +136,7 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
             )}
             {typeof element.Boiling === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Boiling Point:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.boilingPoint')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">
                   {element.Boiling.toFixed(2)} K
                 </dd>
@@ -142,7 +144,7 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
             )}
             {typeof element.SpecHeat === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Specific Heat:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.specificHeat')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">
                   {element.SpecHeat.toFixed(2)} J/(g·K)
                 </dd>
@@ -150,7 +152,7 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
             )}
             {typeof element.ThermConduct === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Thermal Conductivity:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.thermalConductivity')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">
                   {element.ThermConduct.toFixed(2)} W/(m·K)
                 </dd>
@@ -161,12 +163,12 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
 
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">
-            Physical Properties
+            {t('elements.physicalProperties')}
           </h3>
           <dl className="space-y-2 text-sm">
             {typeof element.STPDensity === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Density (STP):</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.densitySTP')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">
                   {element.STPDensity.toFixed(3)} g/cm³
                 </dd>
@@ -174,7 +176,7 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
             )}
             {typeof element.MolarVolume === 'number' && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Molar Volume:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.molarVolume')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">
                   {element.MolarVolume.toFixed(2)} cm³/mol
                 </dd>
@@ -182,7 +184,7 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
             )}
             {typeof element.ElectConduct === 'number' && !isNaN(element.ElectConduct) && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Electrical Conductivity:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.electricalConductivity', { defaultValue: 'Electrical Conductivity' })}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">
                   {element.ElectConduct.toFixed(2)} MS/m
                 </dd>
@@ -190,7 +192,7 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
             )}
             {element.MagType && (
               <div className="flex justify-between">
-                <dt className="text-gray-600 dark:text-gray-400">Magnetic Type:</dt>
+                <dt className="text-gray-600 dark:text-gray-400">{t('elements.magneticType')}:</dt>
                 <dd className="font-medium text-gray-900 dark:text-gray-100">{element.MagType}</dd>
               </div>
             )}
@@ -200,37 +202,37 @@ export default function ElementDetailsCard({ element, atomicRadii, onClose }: El
         {atomicRadii && (
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">
-              Atomic Radii (pm)
+              {t('elements.atomicRadii')}
             </h3>
             <dl className="space-y-2 text-sm">
               {atomicRadii.empirical !== null && (
                 <div className="flex justify-between">
-                  <dt className="text-gray-600 dark:text-gray-400">Empirical:</dt>
+                  <dt className="text-gray-600 dark:text-gray-400">{t('elements.empirical')}:</dt>
                   <dd className="font-medium text-gray-900 dark:text-gray-100">{atomicRadii.empirical} pm</dd>
                 </div>
               )}
               {atomicRadii.calculated !== null && (
                 <div className="flex justify-between">
-                  <dt className="text-gray-600 dark:text-gray-400">Calculated:</dt>
+                  <dt className="text-gray-600 dark:text-gray-400">{t('elements.calculated')}:</dt>
                   <dd className="font-medium text-gray-900 dark:text-gray-100">{atomicRadii.calculated} pm</dd>
                 </div>
               )}
               {atomicRadii.vanDerWaals !== null && (
                 <div className="flex justify-between">
-                  <dt className="text-gray-600 dark:text-gray-400">Van der Waals:</dt>
+                  <dt className="text-gray-600 dark:text-gray-400">{t('elements.vanDerWaals')}:</dt>
                   <dd className="font-medium text-gray-900 dark:text-gray-100">{atomicRadii.vanDerWaals} pm</dd>
                 </div>
               )}
               {atomicRadii.covalent !== null && (
                 <div className="flex justify-between">
-                  <dt className="text-gray-600 dark:text-gray-400">Covalent:</dt>
+                  <dt className="text-gray-600 dark:text-gray-400">{t('elements.covalent')}:</dt>
                   <dd className="font-medium text-gray-900 dark:text-gray-100">{atomicRadii.covalent} pm</dd>
                 </div>
               )}
             </dl>
             <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-800 rounded text-xs text-gray-600 dark:text-gray-400">
-              <strong>Empirical:</strong> Measured • <strong>Calculated:</strong> Theoretical<br />
-              <strong>Van der Waals:</strong> Non-bonded • <strong>Covalent:</strong> Bonded atoms
+              <strong>{t('elements.empirical')}:</strong> {t('elements.empiricalMeasured').split(': ')[1]} • <strong>{t('elements.calculated')}:</strong> {t('elements.calculatedTheoretical').split(': ')[1]}<br />
+              <strong>{t('elements.vanDerWaals')}:</strong> {t('elements.vanDerWaalsNonBonded').split(': ')[1]} • <strong>{t('elements.covalent')}:</strong> {t('elements.covalentBonded').split(': ')[1]}
             </div>
           </div>
         )}

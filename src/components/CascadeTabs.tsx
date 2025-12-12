@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BarChart3, Network, Table2, TrendingUp, Info } from 'lucide-react';
 import type { CascadeResults } from '../types';
 import { analyzePathways, getPathwayStats } from '../services/pathwayAnalyzer';
@@ -24,6 +25,7 @@ type TabId = 'summary' | 'flow' | 'pathways' | 'network' | 'products';
  * - Products: Bar chart of top products
  */
 export default function CascadeTabs({ results, fuelNuclides = [] }: CascadeTabsProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabId>('summary');
 
   // Analyze pathways for all tabs
@@ -34,12 +36,12 @@ export default function CascadeTabs({ results, fuelNuclides = [] }: CascadeTabsP
 
   const stats = useMemo(() => getPathwayStats(pathways), [pathways]);
 
-  const tabs: Array<{ id: TabId; label: string; icon: React.ReactNode }> = [
-    { id: 'summary', label: 'Summary', icon: <Info className="w-4 h-4" /> },
-    { id: 'flow', label: 'Flow View', icon: <TrendingUp className="w-4 h-4" /> },
-    { id: 'pathways', label: 'Pathway Browser', icon: <Table2 className="w-4 h-4" /> },
-    { id: 'network', label: 'Network', icon: <Network className="w-4 h-4" /> },
-    { id: 'products', label: 'Products', icon: <BarChart3 className="w-4 h-4" /> },
+  const tabs: Array<{ id: TabId; labelKey: string; icon: React.ReactNode }> = [
+    { id: 'summary', labelKey: 'cascades.tabSummary', icon: <Info className="w-4 h-4" /> },
+    { id: 'flow', labelKey: 'cascades.tabFlowView', icon: <TrendingUp className="w-4 h-4" /> },
+    { id: 'pathways', labelKey: 'cascades.tabPathwayBrowser', icon: <Table2 className="w-4 h-4" /> },
+    { id: 'network', labelKey: 'cascades.tabNetwork', icon: <Network className="w-4 h-4" /> },
+    { id: 'products', labelKey: 'cascades.tabProducts', icon: <BarChart3 className="w-4 h-4" /> },
   ];
 
   return (
@@ -58,7 +60,7 @@ export default function CascadeTabs({ results, fuelNuclides = [] }: CascadeTabsP
               }`}
             >
               {tab.icon}
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           ))}
         </div>
@@ -71,25 +73,25 @@ export default function CascadeTabs({ results, fuelNuclides = [] }: CascadeTabsP
             {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="card p-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Unique Pathways</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t('cascades.uniquePathways')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {stats.totalPathways}
                 </p>
               </div>
               <div className="card p-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Reactions</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t('cascades.totalReactions')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {stats.totalReactions}
                 </p>
               </div>
               <div className="card p-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Feedback Loops</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t('cascades.feedbackLoops')}</p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {stats.feedbackCount}
                 </p>
               </div>
               <div className="card p-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Avg Frequency</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t('cascades.avgFrequency')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {stats.avgFrequency.toFixed(1)}×
                 </p>
@@ -101,14 +103,14 @@ export default function CascadeTabs({ results, fuelNuclides = [] }: CascadeTabsP
               {stats.mostCommon && (
                 <div className="card p-4 bg-blue-50 dark:bg-blue-900/20">
                   <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                    Most Common Pathway
+                    {t('cascades.mostCommonPathway')}
                   </h4>
                   <p className="font-mono text-sm text-gray-900 dark:text-white mb-2">
                     {stats.mostCommon.pathway}
                   </p>
                   <div className="flex gap-4 text-sm text-gray-700 dark:text-gray-300">
-                    <span>Frequency: ×{stats.mostCommon.frequency}</span>
-                    <span>Energy: {stats.mostCommon.avgEnergy.toFixed(2)} MeV</span>
+                    <span>{t('cascades.frequency')}: ×{stats.mostCommon.frequency}</span>
+                    <span>{t('cascades.energy')}: {stats.mostCommon.avgEnergy.toFixed(2)} MeV</span>
                   </div>
                 </div>
               )}
@@ -116,14 +118,14 @@ export default function CascadeTabs({ results, fuelNuclides = [] }: CascadeTabsP
               {stats.highestEnergy && (
                 <div className="card p-4 bg-orange-50 dark:bg-orange-900/20">
                   <h4 className="font-semibold text-orange-900 dark:text-orange-100 mb-2">
-                    Highest Energy Pathway
+                    {t('cascades.highestEnergyPathway')}
                   </h4>
                   <p className="font-mono text-sm text-gray-900 dark:text-white mb-2">
                     {stats.highestEnergy.pathway}
                   </p>
                   <div className="flex gap-4 text-sm text-gray-700 dark:text-gray-300">
-                    <span>Energy: {stats.highestEnergy.avgEnergy.toFixed(2)} MeV</span>
-                    <span>Frequency: ×{stats.highestEnergy.frequency}</span>
+                    <span>{t('cascades.energy')}: {stats.highestEnergy.avgEnergy.toFixed(2)} MeV</span>
+                    <span>{t('cascades.frequency')}: ×{stats.highestEnergy.frequency}</span>
                   </div>
                 </div>
               )}
@@ -132,9 +134,7 @@ export default function CascadeTabs({ results, fuelNuclides = [] }: CascadeTabsP
             {/* Info Note */}
             <div className="card p-4 bg-gray-50 dark:bg-gray-800">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                💡 <strong>Tip:</strong> Use the <strong>Flow View</strong> tab to see a visual representation
-                of the top pathways, or <strong>Pathway Browser</strong> to explore all pathways with
-                sorting and filtering.
+                💡 <strong>{t('cascades.tip')}:</strong> {t('cascades.tipFlowViewDescription')}
               </p>
             </div>
           </div>
@@ -156,8 +156,7 @@ export default function CascadeTabs({ results, fuelNuclides = [] }: CascadeTabsP
           <div className="card p-6">
             <div className="mb-4">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                ℹ️ Network view shows hierarchical relationship between nuclides. For large cascades,
-                the Flow View may be easier to read.
+                ℹ️ {t('cascades.networkViewDescription')}
               </p>
             </div>
             <CascadeNetworkDiagram reactions={results.reactions} />
@@ -167,7 +166,7 @@ export default function CascadeTabs({ results, fuelNuclides = [] }: CascadeTabsP
         {activeTab === 'products' && (
           <div className="card p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Top Products ({results.productDistribution.size} unique nuclides)
+              {t('cascades.topProducts')} ({results.productDistribution.size} {t('cascades.uniqueNuclides')})
             </h3>
             <div className="space-y-2">
               {Array.from(results.productDistribution.entries())
@@ -201,7 +200,7 @@ export default function CascadeTabs({ results, fuelNuclides = [] }: CascadeTabsP
             </div>
             {results.productDistribution.size > 20 && (
               <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                Showing top 20 of {results.productDistribution.size} unique products.
+                {t('cascades.showingTopProducts', { shown: 20, total: results.productDistribution.size })}
               </p>
             )}
           </div>

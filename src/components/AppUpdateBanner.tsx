@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { RefreshCw, X, Sparkles } from 'lucide-react'
 import { startVersionPolling, VersionCheckResult } from '../services/versionCheck'
 
@@ -50,6 +51,7 @@ function markVersionDismissed(version: string) {
 }
 
 export default function AppUpdateBanner({ className = '', onVisibilityChange, onViewChangelog }: AppUpdateBannerProps) {
+  const { t } = useTranslation()
   const [availableVersion, setAvailableVersion] = useState<string | null>(null)
   const [buildTime, setBuildTime] = useState<string | null>(null)
   const [isRendered, setIsRendered] = useState(false)
@@ -143,11 +145,11 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
             <Sparkles className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
             <div>
               <p className="text-sm font-medium">
-                App update available: {CURRENT_VERSION} → {availableVersion}
+                {t('updates.appUpdateAvailable', { current: CURRENT_VERSION, available: availableVersion })}
               </p>
               {formattedBuildTime && (
                 <p className="text-xs text-amber-100 mt-1">
-                  Deployed {formattedBuildTime}
+                  {t('updates.deployed', { time: formattedBuildTime })}
                 </p>
               )}
             </div>
@@ -158,7 +160,7 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
                 onClick={() => onViewChangelog(availableVersion)}
                 className="px-4 py-2 bg-amber-400/20 text-white border border-white/20 rounded-md text-sm font-medium hover:bg-amber-400/30 transition-colors"
               >
-                View What&apos;s New
+                {t('updates.viewWhatsNew')}
               </button>
             )}
             <button
@@ -166,12 +168,12 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
               className="px-4 py-2 bg-white text-amber-600 rounded-md text-sm font-medium hover:bg-amber-50 transition-colors"
             >
               <RefreshCw className="w-4 h-4 inline mr-1" aria-hidden="true" />
-              Refresh Now
+              {t('updates.refreshNow')}
             </button>
             <button
               onClick={handleDismiss}
               className="text-white hover:text-amber-100 transition-colors"
-              aria-label="Dismiss app update notification"
+              aria-label={t('common.close')}
             >
               <X className="w-5 h-5" aria-hidden="true" />
             </button>

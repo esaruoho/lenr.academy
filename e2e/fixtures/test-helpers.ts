@@ -80,14 +80,50 @@ export async function setTheme(page: Page, theme: 'light' | 'dark') {
 }
 
 /**
- * Helper to accept privacy consent and dismiss changelog
+ * Helper to accept privacy consent, dismiss changelog, and set language preference
  */
 export async function acceptPrivacyConsent(page: Page) {
   await page.context().addInitScript(() => {
     localStorage.setItem('lenr-analytics-consent', 'accepted');
     // Disable changelog auto-launch (tests will open it explicitly if needed)
     localStorage.setItem('lenr-changelog-disable-auto', 'true');
+    // Set language preference to English to avoid language selection modal
+    localStorage.setItem('lenr-language-preference', 'en');
+    localStorage.setItem('lenr-language-selected', 'true');
   });
+}
+
+/**
+ * Helper to set language preference to avoid language selection modal in tests
+ */
+export async function setLanguagePreference(page: Page, language: string = 'en') {
+  await page.context().addInitScript((lang) => {
+    localStorage.setItem('lenr-language-preference', lang);
+    localStorage.setItem('lenr-language-selected', 'true');
+  }, language);
+}
+
+/**
+ * Helper to dismiss language selection modal if present
+ */
+export async function dismissLanguageModalIfPresent(page: Page) {
+  // Wait a moment for the modal to potentially appear
+  await page.waitForTimeout(500);
+
+  // Check if language modal is visible by looking for the modal title
+  const modalTitle = page.getByText(/select language/i);
+
+  if (await modalTitle.isVisible({ timeout: 2000 }).catch(() => false)) {
+    // Click the cancel button or close button
+    const closeButton = page.getByRole('button', { name: /close/i }).or(
+      page.getByRole('button', { name: /cancel/i })
+    );
+
+    if (await closeButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await closeButton.click();
+      await page.waitForTimeout(300); // Wait for modal close animation
+    }
+  }
 }
 
 /**

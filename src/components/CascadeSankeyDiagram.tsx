@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Sankey, Tooltip, ResponsiveContainer, Rectangle } from 'recharts';
 import { Sliders, HelpCircle, X, Scale } from 'lucide-react';
 import type { PathwayAnalysis } from '../services/pathwayAnalyzer';
@@ -230,6 +231,7 @@ function pathwaysToSankeyData(
  * Width of flows represents pathway frequency.
  */
 export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useWeightedMode = false }: CascadeSankeyDiagramProps) {
+  const { t } = useTranslation();
   const [topN, setTopN] = useState(15);
   const [feedbackOnly, setFeedbackOnly] = useState(false);
   const [minFrequency, setMinFrequency] = useState(1);
@@ -364,12 +366,12 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
 
     const pathway = linkData.pathway as PathwayAnalysis | WeightedPathwayAnalysis;
     // Build tooltip with weighted info if available (Issue #96)
-    let freqText = `Frequency: ×${pathway.frequency}`;
+    let freqText = `${t('cascades.sankey.frequency')}: ×${pathway.frequency}`;
     if (useWeighted && 'weightedFrequency' in pathway) {
-      freqText = `Weighted: ×${pathway.weightedFrequency.toFixed(2)} (raw: ×${pathway.frequency})`;
+      freqText = `${t('cascades.sankey.weighted')}: ×${pathway.weightedFrequency.toFixed(2)} (${t('cascades.sankey.raw')}: ×${pathway.frequency})`;
     }
     const tooltipText = pathway ?
-      `${pathway.pathway}\nType: ${pathway.type === 'fusion' ? 'Fusion' : 'Two-to-Two'}\n${freqText}\nAvg Energy: ${pathway.avgEnergy.toFixed(2)} MeV${pathway.isFeedback ? '\n✓ Feedback Loop' : ''}`
+      `${pathway.pathway}\n${t('cascades.sankey.type')}: ${pathway.type === 'fusion' ? t('cascades.sankey.fusion') : t('cascades.sankey.twoToTwo')}\n${freqText}\n${t('cascades.sankey.avgEnergy')}: ${pathway.avgEnergy.toFixed(2)} MeV${pathway.isFeedback ? `\n✓ ${t('cascades.sankey.feedbackLoop')}` : ''}`
       : '';
 
     return (
@@ -411,34 +413,34 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
         <p className="font-semibold text-gray-900 dark:text-white mb-2">{pathway.pathway}</p>
         <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
           <p>
-            <span className="font-medium">Type:</span>{' '}
+            <span className="font-medium">{t('cascades.sankey.type')}:</span>{' '}
             <span className={pathway.type === 'fusion' ? 'text-blue-600' : 'text-purple-600'}>
-              {pathway.type === 'fusion' ? 'Fusion' : 'Two-to-Two'}
+              {pathway.type === 'fusion' ? t('cascades.sankey.fusion') : t('cascades.sankey.twoToTwo')}
             </span>
           </p>
           {isWeighted ? (
             <>
               <p>
-                <span className="font-medium">Weighted Frequency:</span>{' '}
+                <span className="font-medium">{t('cascades.sankey.weightedFrequency')}:</span>{' '}
                 <span className="text-purple-600">×{(pathway as WeightedPathwayAnalysis).weightedFrequency.toFixed(2)}</span>
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Raw frequency: ×{pathway.frequency}
+                {t('cascades.sankey.rawFrequency')}: ×{pathway.frequency}
               </p>
             </>
           ) : (
             <p>
-              <span className="font-medium">Frequency:</span> ×{pathway.frequency}
+              <span className="font-medium">{t('cascades.sankey.frequency')}:</span> ×{pathway.frequency}
             </p>
           )}
           <p>
-            <span className="font-medium">Avg Energy:</span> {pathway.avgEnergy.toFixed(2)} MeV
+            <span className="font-medium">{t('cascades.sankey.avgEnergy')}:</span> {pathway.avgEnergy.toFixed(2)} MeV
           </p>
           {pathway.isFeedback && (
-            <p className="text-green-600 font-medium">✓ Feedback Loop</p>
+            <p className="text-green-600 font-medium">✓ {t('cascades.sankey.feedbackLoop')}</p>
           )}
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Loops: {pathway.loops.join(', ')}
+            {t('cascades.sankey.loops')}: {pathway.loops.join(', ')}
           </p>
         </div>
       </div>
@@ -448,7 +450,7 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
   if (pathways.length === 0) {
     return (
       <div className="flex items-center justify-center h-96 text-gray-500 dark:text-gray-400">
-        No pathways to display
+        {t('cascades.sankey.noPathways')}
       </div>
     );
   }
@@ -463,12 +465,12 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
             className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
             <Sliders className="w-4 h-4" />
-            {showFilters ? 'Hide' : 'Show'} Filters
+            {showFilters ? t('cascades.sankey.hideFilters') : t('cascades.sankey.showFilters')}
           </button>
         </div>
 
         <div className="flex items-center justify-center h-96 text-gray-500 dark:text-gray-400">
-          No pathways match current filters. Try adjusting your filter criteria.
+          {t('cascades.sankey.noMatchingPathways')}
         </div>
       </div>
     );
@@ -488,17 +490,17 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
               <div className="flex items-center gap-2 mb-2">
                 <HelpCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <h4 className="font-semibold text-blue-900 dark:text-blue-100">
-                  How to Read This Diagram
+                  {t('cascades.sankey.howToRead')}
                 </h4>
               </div>
               <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
-                <p>👋 This shows your cascade reactions flowing from <strong>left to right</strong>:</p>
+                <p>👋 {t('cascades.sankey.flowDescription')}</p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li><strong className="text-green-700 dark:text-green-300">Green boxes</strong> = Your fuel nuclides (starting materials)</li>
-                  <li><strong className="text-blue-700 dark:text-blue-300">Blue boxes</strong> = Intermediate products (created and consumed)</li>
-                  <li><strong className="text-orange-700 dark:text-orange-300">Orange boxes</strong> = Final products (not consumed further)</li>
-                  <li><strong>Thicker flows</strong> = More frequent reaction pathways</li>
-                  <li><strong>Hover</strong> over flows to see reaction details</li>
+                  <li><strong className="text-green-700 dark:text-green-300">{t('cascades.sankey.greenBoxes')}</strong> = {t('cascades.sankey.fuelNuclides')}</li>
+                  <li><strong className="text-blue-700 dark:text-blue-300">{t('cascades.sankey.blueBoxes')}</strong> = {t('cascades.sankey.intermediateProducts')}</li>
+                  <li><strong className="text-orange-700 dark:text-orange-300">{t('cascades.sankey.orangeBoxes')}</strong> = {t('cascades.sankey.finalProducts')}</li>
+                  <li><strong>{t('cascades.sankey.thickerFlows')}</strong> = {t('cascades.sankey.moreFrequent')}</li>
+                  <li><strong>{t('cascades.sankey.hover')}</strong> {t('cascades.sankey.hoverToSee')}</li>
                 </ul>
               </div>
             </div>
@@ -516,13 +518,13 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Reaction Flow Diagram
+            {t('cascades.sankey.title')}
           </h3>
           {!showGuide && (
             <button
               onClick={() => setShowGuide(true)}
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              title="Show guide"
+              title={t('cascades.sankey.showGuide')}
             >
               <HelpCircle className="w-4 h-4" />
             </button>
@@ -538,10 +540,10 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
                   ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
-              title={showWeightedView ? 'Switch to raw frequencies' : 'Switch to weighted frequencies'}
+              title={showWeightedView ? t('cascades.sankey.switchToRaw') : t('cascades.sankey.switchToWeighted')}
             >
               <Scale className="w-4 h-4" />
-              {showWeightedView ? 'Weighted' : 'Raw'}
+              {showWeightedView ? t('cascades.sankey.weighted') : t('cascades.sankey.raw')}
             </button>
           )}
           <button
@@ -549,7 +551,7 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
             className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
             <Sliders className="w-4 h-4" />
-            {showFilters ? 'Hide' : 'Show'} Filters
+            {showFilters ? t('cascades.sankey.hideFilters') : t('cascades.sankey.showFilters')}
           </button>
         </div>
       </div>
@@ -564,7 +566,7 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
           {/* Top N Slider */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Show Top Pathways: {topN}
+              {t('cascades.sankey.showTopPathways', { count: topN })}
             </label>
             <input
               type="range"
@@ -577,11 +579,11 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
             />
             <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
               <span>5</span>
-              <span>30 (max)</span>
+              <span>30 ({t('cascades.sankey.max')})</span>
             </div>
             {topN > 20 && (
               <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                ⚠️ High pathway counts may cause slow rendering or errors
+                ⚠️ {t('cascades.sankey.highPathwayWarning')}
               </p>
             )}
           </div>
@@ -589,7 +591,7 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
           {/* Min Frequency Slider */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Minimum Frequency: {minFrequency}×
+              {t('cascades.sankey.minFrequency', { count: minFrequency })}
             </label>
             <input
               type="range"
@@ -619,7 +621,7 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
               htmlFor="feedback-only"
               className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
             >
-              Show only feedback loops
+              {t('cascades.sankey.showOnlyFeedback')}
             </label>
           </div>
         </div>
@@ -628,23 +630,23 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
       {/* Filter Status Message */}
       <div className="text-sm text-gray-600 dark:text-gray-400">
         <p>
-          Showing <strong>{filteredPathways.length}</strong> of <strong>{totalPathways}</strong> total pathways
+          {t('cascades.sankey.showing', { shown: filteredPathways.length, total: totalPathways })}
           {beforeTopNLimit > safeTopN && (
-            <span className="text-gray-500"> (top {safeTopN} by {useWeighted ? 'weighted ' : ''}frequency)</span>
+            <span className="text-gray-500"> ({t('cascades.sankey.topNByFrequency', { n: safeTopN, weighted: useWeighted ? t('cascades.sankey.weighted') + ' ' : '' })})</span>
           )}
           {useWeighted && (
             <span className="ml-2 text-purple-600 dark:text-purple-400 font-medium">
               <Scale className="w-3 h-3 inline mr-0.5" />
-              Weighted view
+              {t('cascades.sankey.weightedView')}
             </span>
           )}
         </p>
         {(minFrequency > 1 || feedbackOnly) && (
           <p className="text-xs mt-1">
-            Filters applied:
-            {feedbackOnly && <span> • Feedback loops only ({afterFeedbackFilter} matched)</span>}
+            {t('cascades.sankey.filtersApplied')}:
+            {feedbackOnly && <span> • {t('cascades.sankey.feedbackLoopsOnly', { count: afterFeedbackFilter })}</span>}
             {minFrequency > 1 && (
-              <span> • Min frequency ≥{minFrequency}× ({afterFrequencyFilter} matched)</span>
+              <span> • {t('cascades.sankey.minFreqFilter', { freq: minFrequency, count: afterFrequencyFilter })}</span>
             )}
           </p>
         )}
@@ -656,16 +658,16 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
           <div className="flex items-start gap-3">
             <div className="flex-1">
               <h4 className="font-semibold text-red-900 dark:text-red-100 mb-2">
-                Diagram Rendering Error
+                {t('cascades.sankey.renderError')}
               </h4>
               <p className="text-sm text-red-800 dark:text-red-200">
-                The Sankey diagram encountered an error while rendering. This usually happens with too many pathways.
+                {t('cascades.sankey.renderErrorDescription')}
               </p>
               <p className="text-xs text-red-700 dark:text-red-300 mt-2">
-                Try reducing the number of pathways or using filters to simplify the data.
+                {t('cascades.sankey.renderErrorHint')}
               </p>
               <details className="mt-2">
-                <summary className="text-xs text-red-600 dark:text-red-400 cursor-pointer">Technical details</summary>
+                <summary className="text-xs text-red-600 dark:text-red-400 cursor-pointer">{t('cascades.sankey.technicalDetails')}</summary>
                 <pre className="text-xs text-red-700 dark:text-red-300 mt-1 whitespace-pre-wrap">{renderError}</pre>
               </details>
             </div>
@@ -718,9 +720,9 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
                 ? 'start'  // Left-align for right side
                 : 'middle';  // Center for middle
 
-            const nodeTypeLabel = node.type === 'fuel' ? 'Fuel Nuclide' :
-                                  node.type === 'final' ? 'Final Product' :
-                                  'Intermediate Product';
+            const nodeTypeLabel = node.type === 'fuel' ? t('cascades.sankey.fuelNuclide') :
+                                  node.type === 'final' ? t('cascades.sankey.finalProduct') :
+                                  t('cascades.sankey.intermediateProduct');
             const tooltipText = `${node.name}\n${nodeTypeLabel}`;
 
             return (
@@ -769,35 +771,35 @@ export default function CascadeSankeyDiagram({ pathways, fuelNuclides = [], useW
 
       {/* Interactive Legend */}
       <div className="card p-4 bg-gray-50 dark:bg-gray-800">
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Legend</h4>
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t('cascades.sankey.legend')}</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-green-500 dark:bg-green-600 rounded border-2 border-gray-700"></div>
             <div className="text-sm">
-              <div className="font-medium text-gray-900 dark:text-white">Fuel Nuclides</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Starting materials</div>
+              <div className="font-medium text-gray-900 dark:text-white">{t('cascades.sankey.legendFuel')}</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">{t('cascades.sankey.legendFuelDesc')}</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-blue-500 dark:bg-blue-600 rounded border-2 border-gray-700"></div>
             <div className="text-sm">
-              <div className="font-medium text-gray-900 dark:text-white">Intermediates</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Created & consumed</div>
+              <div className="font-medium text-gray-900 dark:text-white">{t('cascades.sankey.legendIntermediates')}</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">{t('cascades.sankey.legendIntermediatesDesc')}</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-orange-500 dark:bg-orange-600 rounded border-2 border-gray-700"></div>
             <div className="text-sm">
-              <div className="font-medium text-gray-900 dark:text-white">Final Products</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Not consumed further</div>
+              <div className="font-medium text-gray-900 dark:text-white">{t('cascades.sankey.legendFinalProducts')}</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">{t('cascades.sankey.legendFinalProductsDesc')}</div>
             </div>
           </div>
         </div>
         <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 space-y-1">
-          <p>💡 <strong>Flow width</strong> represents {useWeighted ? 'weighted frequency (fuel proportions applied)' : 'how often each reaction pathway occurs'}</p>
-          <p>💡 <strong>Hover</strong> over flows to see detailed reaction information</p>
+          <p>💡 <strong>{t('cascades.sankey.flowWidth')}</strong> {useWeighted ? t('cascades.sankey.flowWidthWeighted') : t('cascades.sankey.flowWidthRaw')}</p>
+          <p>💡 <strong>{t('cascades.sankey.hover')}</strong> {t('cascades.sankey.legendHoverDesc')}</p>
           {hasWeightedData && (
-            <p>💡 Use the <strong>{showWeightedView ? 'Weighted' : 'Raw'}</strong> button to toggle between weighted and raw frequencies</p>
+            <p>💡 {t('cascades.sankey.legendToggleHint', { mode: showWeightedView ? t('cascades.sankey.weighted') : t('cascades.sankey.raw') })}</p>
           )}
         </div>
       </div>

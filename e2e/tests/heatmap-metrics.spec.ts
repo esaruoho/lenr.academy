@@ -15,7 +15,10 @@ test.describe('Heatmap Metrics Calculation', () => {
   });
 
   test('should calculate frequency metrics from fusion results', async ({ page }) => {
-    // Use default H+C,O fusion query which should have predictable results
+    // Navigate to H+C,O fusion query which should have predictable results
+    await page.goto('/fusion?e1=H&e2=C,O');
+    await waitForDatabaseReady(page);
+
     // Wait for results to load
     await waitForReactionResults(page, 'fusion');
 

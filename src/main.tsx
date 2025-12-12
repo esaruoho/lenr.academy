@@ -5,6 +5,7 @@ import App from './App.tsx'
 import './index.css'
 import { loadUmamiScript } from './utils/analytics'
 import { generateErrorFingerprint } from './utils/errorFingerprint'
+import './i18n/config' // Initialize i18n
 
 // Initialize Sentry for error tracking
 // Only initialize if DSN is provided (production environment) AND user hasn't explicitly declined

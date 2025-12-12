@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Search, Beaker, Factory, FlaskConical, Atom, Save, Trash2, ChevronRight, ChevronLeft, User, Plus, Layers } from 'lucide-react';
 import type { Material, MaterialCategory, WeightedNuclide } from '../types';
 import {
@@ -21,14 +22,36 @@ interface MaterialsCatalogProps {
 
 type TabKey = 'all' | 'natural-abundance' | 'alloy' | 'compound' | 'lenr-experiment' | 'custom';
 
-const TABS: { key: TabKey; label: string; icon: typeof Atom }[] = [
-  { key: 'all', label: 'All', icon: Beaker },
-  { key: 'natural-abundance', label: 'Natural', icon: Atom },
-  { key: 'alloy', label: 'Alloys', icon: Factory },
-  { key: 'compound', label: 'Compounds', icon: FlaskConical },
-  { key: 'lenr-experiment', label: 'LENR', icon: Beaker },
-  { key: 'custom', label: 'Custom', icon: User },
+const TABS: { key: TabKey; labelKey: string; icon: typeof Atom }[] = [
+  { key: 'all', labelKey: 'cascades.tabAll', icon: Beaker },
+  { key: 'natural-abundance', labelKey: 'cascades.tabNatural', icon: Atom },
+  { key: 'alloy', labelKey: 'cascades.tabAlloys', icon: Factory },
+  { key: 'compound', labelKey: 'cascades.tabCompounds', icon: FlaskConical },
+  { key: 'lenr-experiment', labelKey: 'cascades.tabLENR', icon: Beaker },
+  { key: 'custom', labelKey: 'cascades.tabCustom', icon: User },
 ];
+
+/**
+ * Get translated material name
+ * Falls back to raw name for custom materials or missing translations
+ */
+function getMaterialName(t: (key: string, options?: Record<string, unknown>) => string, material: Material): string {
+  if (material.isCustom) return material.name;
+  const key = `materials.${material.id}.name`;
+  const translated = t(key, { defaultValue: '' });
+  return translated || material.name;
+}
+
+/**
+ * Get translated material description
+ * Falls back to raw description for custom materials or missing translations
+ */
+function getMaterialDescription(t: (key: string, options?: Record<string, unknown>) => string, material: Material): string {
+  if (material.isCustom) return material.description || '';
+  const key = `materials.${material.id}.description`;
+  const translated = t(key, { defaultValue: '' });
+  return translated || material.description || '';
+}
 
 /**
  * Materials Catalog Modal
@@ -42,6 +65,7 @@ export default function MaterialsCatalog({
   onSelectMaterial,
   currentFuel,
 }: MaterialsCatalogProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
@@ -196,15 +220,15 @@ export default function MaterialsCatalog({
           <div className="flex items-start justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="min-w-0 flex-1 pr-2">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-                Materials Catalog
+                {t('cascades.materialsCatalog')}
               </h2>
               <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1">
-                Select a material or save your current fuel mixture
+                {t('cascades.materialsCatalogSubtitle')}
               </p>
             </div>
             <button
               onClick={onClose}
-              aria-label="Close"
+              aria-label={t('common.close')}
               className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
             >
               <X className="w-5 h-5" />
@@ -218,7 +242,7 @@ export default function MaterialsCatalog({
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search materials..."
+                  placeholder={t('cascades.searchMaterials')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -232,14 +256,14 @@ export default function MaterialsCatalog({
                   data-testid="save-custom-material-button"
                 >
                   <Save className="w-4 h-4" />
-                  Save Current
+                  {t('cascades.saveCurrent')}
                 </button>
               )}
             </div>
 
             {/* Mode Toggle */}
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Mode:</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t('cascades.mode')}:</span>
               <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
                 <button
                   onClick={() => setBlendMode(false)}
@@ -250,7 +274,7 @@ export default function MaterialsCatalog({
                   }`}
                   data-testid="mode-replace"
                 >
-                  Replace
+                  {t('cascades.replace')}
                 </button>
                 <button
                   onClick={() => setBlendMode(true)}
@@ -262,12 +286,12 @@ export default function MaterialsCatalog({
                   data-testid="mode-blend"
                 >
                   <Layers className="w-3.5 h-3.5" />
-                  Blend
+                  {t('cascades.blend')}
                 </button>
               </div>
               {blendMode && blendMaterials.length > 0 && (
                 <span className="text-sm text-primary-600 dark:text-primary-400 font-medium">
-                  {blendMaterials.length} selected
+                  {blendMaterials.length} {t('common.selected')}
                 </span>
               )}
             </div>
@@ -277,14 +301,14 @@ export default function MaterialsCatalog({
               <div className="mt-3 p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
-                    Materials to blend:
+                    {t('cascades.materialsToBlend')}
                   </span>
                   <button
                     onClick={handleClearBlend}
                     className="text-xs text-primary-600 dark:text-primary-400 hover:underline"
                     data-testid="clear-blend-button"
                   >
-                    Clear all
+                    {t('cascades.clearAll')}
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -293,11 +317,11 @@ export default function MaterialsCatalog({
                       key={material.id}
                       className="inline-flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded text-sm text-gray-700 dark:text-gray-300 border border-primary-200 dark:border-primary-700"
                     >
-                      {material.name}
+                      {getMaterialName(t, material)}
                       <button
                         onClick={() => handleRemoveFromBlend(material.id)}
                         className="text-gray-400 hover:text-red-500 ml-1"
-                        title="Remove from blend"
+                        title={t('cascades.removeFromBlend')}
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -336,7 +360,7 @@ export default function MaterialsCatalog({
                     data-testid={`materials-tab-${tab.key}`}
                   >
                     <Icon className="w-4 h-4" />
-                    {tab.label}
+                    {t(tab.labelKey)}
                     <span className="text-xs bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded-full">
                       {count}
                     </span>
@@ -356,8 +380,8 @@ export default function MaterialsCatalog({
               {filteredMaterials.length === 0 ? (
                 <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                   {searchQuery
-                    ? `No materials found for "${searchQuery}"`
-                    : 'No materials in this category'}
+                    ? t('cascades.noMaterialsFound', { query: searchQuery })
+                    : t('cascades.noMaterialsInCategory')}
                 </div>
               ) : (
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -385,16 +409,16 @@ export default function MaterialsCatalog({
                                 {getCategoryIcon(material.category)}
                               </span>
                               <span className="font-medium text-gray-900 dark:text-white truncate">
-                                {material.name}
+                                {getMaterialName(t, material)}
                               </span>
                               {inBlend && (
                                 <span className="text-xs px-1.5 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded flex-shrink-0">
-                                  In blend
+                                  {t('cascades.inBlend')}
                                 </span>
                               )}
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-                              {material.description}
+                              {getMaterialDescription(t, material)}
                             </p>
                             <div className="flex flex-wrap gap-1 mt-2">
                               {material.tags?.slice(0, 3).map((tag) => (
@@ -412,7 +436,7 @@ export default function MaterialsCatalog({
                               <button
                                 onClick={(e) => handleDeleteCustom(material.id, e)}
                                 className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
-                                title="Delete custom material"
+                                title={t('cascades.deleteCustomMaterial')}
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -440,21 +464,21 @@ export default function MaterialsCatalog({
                     className="sm:hidden flex items-center gap-1 text-sm text-primary-600 dark:text-primary-400 mb-3 -ml-1"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    Back to list
+                    {t('cascades.backToList')}
                   </button>
 
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    {selectedMaterial.name}
+                    {getMaterialName(t, selectedMaterial)}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    {selectedMaterial.description}
+                    {getMaterialDescription(t, selectedMaterial)}
                   </p>
 
                   {/* Source citation */}
                   {selectedMaterial.source && (
                     <div className="mb-4">
                       <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Source:
+                        {t('cascades.source')}:
                       </span>
                       <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                         {selectedMaterial.source}
@@ -467,14 +491,14 @@ export default function MaterialsCatalog({
                     <div className="mb-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                       <div className="text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">Researcher:</span>
+                          <span className="text-gray-600 dark:text-gray-400">{t('cascades.researcher')}:</span>
                           <span className="font-medium text-gray-900 dark:text-white">
                             {(selectedMaterial as any).researcher}
                           </span>
                         </div>
                         {(selectedMaterial as any).year && (
                           <div className="flex justify-between mt-1">
-                            <span className="text-gray-600 dark:text-gray-400">Year:</span>
+                            <span className="text-gray-600 dark:text-gray-400">{t('cascades.year')}:</span>
                             <span className="font-medium text-gray-900 dark:text-white">
                               {(selectedMaterial as any).year}
                             </span>
@@ -482,7 +506,7 @@ export default function MaterialsCatalog({
                         )}
                         {(selectedMaterial as any).experimentType && (
                           <div className="flex justify-between mt-1">
-                            <span className="text-gray-600 dark:text-gray-400">Type:</span>
+                            <span className="text-gray-600 dark:text-gray-400">{t('cascades.type')}:</span>
                             <span className="font-medium text-gray-900 dark:text-white">
                               {(selectedMaterial as any).experimentType}
                             </span>
@@ -495,17 +519,17 @@ export default function MaterialsCatalog({
                   {/* Composition table */}
                   <div className="mb-4">
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Composition ({selectedMaterial.composition.length} nuclides)
+                      {t('cascades.composition')} ({selectedMaterial.composition.length} {t('cascades.nuclides')})
                     </h4>
                     <div className="overflow-y-auto overscroll-contain border border-gray-200 dark:border-gray-700 rounded-lg sm:max-h-80">
                       <table className="w-full text-sm">
                         <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
                           <tr>
                             <th className="text-left px-3 py-2 text-gray-600 dark:text-gray-400">
-                              Nuclide
+                              {t('cascades.nuclide')}
                             </th>
                             <th className="text-right px-3 py-2 text-gray-600 dark:text-gray-400">
-                              Proportion
+                              {t('cascades.proportion')}
                             </th>
                           </tr>
                         </thead>
@@ -529,7 +553,7 @@ export default function MaterialsCatalog({
                 <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
                   <div className="text-center">
                     <Beaker className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Select a material to view details</p>
+                    <p>{t('cascades.selectMaterialToView')}</p>
                   </div>
                 </div>
               )}
@@ -539,14 +563,14 @@ export default function MaterialsCatalog({
           {/* Footer Actions */}
           <div className="flex items-center justify-between gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
             <div className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-              {filteredMaterials.length} materials
+              {filteredMaterials.length} {t('cascades.materials').toLowerCase()}
             </div>
             <div className="flex gap-2">
               <button
                 onClick={onClose}
                 className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                Cancel
+                {t('cascades.cancel')}
               </button>
               {blendMode ? (
                 <>
@@ -557,7 +581,7 @@ export default function MaterialsCatalog({
                     data-testid="add-to-blend-button"
                   >
                     <Plus className="w-4 h-4" />
-                    <span className="hidden xs:inline">Add</span>
+                    <span className="hidden xs:inline">{t('cascades.add')}</span>
                   </button>
                   <button
                     onClick={handleApplyBlend}
@@ -566,7 +590,7 @@ export default function MaterialsCatalog({
                     data-testid="apply-blend-button"
                   >
                     <Layers className="w-4 h-4" />
-                    <span className="hidden xs:inline">Blend</span> ({blendMaterials.length})
+                    <span className="hidden xs:inline">{t('cascades.blend')}</span> ({blendMaterials.length})
                   </button>
                 </>
               ) : (
@@ -576,7 +600,7 @@ export default function MaterialsCatalog({
                   className="px-3 sm:px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
                   data-testid="load-material-button"
                 >
-                  Load
+                  {t('cascades.load')}
                 </button>
               )}
             </div>
@@ -595,12 +619,12 @@ export default function MaterialsCatalog({
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Save Custom Material
+              {t('cascades.saveCustomMaterial')}
             </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Name *
+                  {t('cascades.name')} *
                 </label>
                 <input
                   type="text"
@@ -613,7 +637,7 @@ export default function MaterialsCatalog({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Description
+                  {t('cascades.description')}
                 </label>
                 <textarea
                   value={saveDescription}
@@ -624,8 +648,7 @@ export default function MaterialsCatalog({
                 />
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                This will save your current fuel mixture ({currentFuel?.length || 0} nuclides)
-                as a custom material.
+                {t('cascades.saveCurrentFuelMixture', { count: currentFuel?.length || 0 })}
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-6">
@@ -633,7 +656,7 @@ export default function MaterialsCatalog({
                 onClick={() => setShowSaveDialog(false)}
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                Cancel
+                {t('cascades.cancel')}
               </button>
               <button
                 onClick={handleSaveCustom}
@@ -641,7 +664,7 @@ export default function MaterialsCatalog({
                 className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors"
                 data-testid="confirm-save-material-button"
               >
-                Save Material
+                {t('cascades.saveMaterial')}
               </button>
             </div>
           </div>

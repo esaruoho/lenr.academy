@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Download, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
 import { useSearchParams, Link } from 'react-router-dom'
 import type { TwoToTwoReaction, QueryFilter, Element, Nuclide, HeatmapMode, HeatmapMetrics, AtomicRadiiData, NeutrinoType } from '../types'
@@ -24,6 +25,7 @@ const SCROLLBAR_COMPENSATION = 16
 const SMALL_RESULT_THRESHOLD = 12
 
 export default function TwoToTwoQuery() {
+  const { t } = useTranslation()
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const [searchParams, setSearchParams] = useSearchParams()
   const { getTwoToTwoState, updateTwoToTwoState } = useQueryState()
@@ -648,19 +650,19 @@ export default function TwoToTwoQuery() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Two-To-Two Reactions</h1>
-        <p className="text-gray-600 dark:text-gray-400">Query 2-2 transmutation reactions where two input nuclei transform into two different output nuclei</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('reactions.twoToTwoTitle')}</h1>
+        <p className="text-gray-600 dark:text-gray-400">{t('reactions.twoToTwoDescription')}</p>
       </div>
 
       {/* Query Builder */}
       <div className="card p-6 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Query Parameters</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{t('reactions.queryParameters')}</h2>
 
         {/* Input/Output Selectors (always visible) */}
         <div className="grid md:grid-cols-4 gap-6 mb-6">
           {/* Input Element 1 Selection (E1) */}
           <PeriodicTableSelector
-            label="Input Element 1 (E1)"
+            label={t('reactions.inputElement1')}
             availableElements={elements}
             selectedElements={selectedElement1}
             onSelectionChange={setSelectedElement1}
@@ -669,7 +671,7 @@ export default function TwoToTwoQuery() {
 
           {/* Input Element 2 Selection (E2) */}
           <PeriodicTableSelector
-            label="Input Element 2 (E2)"
+            label={t('reactions.inputElement2')}
             availableElements={elements}
             selectedElements={selectedElement2}
             onSelectionChange={setSelectedElement2}
@@ -679,7 +681,7 @@ export default function TwoToTwoQuery() {
 
           {/* Output Element 1 Selection (E3) */}
           <PeriodicTableSelector
-            label="Output Element 1 (E3)"
+            label={t('reactions.outputElement1')}
             availableElements={elements}
             selectedElements={selectedOutputElement3}
             onSelectionChange={setSelectedOutputElement3}
@@ -689,7 +691,7 @@ export default function TwoToTwoQuery() {
 
           {/* Output Element 2 Selection (E4) */}
           <PeriodicTableSelector
-            label="Output Element 2 (E4)"
+            label={t('reactions.outputElement2')}
             availableElements={elements}
             selectedElements={selectedOutputElement4}
             onSelectionChange={setSelectedOutputElement4}
@@ -702,12 +704,12 @@ export default function TwoToTwoQuery() {
         <div className="border-t pt-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-medium text-gray-900 dark:text-white">
-              Additional Filters
+              {t('reactions.additionalFilters')}
             </h3>
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="btn btn-secondary p-2"
-              title={showFilters ? 'Collapse filters' : 'Expand filters'}
+              title={showFilters ? t('reactions.collapseFilters') : t('reactions.expandFilters')}
               aria-label={showFilters ? 'Collapse filters' : 'Expand filters'}
             >
               <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${showFilters ? 'rotate-180' : ''}`} />
@@ -719,7 +721,7 @@ export default function TwoToTwoQuery() {
               {/* Energy Range */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Energy Range (MeV)
+                  {t('reactions.energyRangeMeV')}
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -742,7 +744,7 @@ export default function TwoToTwoQuery() {
                {/* Neutrino Involvement */}
                <div>
                  <label htmlFor="neutrino-filter-twotwo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                   Neutrino Involvement
+                   {t('reactions.neutrinoInvolvement')}
                  </label>
                  <select
                    id="neutrino-filter-twotwo"
@@ -750,11 +752,11 @@ export default function TwoToTwoQuery() {
                    onChange={(e) => setFilter({...filter, neutrinoType: e.target.value as NeutrinoType})}
                    className="input w-full"
                  >
-                   <option value="any">Any neutrino type</option>
-                   <option value="none">No neutrino</option>
-                   <option value="left">Only left neutrino</option>
-                   <option value="right">Only right neutrino</option>
-                   <option value="left-right">Left and right neutrinos</option>
+                   <option value="any">{t('reactions.anyNeutrinoType')}</option>
+                   <option value="none">{t('reactions.noNeutrino')}</option>
+                   <option value="left">{t('reactions.onlyLeftNeutrino')}</option>
+                   <option value="right">{t('reactions.onlyRightNeutrino')}</option>
+                   <option value="left-right">{t('reactions.leftRightNeutrinos')}</option>
                  </select>
                </div>
 
@@ -774,13 +776,13 @@ export default function TwoToTwoQuery() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
             <div className="flex items-center gap-2">
               <Info className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">SQL Preview:</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('reactions.sqlPreview')}:</span>
             </div>
             <div className="flex items-center gap-3">
               {isQuerying && (
                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm">Querying...</span>
+                  <span className="text-sm">{t('reactions.querying')}</span>
                 </div>
               )}
                  <button
@@ -801,7 +803,7 @@ export default function TwoToTwoQuery() {
                    }}
                    className="btn btn-secondary px-4 py-1.5 text-sm whitespace-nowrap"
                  >
-                   Reset Filters
+                   {t('reactions.resetFilters')}
                  </button>
             </div>
           </div>
@@ -839,16 +841,16 @@ export default function TwoToTwoQuery() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Heatmap Visualization
+                  {t('reactions.elementHeatmap')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Click any element to filter the results table and nuclides list to show only reactions containing that element. Color intensity shows the selected metric value.
+                  {t('reactions.heatmapDescription')}
                 </p>
               </div>
               <button
                 onClick={() => setShowHeatmap(!showHeatmap)}
                 className="btn btn-secondary p-2 ml-4"
-                title={showHeatmap ? 'Collapse periodic table' : 'Expand periodic table'}
+                title={showHeatmap ? t('reactions.collapsePeriodicTable') : t('reactions.expandPeriodicTable')}
                 aria-label={showHeatmap ? 'Collapse periodic table' : 'Expand periodic table'}
               >
                 <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${showHeatmap ? 'rotate-180' : ''}`} />
@@ -861,7 +863,7 @@ export default function TwoToTwoQuery() {
                 <div className="flex flex-col md:flex-row gap-4 mb-4">
                   <div className="flex flex-col gap-1 md:min-w-[140px]">
                     <label htmlFor="heatmap-metric-selector" className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                      Metric:
+                      {t('reactions.metric')}:
                     </label>
                     <select
                       id="heatmap-metric-selector"
@@ -870,32 +872,17 @@ export default function TwoToTwoQuery() {
                       className="input px-3 py-2 text-sm"
                       aria-label="Select heatmap metric"
                     >
-                      <option value="frequency">Frequency</option>
-                      <option value="energy">Energy</option>
-                      <option value="diversity">Diversity</option>
+                      <option value="frequency">{t('reactions.frequency')}</option>
+                      <option value="energy">{t('reactions.energy')}</option>
+                      <option value="diversity">{t('reactions.diversity')}</option>
                     </select>
                   </div>
 
                   <div className="flex-1 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800">
                     <p className="text-sm text-blue-900 dark:text-blue-100">
-                      {heatmapMode === 'frequency' && (
-                        <>
-                          Number of times each element appears across {useAllResultsForHeatmap ? `all ${totalCount.toLocaleString()} matching` : results.length.toLocaleString()} reactions (as input or output).
-                          Higher frequency = darker color.
-                        </>
-                      )}
-                      {heatmapMode === 'energy' && (
-                        <>
-                          Total energy (MeV) from all reactions involving each element.
-                          Higher total energy = darker color.
-                        </>
-                      )}
-                      {heatmapMode === 'diversity' && (
-                        <>
-                          Number of unique isotopes of each element appearing in the results.
-                          More isotopic variety = darker color.
-                        </>
-                      )}
+                      {heatmapMode === 'frequency' && t('reactions.frequencyDescription', { count: useAllResultsForHeatmap ? totalCount.toLocaleString() : results.length.toLocaleString() })}
+                      {heatmapMode === 'energy' && t('reactions.energyDescription')}
+                      {heatmapMode === 'diversity' && t('reactions.diversityDescription')}
                     </p>
                   </div>
                 </div>
@@ -904,16 +891,16 @@ export default function TwoToTwoQuery() {
                 <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
                   <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Element Role:</span>
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">{t('reactions.elementRole')}:</span>
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <span className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">Input</span>
+                        <span className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">{t('reactions.input')}</span>
                         <div className="flex-1 min-w-[60px] h-4 rounded" style={{
                           background: 'linear-gradient(to right, rgb(37, 99, 235), rgb(29, 131, 155), rgb(22, 163, 74))'
                         }}></div>
-                        <span className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">Output</span>
+                        <span className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">{t('reactions.output')}</span>
                       </div>
                     </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 text-center md:text-left md:whitespace-nowrap">• Intensity shows metric value</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 text-center md:text-left md:whitespace-nowrap">• {t('reactions.intensityShowsMetric')}</span>
                   </div>
                 </div>
 
@@ -927,8 +914,8 @@ export default function TwoToTwoQuery() {
                     <>
                       <label className="flex items-center gap-3 cursor-pointer">
                       <span className="text-sm text-gray-700 dark:text-gray-300">
-                        Use all {totalCount.toLocaleString()} matching results
-                        {totalCount > 1000 && <span className="text-gray-500 dark:text-gray-400"> (may be slow)</span>}
+                        {t('reactions.useAllResults', { count: totalCount.toLocaleString() })}
+                        {totalCount > 1000 && <span className="text-gray-500 dark:text-gray-400"> {t('reactions.mayBeSlow')}</span>}
                       </span>
                       <button
                         type="button"
@@ -976,9 +963,9 @@ export default function TwoToTwoQuery() {
                       }}
                       disabled={filter.limit === 0}
                       className="btn btn-secondary px-4 py-2 text-sm whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-                      title={filter.limit === 0 ? "Already showing all results" : "Remove limit and show all matching reactions in table"}
+                      title={filter.limit === 0 ? t('reactions.alreadyShowingAll') : "Remove limit and show all matching reactions in table"}
                     >
-                      Show All in Table →
+                      {t('reactions.showAllInTable')}
                     </button>
                     </>
                   )}
@@ -1016,19 +1003,19 @@ export default function TwoToTwoQuery() {
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                   {pinnedNuclide && highlightedNuclide ? (
-                    `Showing ${filteredResults.length.toLocaleString()} of ${results.length.toLocaleString()} reactions containing ${highlightedNuclide}`
+                    t('reactions.showingReactions', { shown: filteredResults.length.toLocaleString(), total: results.length.toLocaleString(), nuclide: highlightedNuclide })
                   ) : pinnedElement && highlightedElement ? (
-                    `Showing ${filteredResults.length.toLocaleString()} of ${results.length.toLocaleString()} reactions containing ${highlightedElement}`
+                    t('reactions.showingReactions', { shown: filteredResults.length.toLocaleString(), total: results.length.toLocaleString(), nuclide: highlightedElement })
                   ) : results.length === totalCount ? (
-                    `Showing all ${totalCount.toLocaleString()} matching reactions`
+                    t('reactions.showingAllReactions', { total: totalCount.toLocaleString() })
                   ) : (
-                    `Showing ${results.length.toLocaleString()} of ${totalCount.toLocaleString()} matching reactions`
+                    t('reactions.showingReactionsNoNuclide', { shown: results.length.toLocaleString(), total: totalCount.toLocaleString() })
                   )}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Query executed in {executionTime.toFixed(2)}ms
+                  {t('reactions.queryExecuted', { time: executionTime.toFixed(2) })}
                   {filter.limit && filter.limit > 0 && totalCount > filter.limit && (
-                    <span className="ml-2">• Increase limit to see more results</span>
+                    <span className="ml-2">• {t('reactions.increaseLimit')}</span>
                   )}
                 </p>
               </div>
@@ -1039,7 +1026,7 @@ export default function TwoToTwoQuery() {
                   title={showBosonFermion ? 'Hide Boson/Fermion columns' : 'Show Boson/Fermion columns'}
                 >
                   {showBosonFermion ? <EyeOff className="w-4 h-4 mr-2 inline" /> : <Eye className="w-4 h-4 mr-2 inline" />}
-                  {showBosonFermion ? 'Hide' : 'Show'} B/F Types
+                  {showBosonFermion ? t('reactions.hideBFTypes') : t('reactions.showBFTypes')}
                 </button>
                 <button
                   onClick={exportToCSV}
@@ -1047,7 +1034,7 @@ export default function TwoToTwoQuery() {
                   disabled={results.length === 0}
                 >
                   <Download className="w-4 h-4 mr-2 inline" />
-                  Export CSV
+                  {t('reactions.exportCsv')}
                 </button>
               </div>
             </div>
@@ -1068,26 +1055,26 @@ export default function TwoToTwoQuery() {
                     style={{ gridTemplateColumns: twoTwoColumnTemplate }}
                   >
                     <div className="px-3 py-2 text-center bg-blue-50 dark:bg-blue-900/30 col-span-2">
-                      Inputs
+                      {t('reactions.inputs')}
                     </div>
                     <div className="px-3 py-2 text-center bg-green-50 dark:bg-green-900/30 col-span-2">
-                      Outputs
+                      {t('reactions.outputs')}
                     </div>
-                    <div className="px-3 py-2 text-center">Energy (MeV)</div>
-                    <div className="px-1 py-2 sm:px-3 text-center">Neutrino</div>
+                    <div className="px-3 py-2 text-center">{t('reactions.energyMeV')}</div>
+                    <div className="px-1 py-2 sm:px-3 text-center">{t('reactions.neutrino')}</div>
                     {showBosonFermion && (
                       <>
                         <div className="px-3 py-2 text-center bg-purple-50 dark:bg-purple-900/30 col-span-2">
-                          Input 1 Type
+                          {t('reactions.input1Type')}
                         </div>
                         <div className="px-3 py-2 text-center bg-purple-50 dark:bg-purple-900/30 col-span-2">
-                          Input 2 Type
+                          {t('reactions.input2Type')}
                         </div>
                         <div className="px-3 py-2 text-center bg-amber-50 dark:bg-amber-900/30 col-span-2">
-                          Output 1 Type
+                          {t('reactions.output1Type')}
                         </div>
                         <div className="px-3 py-2 text-center bg-amber-50 dark:bg-amber-900/30 col-span-2">
-                          Output 2 Type
+                          {t('reactions.output2Type')}
                         </div>
                       </>
                     )}
@@ -1096,22 +1083,22 @@ export default function TwoToTwoQuery() {
                     className="grid border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/80 text-xs font-medium uppercase text-gray-500 dark:text-gray-400"
                     style={{ gridTemplateColumns: twoTwoColumnTemplate }}
                   >
-                    <div className="px-3 py-2 text-center bg-blue-50 dark:bg-blue-900/30">Input 1</div>
-                    <div className="px-3 py-2 text-center bg-blue-50 dark:bg-blue-900/30">Input 2</div>
-                    <div className="px-3 py-2 text-center bg-green-50 dark:bg-green-900/30">Output 1</div>
-                    <div className="px-3 py-2 text-center bg-green-50 dark:bg-green-900/30">Output 2</div>
-                    <div className="px-3 py-2 text-center">Energy</div>
-                    <div className="px-1 py-2 sm:px-3 text-center">Neutrino</div>
+                    <div className="px-3 py-2 text-center bg-blue-50 dark:bg-blue-900/30">{t('reactions.input1')}</div>
+                    <div className="px-3 py-2 text-center bg-blue-50 dark:bg-blue-900/30">{t('reactions.input2')}</div>
+                    <div className="px-3 py-2 text-center bg-green-50 dark:bg-green-900/30">{t('reactions.output1')}</div>
+                    <div className="px-3 py-2 text-center bg-green-50 dark:bg-green-900/30">{t('reactions.output2')}</div>
+                    <div className="px-3 py-2 text-center">{t('reactions.energy')}</div>
+                    <div className="px-1 py-2 sm:px-3 text-center">{t('reactions.neutrino')}</div>
                     {showBosonFermion && (
                       <>
-                        <div className="px-3 py-2 text-center">Nuclear</div>
-                        <div className="px-3 py-2 text-center">Atomic</div>
-                        <div className="px-3 py-2 text-center">Nuclear</div>
-                        <div className="px-3 py-2 text-center">Atomic</div>
-                        <div className="px-3 py-2 text-center">Nuclear</div>
-                        <div className="px-3 py-2 text-center">Atomic</div>
-                        <div className="px-3 py-2 text-center">Nuclear</div>
-                        <div className="px-3 py-2 text-center">Atomic</div>
+                        <div className="px-3 py-2 text-center">{t('reactions.nuclear')}</div>
+                        <div className="px-3 py-2 text-center">{t('reactions.atomic')}</div>
+                        <div className="px-3 py-2 text-center">{t('reactions.nuclear')}</div>
+                        <div className="px-3 py-2 text-center">{t('reactions.atomic')}</div>
+                        <div className="px-3 py-2 text-center">{t('reactions.nuclear')}</div>
+                        <div className="px-3 py-2 text-center">{t('reactions.atomic')}</div>
+                        <div className="px-3 py-2 text-center">{t('reactions.nuclear')}</div>
+                        <div className="px-3 py-2 text-center">{t('reactions.atomic')}</div>
                       </>
                     )}
                   </div>
@@ -1119,12 +1106,12 @@ export default function TwoToTwoQuery() {
 
                 {filteredResults.length === 0 ? (
                   <div className="p-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                    {results.length === 0 ? 'Run a query to view two-to-two reactions.' : (
+                    {results.length === 0 ? t('reactions.runQueryToView', { type: 'two-to-two' }) : (
                       // Enhanced empty state for pinned elements in limited results
                       useAllResultsForHeatmap && pinnedElement && highlightedElement && (filter.limit ?? 0) > 0 && totalCount > (filter.limit ?? 0) ? (
                         <div className="space-y-3">
                           <div>
-                            Element <span className="font-medium">{selectedElementDetails?.EName || highlightedElement}</span> exists in the full dataset but not in the limited results. (may be slow)
+                            {t('reactions.elementExistsInFull', { element: selectedElementDetails?.EName || highlightedElement })} {t('reactions.mayBeSlow')}
                           </div>
                           <button
                             onClick={() => {
@@ -1135,11 +1122,11 @@ export default function TwoToTwoQuery() {
                             className="btn btn-secondary px-4 py-2 text-sm whitespace-nowrap"
                             title="Remove limit and show all matching reactions in table"
                           >
-                            Show All in Table →
+                            {t('reactions.showAllInTable')}
                           </button>
                         </div>
                       ) : (
-                        'No reactions match the selected filter.'
+                        t('reactions.noMatchingReactions')
                       )
                     )}
                   </div>
@@ -1172,7 +1159,7 @@ export default function TwoToTwoQuery() {
                                 {reaction.E1}-{reaction.A1}
                               </Link>
                               {isE1Radioactive && (
-                                <span title="Radioactive">
+                                <span title={t('reactions.radioactive')}>
                                   <Radiation className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                                 </span>
                               )}
@@ -1188,7 +1175,7 @@ export default function TwoToTwoQuery() {
                                 {reaction.E2}-{reaction.A2}
                               </Link>
                               {isE2Radioactive && (
-                                <span title="Radioactive">
+                                <span title={t('reactions.radioactive')}>
                                   <Radiation className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                                 </span>
                               )}
@@ -1204,7 +1191,7 @@ export default function TwoToTwoQuery() {
                                 {reaction.E3}-{reaction.A3}
                               </Link>
                               {isE3Radioactive && (
-                                <span title="Radioactive">
+                                <span title={t('reactions.radioactive')}>
                                   <Radiation className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                                 </span>
                               )}
@@ -1220,7 +1207,7 @@ export default function TwoToTwoQuery() {
                                 {reaction.E4}-{reaction.A4}
                               </Link>
                               {isE4Radioactive && (
-                                <span title="Radioactive">
+                                <span title={t('reactions.radioactive')}>
                                   <Radiation className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                                 </span>
                               )}
@@ -1253,7 +1240,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.nBorF1 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.nBorF1 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1264,7 +1251,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.aBorF1 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.aBorF1 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1275,7 +1262,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.nBorF2 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.nBorF2 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1286,7 +1273,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.aBorF2 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.aBorF2 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1297,7 +1284,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.nBorF3 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.nBorF3 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1308,7 +1295,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.aBorF3 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.aBorF3 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1319,7 +1306,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.nBorF4 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.nBorF4 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1330,7 +1317,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                 {reaction.aBorF4 === 'b' ? 'Boson' : 'Fermion'}
+                                 {reaction.aBorF4 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                </span>
                              </div>
                            </>
@@ -1375,7 +1362,7 @@ export default function TwoToTwoQuery() {
                                 {reaction.E1}-{reaction.A1}
                               </Link>
                               {isE1Radioactive && (
-                                <span title="Radioactive">
+                                <span title={t('reactions.radioactive')}>
                                   <Radiation className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                                 </span>
                               )}
@@ -1391,7 +1378,7 @@ export default function TwoToTwoQuery() {
                                 {reaction.E2}-{reaction.A2}
                               </Link>
                               {isE2Radioactive && (
-                                <span title="Radioactive">
+                                <span title={t('reactions.radioactive')}>
                                   <Radiation className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                                 </span>
                               )}
@@ -1407,7 +1394,7 @@ export default function TwoToTwoQuery() {
                                 {reaction.E3}-{reaction.A3}
                               </Link>
                               {isE3Radioactive && (
-                                <span title="Radioactive">
+                                <span title={t('reactions.radioactive')}>
                                   <Radiation className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                                 </span>
                               )}
@@ -1423,7 +1410,7 @@ export default function TwoToTwoQuery() {
                                 {reaction.E4}-{reaction.A4}
                               </Link>
                               {isE4Radioactive && (
-                                <span title="Radioactive">
+                                <span title={t('reactions.radioactive')}>
                                   <Radiation className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                                 </span>
                               )}
@@ -1456,7 +1443,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.nBorF1 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.nBorF1 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1467,7 +1454,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.aBorF1 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.aBorF1 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1478,7 +1465,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.nBorF2 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.nBorF2 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1489,7 +1476,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.aBorF2 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.aBorF2 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1500,7 +1487,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.nBorF3 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.nBorF3 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1511,7 +1498,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.aBorF3 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.aBorF3 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1522,7 +1509,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                  {reaction.nBorF4 === 'b' ? 'Boson' : 'Fermion'}
+                                  {reaction.nBorF4 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                 </span>
                               </div>
                               <div className="px-1 py-1.5 sm:px-3 sm:py-3 text-center">
@@ -1533,7 +1520,7 @@ export default function TwoToTwoQuery() {
                                       : 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
                                   }`}
                                 >
-                                 {reaction.aBorF4 === 'b' ? 'Boson' : 'Fermion'}
+                                 {reaction.aBorF4 === 'b' ? t('reactions.boson') : t('reactions.fermion')}
                                </span>
                              </div>
                            </>
@@ -1592,9 +1579,9 @@ export default function TwoToTwoQuery() {
           <div className="card p-4 sm:p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {pinnedElement && highlightedElement ? (
-                <>Nuclides of {highlightedElement} in Results ({filteredNuclides.length} of {nuclides.length})</>
+                t('reactions.nuclidesOfElement', { element: highlightedElement, filtered: filteredNuclides.length, total: nuclides.length })
               ) : (
-                <>Nuclides Appearing in Results ({filteredNuclides.length})</>
+                t('reactions.nuclidesSummary', { count: filteredNuclides.length })
               )}
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
@@ -1640,7 +1627,7 @@ export default function TwoToTwoQuery() {
                   <div className="flex items-center justify-between gap-1">
                     <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">{nuc.E}-{nuc.A}</span>
                     {nuclideIsRadioactive && (
-                      <span title="Radioactive">
+                      <span title={t('reactions.radioactive')}>
                         <Radiation className="w-3 h-3 text-amber-600 dark:text-amber-400 flex-shrink-0" />
                       </span>
                     )}
@@ -1685,10 +1672,10 @@ export default function TwoToTwoQuery() {
           ) : (
             <div className="card p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Details
+                {t('reactions.details')}
               </h3>
               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                <p className="text-sm">Click on an element or a nuclide above to see detailed properties</p>
+                <p className="text-sm">{t('reactions.clickForDetails')}</p>
               </div>
             </div>
           )}

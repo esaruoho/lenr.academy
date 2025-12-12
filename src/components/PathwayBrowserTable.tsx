@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, ArrowUpDown, Filter, ChevronUp, ChevronDown, Scale } from 'lucide-react';
 import type { PathwayAnalysis } from '../services/pathwayAnalyzer';
 import type { WeightedPathwayAnalysis } from '../types';
@@ -54,6 +55,7 @@ function formatLoops(loops: number[]): string {
  * Enables pattern discovery through ranking and filtering.
  */
 export default function PathwayBrowserTable({ pathways, useWeightedMode = false }: PathwayBrowserTableProps) {
+  const { t } = useTranslation();
   const [sortField, setSortField] = useState<SortField>('frequency');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [searchTerm, setSearchTerm] = useState('');
@@ -175,7 +177,7 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search by nuclide name..."
+            placeholder={t('cascades.pathwayBrowser.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -188,7 +190,7 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
           className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
         >
           <Filter className="w-4 h-4" />
-          {showFilters ? 'Hide' : 'Show'} Filters
+          {showFilters ? t('cascades.pathwayBrowser.hideFilters') : t('cascades.pathwayBrowser.showFilters')}
         </button>
 
         {/* Filters Panel */}
@@ -200,7 +202,7 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
           <div className="card p-4 space-y-4 bg-gray-50 dark:bg-gray-800">
             {/* Type Filters */}
             <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Reaction Types:</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('cascades.pathwayBrowser.reactionTypes')}:</p>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -209,7 +211,7 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
                     onChange={(e) => setShowFusion(e.target.checked)}
                     className="rounded border-gray-300 dark:border-gray-600"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Fusion</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('cascades.pathwayBrowser.fusion')}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -218,7 +220,7 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
                     onChange={(e) => setShowTwoToTwo(e.target.checked)}
                     className="rounded border-gray-300 dark:border-gray-600"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Two-to-Two</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('cascades.pathwayBrowser.twoToTwo')}</span>
                 </label>
               </div>
             </div>
@@ -233,7 +235,7 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
                   className="rounded border-gray-300 dark:border-gray-600"
                 />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Show only feedback loops
+                  {t('cascades.pathwayBrowser.showOnlyFeedback')}
                 </span>
               </label>
             </div>
@@ -241,7 +243,7 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
             {/* Min Frequency Slider */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Minimum Frequency: {minFrequency}×
+                {t('cascades.pathwayBrowser.minFrequency', { count: minFrequency })}
               </label>
               <input
                 type="range"
@@ -259,11 +261,11 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
       {/* Results Count and Weighted Toggle */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Showing {filteredAndSorted.length} of {pathways.length} pathways
+          {t('cascades.pathwayBrowser.showing', { shown: filteredAndSorted.length, total: pathways.length })}
           {useWeighted && (
             <span className="ml-2 text-purple-600 dark:text-purple-400 font-medium">
               <Scale className="w-3 h-3 inline mr-0.5" />
-              Weighted view
+              {t('cascades.pathwayBrowser.weightedView')}
             </span>
           )}
         </p>
@@ -276,10 +278,10 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
                 ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
-            title={showWeightedView ? 'Switch to raw frequencies' : 'Switch to weighted frequencies'}
+            title={showWeightedView ? t('cascades.pathwayBrowser.switchToRaw') : t('cascades.pathwayBrowser.switchToWeighted')}
           >
             <Scale className="w-4 h-4" />
-            {showWeightedView ? 'Weighted' : 'Raw'}
+            {showWeightedView ? t('cascades.pathwayBrowser.weighted') : t('cascades.pathwayBrowser.raw')}
           </button>
         )}
       </div>
@@ -291,31 +293,31 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
           <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
             <thead className="bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700">
               <tr>
-                <th className="hidden md:table-cell px-4 py-3 text-left font-medium" style={{ width: useWeighted ? '25%' : '30%' }}>Pathway</th>
-                <th className="px-4 py-3 text-left font-medium" style={{ width: '10%' }}>Type</th>
+                <th className="hidden md:table-cell px-4 py-3 text-left font-medium" style={{ width: useWeighted ? '25%' : '30%' }}>{t('cascades.pathwayBrowser.pathway')}</th>
+                <th className="px-4 py-3 text-left font-medium" style={{ width: '10%' }}>{t('cascades.pathwayBrowser.type')}</th>
                 <th className="px-4 py-3 text-right font-medium" style={{ width: '10%' }}>
-                  <SortButton field="frequency">Count</SortButton>
+                  <SortButton field="frequency">{t('cascades.pathwayBrowser.count')}</SortButton>
                 </th>
                 {/* Weighted frequency column (Issue #96) */}
                 {useWeighted && (
                   <th className="px-4 py-3 text-right font-medium" style={{ width: '10%' }}>
                     <SortButton field="weightedFrequency">
-                      <span className="text-purple-600 dark:text-purple-400">Wtd</span>
+                      <span className="text-purple-600 dark:text-purple-400">{t('cascades.pathwayBrowser.wtd')}</span>
                     </SortButton>
                   </th>
                 )}
                 <th className="px-4 py-3 text-right font-medium" style={{ width: '12%' }}>
-                  <SortButton field="avgEnergy">Avg (MeV)</SortButton>
+                  <SortButton field="avgEnergy">{t('cascades.pathwayBrowser.avgMeV')}</SortButton>
                 </th>
                 <th className="px-4 py-3 text-right font-medium" style={{ width: '12%' }}>
-                  <SortButton field="totalEnergy">Total (MeV)</SortButton>
+                  <SortButton field="totalEnergy">{t('cascades.pathwayBrowser.totalMeV')}</SortButton>
                 </th>
                 <th className="hidden sm:table-cell px-4 py-3 text-center font-medium" style={{ width: '10%' }}>
-                  <SortButton field="loops">Loops</SortButton>
+                  <SortButton field="loops">{t('cascades.pathwayBrowser.loops')}</SortButton>
                 </th>
-                <th className="hidden lg:table-cell px-4 py-3 text-center font-medium" style={{ width: '8%' }}>Feedback</th>
+                <th className="hidden lg:table-cell px-4 py-3 text-center font-medium" style={{ width: '8%' }}>{t('cascades.pathwayBrowser.feedback')}</th>
                 <th className="hidden lg:table-cell px-4 py-3 text-right font-medium" style={{ width: '8%' }}>
-                  <SortButton field="rarity">Rarity</SortButton>
+                  <SortButton field="rarity">{t('cascades.pathwayBrowser.rarity')}</SortButton>
                 </th>
               </tr>
             </thead>
@@ -354,7 +356,7 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
                             : 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
                         }`}
                       >
-                        {pathway.type === 'fusion' ? 'Fusion' : '2→2'}
+                        {pathway.type === 'fusion' ? t('cascades.pathwayBrowser.fusion') : t('cascades.pathwayBrowser.twoToTwoShort')}
                       </span>
                     </td>
                     <td className="px-4 py-2 align-middle text-right font-medium" style={{ width: '10%' }}>×{pathway.frequency}</td>
@@ -387,7 +389,7 @@ export default function PathwayBrowserTable({ pathways, useWeightedMode = false 
 
       {filteredAndSorted.length === 0 && (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          No pathways match your filters. Try adjusting the criteria.
+          {t('cascades.pathwayBrowser.noMatchingPathways')}
         </div>
       )}
     </div>

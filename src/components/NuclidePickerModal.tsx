@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Check } from 'lucide-react';
 import type { Element } from '../types';
 import type { NuclideWithAbundance } from '../services/isotopeService';
@@ -28,6 +29,7 @@ export default function NuclidePickerModal({
   selectedNuclides,
   onSelectionChange,
 }: NuclidePickerModalProps) {
+  const { t } = useTranslation();
   const { db } = useDatabase();
   const [nuclides, setNuclides] = useState<NuclideWithAbundance[]>([]);
   const [localSelection, setLocalSelection] = useState<Set<string>>(new Set());
@@ -136,15 +138,16 @@ export default function NuclidePickerModal({
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {element.EName} Isotopes
+                {element.EName} {t('elements.isotopes')}
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Select isotopes for {element.E} (Z={element.Z})
+                {t('elements.selectIsotopesFor', { element: element.E, z: element.Z })}
               </p>
             </div>
             <button
               onClick={handleCancel}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              aria-label={t('common.close')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -153,38 +156,38 @@ export default function NuclidePickerModal({
           {/* Quick Select Buttons */}
           <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Quick Select:
+              {t('elements.quickSelect')}
             </p>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => handleQuickSelect('most-common')}
                 className="px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                Most Common
+                {t('elements.mostCommon')}
               </button>
               <button
                 onClick={() => handleQuickSelect('abundant')}
                 className="px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                Abundant (&gt;1%)
+                {t('elements.abundant')}
               </button>
               <button
                 onClick={() => handleQuickSelect('stable')}
                 className="px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                Stable
+                {t('elements.stable')}
               </button>
               <button
                 onClick={() => handleQuickSelect('all')}
                 className="px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                All
+                {t('elements.all')}
               </button>
               <button
                 onClick={() => handleQuickSelect('none')}
                 className="px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-red-600 dark:text-red-400"
               >
-                Clear
+                {t('common.clear')}
               </button>
             </div>
           </div>
@@ -193,7 +196,7 @@ export default function NuclidePickerModal({
           <div className="p-4 overflow-y-auto flex-1">
             {nuclides.length === 0 ? (
               <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                No isotopes found for {element.E}
+                {t('elements.noIsotopesFound', { element: element.E })}
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -236,7 +239,7 @@ export default function NuclidePickerModal({
                       {/* Stability Indicator */}
                       {!nuclide.isStable && (
                         <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                          Unstable
+                          {t('elements.unstable')}
                         </div>
                       )}
                     </button>
@@ -249,20 +252,20 @@ export default function NuclidePickerModal({
           {/* Legend */}
           <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
             <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Color Legend:
+              {t('elements.colorLegend')}
             </p>
             <div className="flex flex-wrap gap-3 text-xs">
               <span className="flex items-center gap-1.5">
                 <span className="w-4 h-4 rounded bg-green-500 dark:bg-green-600"></span>
-                <span className="text-gray-700 dark:text-gray-300">Abundant (&gt;10%)</span>
+                <span className="text-gray-700 dark:text-gray-300">{t('elements.abundantLabel')}</span>
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="w-4 h-4 rounded bg-yellow-500 dark:bg-yellow-600"></span>
-                <span className="text-gray-700 dark:text-gray-300">Trace (0.1-10%)</span>
+                <span className="text-gray-700 dark:text-gray-300">{t('elements.traceLabel')}</span>
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="w-4 h-4 rounded bg-gray-400 dark:bg-gray-600"></span>
-                <span className="text-gray-700 dark:text-gray-300">Rare/Synthetic</span>
+                <span className="text-gray-700 dark:text-gray-300">{t('elements.rareSyntheticLabel')}</span>
               </span>
             </div>
           </div>
@@ -270,20 +273,20 @@ export default function NuclidePickerModal({
           {/* Footer Actions */}
           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {localSelection.size} selected
+              {t('elements.selected', { count: localSelection.size })}
             </div>
             <div className="flex gap-2">
               <button
                 onClick={handleCancel}
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleSave}
                 className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
               >
-                Apply Selection
+                {t('elements.applySelection')}
               </button>
             </div>
           </div>

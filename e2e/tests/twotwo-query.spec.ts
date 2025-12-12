@@ -209,7 +209,9 @@ test.describe('Two-to-Two Query Page', () => {
 
   test('should allow nuclide pinning in two-to-two results', async ({ page }) => {
     // Note: Two-to-two page only has "Nuclides Appearing in Results", not "Elements Appearing in Results"
-    // Use default query
+    // Navigate to a query with results
+    await page.goto('/twotwo?e1=D&e2=Ni');
+    await waitForDatabaseReady(page);
     await waitForReactionResults(page, 'twotwo');
 
     // Scroll to results section (heatmap pushes it below fold)
@@ -236,7 +238,9 @@ test.describe('Two-to-Two Query Page', () => {
 
   test('should keep pinned nuclide when changing query parameters', async ({ page }) => {
     // Note: Two-to-two page only supports nuclide pinning, not element pinning
-    // Wait for default query results to load
+    // Navigate to a query with results
+    await page.goto('/twotwo?e1=D&e2=Ni');
+    await waitForDatabaseReady(page);
     await waitForReactionResults(page, 'twotwo');
 
     // Scroll to results section (heatmap pushes it below fold)
@@ -322,7 +326,9 @@ test.describe('Two-to-Two Query Page', () => {
 
   test('should allow unpinning nuclides', async ({ page }) => {
     // Note: Two-to-two page only supports nuclide pinning, not element pinning
-    // Wait for default query results to load
+    // Navigate to a query with results
+    await page.goto('/twotwo?e1=D&e2=Ni');
+    await waitForDatabaseReady(page);
     await waitForReactionResults(page, 'twotwo');
 
     // Scroll to results section (heatmap pushes it below fold)
