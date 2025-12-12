@@ -183,10 +183,10 @@ test.describe('Cascade Simulation Translations', () => {
     // Check page title
     await expect(page.getByRole('heading', { name: /Cascade Simulations/i })).toBeVisible();
 
-    // Check cascade parameters section
-    await expect(page.getByText(/Fuel Nuclides/i)).toBeVisible();
-    await expect(page.getByText(/Cascade Parameters/i)).toBeVisible();
-    await expect(page.getByText(/Temperature/i)).toBeVisible();
+    // Check cascade parameters section (use .first() to avoid strict mode violations)
+    await expect(page.getByText(/Fuel Nuclides/i).first()).toBeVisible();
+    await expect(page.getByText(/Cascade Parameters/i).first()).toBeVisible();
+    await expect(page.getByText(/Temperature/i).first()).toBeVisible();
 
     // Check run button
     await expect(page.getByRole('button', { name: /Run Cascade Simulation/i })).toBeVisible();
@@ -199,7 +199,7 @@ test.describe('Cascade Simulation Translations', () => {
     await runButton.click();
 
     // Wait for results
-    await expect(page.getByText(/Cascade Complete/i)).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText(/Cascade Complete/i).first()).toBeVisible({ timeout: 30000 });
 
     // Check tab labels are in English
     await expect(page.getByRole('button', { name: /Summary/i })).toBeVisible();
@@ -214,13 +214,13 @@ test.describe('Cascade Simulation Translations', () => {
     const runButton = page.getByRole('button', { name: /Run Cascade Simulation/i });
     await expect(runButton).toBeEnabled({ timeout: 10000 });
     await runButton.click();
-    await expect(page.getByText(/Cascade Complete/i)).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText(/Cascade Complete/i).first()).toBeVisible({ timeout: 30000 });
 
     // Navigate to Flow View
     await page.getByRole('button', { name: /Flow View/i }).click();
 
     // Check Flow View content
-    await expect(page.getByText(/Reaction Flow Diagram|Showing.*pathways/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Reaction Flow Diagram|Showing.*pathways/i).first()).toBeVisible({ timeout: 5000 });
   });
 
   test('should display Pathway Browser translations', async ({ page }) => {
@@ -228,7 +228,7 @@ test.describe('Cascade Simulation Translations', () => {
     const runButton = page.getByRole('button', { name: /Run Cascade Simulation/i });
     await expect(runButton).toBeEnabled({ timeout: 10000 });
     await runButton.click();
-    await expect(page.getByText(/Cascade Complete/i)).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText(/Cascade Complete/i).first()).toBeVisible({ timeout: 30000 });
 
     // Navigate to Pathway Browser
     await page.getByRole('button', { name: /Pathway Browser/i }).click();
@@ -244,13 +244,13 @@ test.describe('Cascade Simulation Translations', () => {
     const runButton = page.getByRole('button', { name: /Run Cascade Simulation/i });
     await expect(runButton).toBeEnabled({ timeout: 10000 });
     await runButton.click();
-    await expect(page.getByText(/Cascade Complete/i)).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText(/Cascade Complete/i).first()).toBeVisible({ timeout: 30000 });
 
     // Navigate to Network tab
     await page.getByRole('button', { name: /Network/i }).click();
 
     // Check Network content (timeline controls)
-    await expect(page.getByText(/Cascade Evolution Timeline|Loop.*of/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Cascade Evolution Timeline|Loop.*of/i).first()).toBeVisible({ timeout: 5000 });
   });
 
   test('should display Products tab translations', async ({ page }) => {
@@ -258,13 +258,13 @@ test.describe('Cascade Simulation Translations', () => {
     const runButton = page.getByRole('button', { name: /Run Cascade Simulation/i });
     await expect(runButton).toBeEnabled({ timeout: 10000 });
     await runButton.click();
-    await expect(page.getByText(/Cascade Complete/i)).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText(/Cascade Complete/i).first()).toBeVisible({ timeout: 30000 });
 
     // Navigate to Products tab
     await page.getByRole('button', { name: /Products/i }).click();
 
     // Check Products content
-    await expect(page.getByText(/Top Products|unique nuclides/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Top Products|unique nuclides/i).first()).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -324,7 +324,7 @@ test.describe('Materials Catalog Translations', () => {
     await expect(modal).toBeVisible();
 
     // Check translations
-    await expect(modal.getByText(/Materials Catalog/i)).toBeVisible();
+    await expect(modal.getByText(/Materials Catalog/i).first()).toBeVisible();
     await expect(modal.getByRole('button', { name: /Natural/i })).toBeVisible();
     await expect(modal.getByRole('button', { name: /Alloys/i })).toBeVisible();
     await expect(modal.getByRole('button', { name: /Compounds/i })).toBeVisible();
@@ -338,8 +338,8 @@ test.describe('Materials Catalog Translations', () => {
     await expect(modal).toBeVisible();
 
     // Check material names (these are now translated)
-    await expect(modal.getByText(/Natural Lithium/i)).toBeVisible();
-    await expect(modal.getByText(/Natural Nickel/i)).toBeVisible();
+    await expect(modal.getByText(/Natural Lithium/i).first()).toBeVisible();
+    await expect(modal.getByText(/Natural Nickel/i).first()).toBeVisible();
   });
 });
 
