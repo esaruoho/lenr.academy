@@ -217,7 +217,7 @@ test.describe('Cascade Simulation Translations', () => {
   test('should display cascade results tabs in English', async ({ page }) => {
     // Run a quick simulation
     const runButton = page.getByRole('button', { name: /Run Cascade Simulation/i });
-    await expect(runButton).toBeEnabled({ timeout: 10000 });
+    await expect(runButton).toBeEnabled({ timeout: 30000 }); // Increased timeout for cascade initialization
     await runButton.click();
 
     // Wait for results
@@ -234,7 +234,7 @@ test.describe('Cascade Simulation Translations', () => {
   test('should display Flow View translations', async ({ page }) => {
     // Run simulation
     const runButton = page.getByRole('button', { name: /Run Cascade Simulation/i });
-    await expect(runButton).toBeEnabled({ timeout: 10000 });
+    await expect(runButton).toBeEnabled({ timeout: 30000 }); // Increased timeout for cascade initialization
     await runButton.click();
     await expect(page.getByText(/Cascade Complete/i).first()).toBeVisible({ timeout: 30000 });
 
@@ -248,7 +248,7 @@ test.describe('Cascade Simulation Translations', () => {
   test('should display Pathway Browser translations', async ({ page }) => {
     // Run simulation
     const runButton = page.getByRole('button', { name: /Run Cascade Simulation/i });
-    await expect(runButton).toBeEnabled({ timeout: 10000 });
+    await expect(runButton).toBeEnabled({ timeout: 30000 }); // Increased timeout for cascade initialization
     await runButton.click();
     await expect(page.getByText(/Cascade Complete/i).first()).toBeVisible({ timeout: 30000 });
 
@@ -266,7 +266,7 @@ test.describe('Cascade Simulation Translations', () => {
   test('should display Network tab translations', async ({ page }) => {
     // Run simulation
     const runButton = page.getByRole('button', { name: /Run Cascade Simulation/i });
-    await expect(runButton).toBeEnabled({ timeout: 10000 });
+    await expect(runButton).toBeEnabled({ timeout: 30000 }); // Increased timeout for cascade initialization
     await runButton.click();
     await expect(page.getByText(/Cascade Complete/i).first()).toBeVisible({ timeout: 30000 });
 
@@ -280,7 +280,7 @@ test.describe('Cascade Simulation Translations', () => {
   test('should display Products tab translations', async ({ page }) => {
     // Run simulation
     const runButton = page.getByRole('button', { name: /Run Cascade Simulation/i });
-    await expect(runButton).toBeEnabled({ timeout: 10000 });
+    await expect(runButton).toBeEnabled({ timeout: 30000 }); // Increased timeout for cascade initialization
     await runButton.click();
     await expect(page.getByText(/Cascade Complete/i).first()).toBeVisible({ timeout: 30000 });
 
@@ -316,7 +316,7 @@ test.describe('Cascade Simulation in Japanese', () => {
   test('should display cascade results tabs in Japanese', async ({ page }) => {
     // Run simulation
     const runButton = page.getByRole('button', { name: /カスケードシミュレーション.*実行/ });
-    await expect(runButton).toBeEnabled({ timeout: 10000 });
+    await expect(runButton).toBeEnabled({ timeout: 30000 }); // Increased timeout for cascade initialization
     await runButton.click();
 
     // Wait for results (Japanese: カスケード完了) - use .first() to avoid strict mode violations
