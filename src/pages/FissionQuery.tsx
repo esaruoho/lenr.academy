@@ -981,7 +981,7 @@ export default function FissionQuery() {
 
                   <div className="flex-1 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800">
                     <p className="text-sm text-blue-900 dark:text-blue-100">
-                      {heatmapMode === 'frequency' && t('reactions.frequencyDescription', { count: useAllResultsForHeatmap ? totalCount.toLocaleString() : results.length.toLocaleString() })}
+                      {heatmapMode === 'frequency' && t('reactions.frequencyDescription', { total: useAllResultsForHeatmap ? totalCount.toLocaleString() : results.length.toLocaleString() })}
                       {heatmapMode === 'energy' && t('reactions.energyDescription')}
                       {heatmapMode === 'diversity' && t('reactions.diversityDescription')}
                     </p>
@@ -1015,7 +1015,7 @@ export default function FissionQuery() {
                     <>
                       <label className="flex items-center gap-3 cursor-pointer">
                       <span className="text-sm text-gray-700 dark:text-gray-300">
-                        {t('reactions.useAllResults', { count: totalCount.toLocaleString() })}
+                        {t('reactions.useAllResults', { total: totalCount.toLocaleString() })}
                         {totalCount > 1000 && <span className="text-gray-500 dark:text-gray-400"> {t('reactions.mayBeSlow')}</span>}
                       </span>
                       <button
