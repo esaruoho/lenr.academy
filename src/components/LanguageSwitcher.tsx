@@ -12,7 +12,7 @@ interface LanguageSwitcherProps {
 
 export default function LanguageSwitcher({ className = '', compact = false }: LanguageSwitcherProps) {
   const { t } = useTranslation()
-  const { language, setLanguage, supportedLanguages } = useLanguage()
+  const { language, setLanguage, supportedLanguages, markLanguageSelected } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -53,6 +53,7 @@ export default function LanguageSwitcher({ className = '', compact = false }: La
 
   const handleLanguageChange = (lang: SupportedLanguage) => {
     setLanguage(lang)
+    markLanguageSelected()
     setIsOpen(false)
   }
 
