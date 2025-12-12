@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Download, X, RefreshCw, CheckCircle } from 'lucide-react'
 import { useDatabase } from '../contexts/DatabaseContext'
 
@@ -7,6 +8,7 @@ interface DatabaseUpdateBannerProps {
 }
 
 export default function DatabaseUpdateBanner({ className = '' }: DatabaseUpdateBannerProps) {
+  const { t } = useTranslation()
   const {
     isUpdateAvailable,
     isDownloadingUpdate,
@@ -74,7 +76,7 @@ export default function DatabaseUpdateBanner({ className = '' }: DatabaseUpdateB
             <div className="flex items-center flex-1">
               <CheckCircle className="w-5 h-5 mr-3 flex-shrink-0" />
               <p className="text-sm font-medium">
-                Database update ready (v{availableVersion}) - Refresh to use the new data
+                {t('updates.databaseUpdateReady', { version: availableVersion })}
               </p>
             </div>
             <div className="flex items-center gap-3 mt-2 sm:mt-0">
@@ -83,12 +85,12 @@ export default function DatabaseUpdateBanner({ className = '' }: DatabaseUpdateB
                 className="px-4 py-2 bg-white text-green-600 rounded-md text-sm font-medium hover:bg-green-50 transition-colors"
               >
                 <RefreshCw className="w-4 h-4 inline mr-1" />
-                Refresh Now
+                {t('updates.refreshNow')}
               </button>
               <button
                 onClick={() => setDismissed(true)}
                 className="text-white hover:text-green-100 transition-colors"
-                aria-label="Dismiss"
+                aria-label={t('common.close')}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -118,7 +120,7 @@ export default function DatabaseUpdateBanner({ className = '' }: DatabaseUpdateB
               <div className="flex items-center mb-2">
                 <Download className="w-5 h-5 mr-3 flex-shrink-0 animate-bounce" />
                 <p className="text-sm font-medium">
-                  Downloading database update in background...
+                  {t('updates.downloadingUpdate')}
                 </p>
               </div>
 
@@ -141,7 +143,7 @@ export default function DatabaseUpdateBanner({ className = '' }: DatabaseUpdateB
             <button
               onClick={() => setDismissed(true)}
               className="ml-4 text-white hover:text-blue-100 transition-colors"
-              aria-label="Dismiss"
+              aria-label={t('common.close')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -165,7 +167,7 @@ export default function DatabaseUpdateBanner({ className = '' }: DatabaseUpdateB
             <div className="flex items-center flex-1">
               <Download className="w-5 h-5 mr-3 flex-shrink-0" />
               <p className="text-sm font-medium">
-                Database update available: v{currentVersion} → v{availableVersion}
+                {t('updates.databaseUpdateAvailable', { current: currentVersion, available: availableVersion })}
               </p>
             </div>
             <div className="flex items-center gap-3 mt-2 sm:mt-0">
@@ -174,12 +176,12 @@ export default function DatabaseUpdateBanner({ className = '' }: DatabaseUpdateB
                 className="px-4 py-2 bg-white text-yellow-600 rounded-md text-sm font-medium hover:bg-yellow-50 transition-colors"
               >
                 <Download className="w-4 h-4 inline mr-1" />
-                Download Update
+                {t('updates.downloadUpdate')}
               </button>
               <button
                 onClick={() => setDismissed(true)}
                 className="text-white hover:text-yellow-100 transition-colors"
-                aria-label="Dismiss"
+                aria-label={t('common.close')}
               >
                 <X className="w-5 h-5" />
               </button>

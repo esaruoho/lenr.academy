@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 import {
   waitForDatabaseReady,
   acceptMeteredWarningIfPresent,
-  clearAllStorage
+  clearAllStorage,
+  dismissLanguageModalIfPresent
 } from '../fixtures/test-helpers';
 
 test.describe('Privacy Preferences Page', () => {
@@ -13,7 +14,8 @@ test.describe('Privacy Preferences Page', () => {
 
   test('should navigate to privacy preferences from sidebar', async ({ page }) => {
     await page.reload();
-   await acceptMeteredWarningIfPresent(page);
+    await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Dismiss analytics banner if visible to prevent overlay on sidebar links
@@ -36,6 +38,7 @@ test.describe('Privacy Preferences Page', () => {
   test('should be accessible via direct URL', async ({ page }) => {
     await page.goto('/privacy');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     await expect(page.getByRole('heading', { name: /privacy settings/i })).toBeVisible();
@@ -44,15 +47,18 @@ test.describe('Privacy Preferences Page', () => {
   test('should show "No Preference Set" when no choice made', async ({ page }) => {
     await page.goto('/privacy');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     await expect(page.getByText(/no preference set/i)).toBeVisible();
   });
 
   test('should show "Analytics Enabled" when consent is accepted', async ({ page }) => {
-    // Set consent to accepted
+    // Set consent and language preference to skip modals
     await page.evaluate(() => {
       localStorage.setItem('lenr-analytics-consent', 'accepted');
+      localStorage.setItem('lenr-language-selected', 'true');
+      localStorage.setItem('lenr-language-preference', 'en');
     });
 
     await page.goto('/privacy');
@@ -63,9 +69,11 @@ test.describe('Privacy Preferences Page', () => {
   });
 
   test('should show "Analytics Disabled" when consent is declined', async ({ page }) => {
-    // Set consent to declined
+    // Set consent and language preference to skip modals
     await page.evaluate(() => {
       localStorage.setItem('lenr-analytics-consent', 'declined');
+      localStorage.setItem('lenr-language-selected', 'true');
+      localStorage.setItem('lenr-language-preference', 'en');
     });
 
     await page.goto('/privacy');
@@ -76,9 +84,11 @@ test.describe('Privacy Preferences Page', () => {
   });
 
   test('should allow enabling analytics', async ({ page }) => {
-    // Start with declined
+    // Start with declined and set language preference to skip modal
     await page.evaluate(() => {
       localStorage.setItem('lenr-analytics-consent', 'declined');
+      localStorage.setItem('lenr-language-selected', 'true');
+      localStorage.setItem('lenr-language-preference', 'en');
     });
 
     await page.goto('/privacy');
@@ -103,9 +113,11 @@ test.describe('Privacy Preferences Page', () => {
   });
 
   test('should allow disabling analytics', async ({ page }) => {
-    // Start with accepted
+    // Start with accepted and set language preference to skip modal
     await page.evaluate(() => {
       localStorage.setItem('lenr-analytics-consent', 'accepted');
+      localStorage.setItem('lenr-language-selected', 'true');
+      localStorage.setItem('lenr-language-preference', 'en');
     });
 
     await page.goto('/privacy');
@@ -129,6 +141,7 @@ test.describe('Privacy Preferences Page', () => {
   test('should reload page when clicking reload button (error reporting only)', async ({ page }) => {
     await page.goto('/privacy');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Enable error reporting to trigger reload message
@@ -151,6 +164,7 @@ test.describe('Privacy Preferences Page', () => {
   test('should persist preference across page reloads', async ({ page }) => {
     await page.goto('/privacy');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Enable analytics
@@ -167,6 +181,7 @@ test.describe('Privacy Preferences Page', () => {
   test('should load Umami script dynamically after enabling analytics (no reload needed)', async ({ page }) => {
     await page.goto('/privacy');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Skip test if running on dev server (analytics disabled in development)
@@ -199,9 +214,11 @@ test.describe('Privacy Preferences Page', () => {
   });
 
   test('should NOT load Umami script when analytics disabled', async ({ page }) => {
-    // Set to declined
+    // Set to declined and language preference to skip modal
     await page.evaluate(() => {
       localStorage.setItem('lenr-analytics-consent', 'declined');
+      localStorage.setItem('lenr-language-selected', 'true');
+      localStorage.setItem('lenr-language-preference', 'en');
     });
 
     await page.goto('/privacy');
@@ -220,6 +237,7 @@ test.describe('Privacy Preferences Page', () => {
   test('should have proper button states (aria-pressed)', async ({ page }) => {
     await page.goto('/privacy');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     const enableButton = page.getByRole('button', { name: /enable analytics/i });
@@ -247,6 +265,7 @@ test.describe('Privacy Preferences Page', () => {
   test('should be keyboard accessible', async ({ page }) => {
     await page.goto('/privacy');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Get enable button and focus it
@@ -263,6 +282,7 @@ test.describe('Privacy Preferences Page', () => {
   test('should display information about Umami analytics', async ({ page }) => {
     await page.goto('/privacy');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Should mention Umami
@@ -287,6 +307,7 @@ test.describe('Privacy Preferences - Mobile', () => {
   test('should be accessible from mobile sidebar', async ({ page }) => {
     await page.reload();
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Dismiss privacy banner first to avoid click interception
@@ -313,6 +334,7 @@ test.describe('Privacy Preferences - Mobile', () => {
   test('should work on mobile viewport', async ({ page }) => {
     await page.goto('/privacy');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Should be responsive
@@ -335,6 +357,7 @@ test.describe('Privacy Preferences - Accessibility', () => {
   test('privacy page should not have accessibility violations', async ({ page }) => {
     await page.goto('/privacy');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Check for heading structure
@@ -352,6 +375,7 @@ test.describe('Privacy Preferences - Accessibility', () => {
   test('buttons should have accessible names', async ({ page }) => {
     await page.goto('/privacy');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Enable/disable buttons should have clear names
@@ -369,6 +393,7 @@ test.describe('Privacy Banner - Dynamic Script Loading', () => {
   test('should load Umami script dynamically when accepting via banner (no reload)', async ({ page }) => {
     await page.goto('/');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Skip test if running on dev server (analytics disabled in development)
@@ -417,6 +442,7 @@ test.describe('Privacy Banner - Dynamic Script Loading', () => {
   test('should not reload page when accepting analytics via banner', async ({ page }) => {
     await page.goto('/');
     await acceptMeteredWarningIfPresent(page);
+    await dismissLanguageModalIfPresent(page);
     await waitForDatabaseReady(page);
 
     // Get the current navigation entry count to detect page reload

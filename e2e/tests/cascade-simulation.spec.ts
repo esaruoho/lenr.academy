@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { acceptPrivacyConsent } from '../fixtures/test-helpers';
 
 test.describe('Cascade Simulation', () => {
   test.beforeEach(async ({ page }) => {
+    // Set up privacy consent and language preference
+    await acceptPrivacyConsent(page);
     // Navigate to cascades page
     await page.goto('/');
     await page.getByRole('link', { name: 'Cascades' }).click();

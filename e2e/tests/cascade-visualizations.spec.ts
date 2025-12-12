@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { acceptPrivacyConsent } from '../fixtures/test-helpers';
 
 /**
  * E2E Tests for Cascade Visualization Interactions and Responsive Layouts
@@ -12,6 +13,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Cascade Visualizations', () => {
   test.beforeEach(async ({ page }) => {
+    // Set up privacy consent and language preference
+    await acceptPrivacyConsent(page);
     // Navigate to cascades page
     await page.goto('/');
     await page.getByRole('link', { name: 'Cascades' }).click();

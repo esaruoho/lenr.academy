@@ -85,34 +85,6 @@ i18n
     },
   })
 
-// Custom language detection based on geolocation (optional enhancement)
-export async function detectLanguageFromGeolocation(): Promise<SupportedLanguage | null> {
-  try {
-    // Check if geolocation is available
-    if (!navigator.geolocation) {
-      return null
-    }
-
-    // Get user's position
-    await new Promise<GeolocationPosition>((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        timeout: 5000,
-        maximumAge: 300000, // 5 minutes cache
-      })
-    })
-
-    // Use a geocoding service to get country from coordinates with the position data
-    // For now, we'll use the browser's language as fallback
-    // In a production app, you might want to use a service like:
-    // https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}
-
-    return null // Return null to use browser language detection
-  } catch (error) {
-    // User denied geolocation or error occurred
-    return null
-  }
-}
-
 // Helper function to get mapped language
 export function getMappedLanguage(browserLang: string): SupportedLanguage {
   return languageMap[browserLang] || DEFAULT_LANGUAGE

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChevronDown, X, Radiation } from 'lucide-react'
 import type { Element } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
@@ -164,6 +165,7 @@ export default function PeriodicTableSelector({
   mode = 'element',
   disableHydrogenIsotopes = false,
 }: PeriodicTableSelectorProps) {
+  const { t } = useTranslation()
   const { db } = useDatabase()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -316,9 +318,9 @@ const allElementNames: Record<number, string> = {
 
     const buttonTitle = isAvailable
       ? isPurelyRadioactive
-        ? `${cellData.element?.EName || symbol} (${Z}) - No stable isotopes`
+        ? `${cellData.element?.EName || symbol} (${Z}) - ${t('elements.noStableIsotopes')}`
         : `${cellData.element?.EName || symbol} (${Z})`
-      : `${symbol} (${Z}) - Not available in database`
+      : `${symbol} (${Z}) - ${t('elements.notAvailableInDatabase', { defaultValue: 'Not available in database' })}`
 
     const buttonChildren = (
       <>
@@ -469,13 +471,13 @@ const allElementNames: Record<number, string> = {
             ${align === 'right' ? 'sm:right-0' : align === 'center' ? 'sm:left-1/2 sm:-translate-x-1/2' : ''}
           `}>
           <div className="mb-3 flex justify-between items-center">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Select Elements</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{t('query.selectElements')}</h3>
             {selectedElements.length > 0 && (
               <button
                 onClick={clearSelection}
                 className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300"
               >
-                Clear Selection
+                {t('common.clear')}
               </button>
             )}
           </div>
@@ -563,14 +565,14 @@ const allElementNames: Record<number, string> = {
           <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-4">
             <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
               <span className="flex items-center gap-1">
-                <span className="font-semibold">Legend:</span>
+                <span className="font-semibold">{t('elements.legend')}:</span>
                 <Radiation className="w-3 h-3 text-red-600 dark:text-red-400" />
-                <span>= No stable isotopes (half-life &lt; 10⁹ years)</span>
+                <span>= {t('elements.noStableIsotopes')}</span>
               </span>
               <span className="flex items-center gap-1">
                 <span className={`${ISOTOPE_BUTTON_COMMON} legend-swatch`}>D</span>
                 <span className={`${ISOTOPE_BUTTON_COMMON} legend-swatch`}>T</span>
-                <span>= Hydrogen isotopes</span>
+                <span>= {t('elements.hydrogenIsotopes')}</span>
               </span>
             </div>
           </div>

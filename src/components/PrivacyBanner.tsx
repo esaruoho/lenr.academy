@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { loadUmamiScript } from '../utils/analytics'
 
@@ -10,6 +11,7 @@ interface PrivacyBannerProps {
 }
 
 export default function PrivacyBanner({ className = '' }: PrivacyBannerProps) {
+  const { t } = useTranslation()
   const [isVisible, setIsVisible] = useState(false)
   const [isRendered, setIsRendered] = useState(false)
   const [isActive, setIsActive] = useState(false)
@@ -83,21 +85,20 @@ export default function PrivacyBanner({ className = '' }: PrivacyBannerProps) {
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="flex-1">
           <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-            Privacy-Friendly Analytics
+            {t('privacy.banner')}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            We use privacy-friendly analytics (Umami) to understand how visitors use this site.
-            No cookies, no personal data collection, fully GDPR compliant.{' '}
+            {t('privacy.bannerMessage')}{' '}
             <a
               href="https://cloud.umami.is/share/JGkYeKU60K9D1t4U"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary-600 dark:text-primary-400 hover:underline font-medium"
             >
-              View public dashboard
+              {t('privacy.viewDashboard')}
             </a>
-            {' '}to see what we collect.{' '}
-            <span className="font-medium">You can change this later in Privacy Settings.</span>
+            {' '}{t('privacy.dashboardSuffix')}{' '}
+            <span className="font-medium">{t('privacy.changeInSettings')}</span>
           </p>
         </div>
 
@@ -106,18 +107,18 @@ export default function PrivacyBanner({ className = '' }: PrivacyBannerProps) {
             onClick={handleOptOut}
             className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
-            Opt Out
+            {t('privacy.optOut')}
           </button>
           <button
             onClick={handleAccept}
             className="px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           >
-            Accept
+            {t('privacy.accept')}
           </button>
           <button
             onClick={handleClose}
             className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
-            aria-label="Close"
+            aria-label={t('common.close')}
           >
             <X className="w-5 h-5" />
           </button>

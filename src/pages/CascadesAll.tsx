@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Play, Settings, AlertCircle, CheckCircle, XCircle, Loader2, Download, Scale, BookOpen } from 'lucide-react'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useQueryState } from '../contexts/QueryStateContext'
@@ -13,6 +14,7 @@ import { createEqualProportions } from '../services/proportionService'
 import type { CascadeResults, Element, WeightedNuclide, ProportionFormat } from '../types'
 
 export default function CascadesAll() {
+  const { t } = useTranslation()
   const { db } = useDatabase()
   const { getCascadeState, updateCascadeState } = useQueryState()
   const { runCascade, cancelCascade, progress, isRunning, error: workerError } = useCascadeWorker()
@@ -295,25 +297,22 @@ export default function CascadesAll() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Cascade Simulations</h1>
-        <p className="text-gray-600 dark:text-gray-400">Model cascading chain reactions from initial fuel nuclides</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('cascades.simulationTitle')}</h1>
+        <p className="text-gray-600 dark:text-gray-400">{t('cascades.simulationDescription')}</p>
       </div>
 
       <div className="card p-6 mb-6 bg-blue-50 dark:bg-blue-900/20">
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-gray-700 dark:text-gray-300">
-            <strong>Database-driven limits:</strong> The database contains 324 nuclides across 92 elements,
-            with 3,921 fusion reactions and 1.2M two-to-two reactions. Slider ranges reflect these constraints.
-            Default settings (5000 max nuclides, 25 loops) provide comprehensive results.
-            Processing time ranges from 30 seconds to 15 minutes depending on parameters.
+            <strong>{t('cascades.databaseLimitsTitle')}:</strong> {t('cascades.databaseLimitsDescription')}
           </div>
         </div>
       </div>
 
       <div className="card p-6 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Fuel Nuclides</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('cascades.fuelNuclides')}</h2>
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Weighted Mode Toggle */}
             <label className="flex items-center gap-2 cursor-pointer">
@@ -335,8 +334,8 @@ export default function CascadesAll() {
               </div>
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                 <Scale className="w-4 h-4" />
-                <span className="xs:hidden">Weighted</span>
-                <span className="hidden xs:inline">Weighted Mode</span>
+                <span className="xs:hidden">{t('cascades.weighted')}</span>
+                <span className="hidden xs:inline">{t('cascades.weightedMode')}</span>
               </span>
             </label>
             {/* Materials Catalog Button */}
@@ -347,13 +346,13 @@ export default function CascadesAll() {
               data-testid="materials-catalog-button"
             >
               <BookOpen className="w-4 h-4" />
-              Materials
+              {t('cascades.materials')}
             </button>
           </div>
         </div>
 
         <PeriodicTableSelector
-          label="Select specific isotopes for your fuel mixture"
+          label={t('cascades.selectIsotopesLabel')}
           availableElements={availableElements}
           selectedElements={fuelNuclides}
           onSelectionChange={setFuelNuclides}
@@ -361,7 +360,7 @@ export default function CascadesAll() {
           disableHydrogenIsotopes={true}
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-          Click on elements to select specific isotopes. Color coding indicates natural abundance.
+          {t('cascades.selectIsotopesHint')}
         </p>
 
         {/* Weighted Proportions Input (shown when weighted mode is enabled) */}
@@ -386,9 +385,7 @@ export default function CascadesAll() {
             <div className="flex items-start gap-2">
               <Scale className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-blue-700 dark:text-blue-300">
-                <strong>Weighted Mode:</strong> Pathway frequencies will be weighted by fuel proportions
-                using a hybrid deterministic/Monte Carlo approach. Results reflect the probability
-                of reactions occurring based on relative abundances.
+                <strong>{t('cascades.weightedMode')}:</strong> {t('cascades.weightedModeDescription')}
               </div>
             </div>
           </div>
@@ -398,13 +395,13 @@ export default function CascadesAll() {
       <div className="card p-6 mb-6">
         <div className="flex items-center gap-2 mb-4">
           <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Cascade Parameters</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('cascades.cascadeParameters')}</h2>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Temperature (K)
+              {t('cascades.temperatureK')}
             </label>
             <input
               type="number"
@@ -416,7 +413,7 @@ export default function CascadesAll() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Minimum Fusion Energy (MeV)
+              {t('cascades.minFusionEnergy')}
             </label>
             <input
               type="number"
@@ -429,7 +426,7 @@ export default function CascadesAll() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Minimum 2-2 Energy (MeV)
+              {t('cascades.minTwoToTwoEnergy')}
             </label>
             <input
               type="number"
@@ -442,7 +439,7 @@ export default function CascadesAll() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Max Nuclides to Pair: {sliderMaxNuclides}
+              {t('cascades.maxNuclidesToPair')}: {sliderMaxNuclides}
             </label>
             <input
               type="range"
@@ -457,14 +454,14 @@ export default function CascadesAll() {
             />
             <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
               <span>10</span>
-              <span>Database has 324 total nuclides</span>
+              <span>{t('cascades.databaseNuclidesCount')}</span>
               <span>10,000</span>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Max Cascade Loops: {sliderMaxLoops}
+              {t('cascades.maxCascadeLoops')}: {sliderMaxLoops}
             </label>
             <input
               type="range"
@@ -479,14 +476,14 @@ export default function CascadesAll() {
             />
             <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
               <span>1</span>
-              <span>Recommended: 10-50</span>
+              <span>{t('cascades.recommendedLoops')}</span>
               <span>100</span>
             </div>
           </div>
         </div>
 
         <div className="mt-6">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Feedback Options</h3>
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{t('cascades.feedbackOptions')}</h3>
           <div className="space-y-3">
             <label className="flex items-center">
               <input
@@ -495,7 +492,7 @@ export default function CascadesAll() {
                 onChange={(e) => setParams({...params, feedbackBosons: e.target.checked})}
                 className="mr-2"
               />
-              <span className="text-sm">Feedback Bosons</span>
+              <span className="text-sm">{t('cascades.feedbackBosons')}</span>
             </label>
             <label className="flex items-center">
               <input
@@ -504,7 +501,7 @@ export default function CascadesAll() {
                 onChange={(e) => setParams({...params, feedbackFermions: e.target.checked})}
                 className="mr-2"
               />
-              <span className="text-sm">Feedback Fermions</span>
+              <span className="text-sm">{t('cascades.feedbackFermions')}</span>
             </label>
             <label className="flex items-center">
               <input
@@ -513,7 +510,7 @@ export default function CascadesAll() {
                 onChange={(e) => setParams({...params, allowDimers: e.target.checked})}
                 className="mr-2"
               />
-              <span className="text-sm">Allow Dimer Formation (H, N, O, F, Cl, Br, I)</span>
+              <span className="text-sm">{t('cascades.allowDimers')}</span>
             </label>
             <label className="flex items-center">
               <input
@@ -522,7 +519,7 @@ export default function CascadesAll() {
                 onChange={(e) => setParams({...params, excludeMelted: e.target.checked})}
                 className="mr-2"
               />
-              <span className="text-sm">Exclude elements below melting point</span>
+              <span className="text-sm">{t('cascades.excludeMelted')}</span>
             </label>
             <label className="flex items-center">
               <input
@@ -531,7 +528,7 @@ export default function CascadesAll() {
                 onChange={(e) => setParams({...params, excludeBoiledOff: e.target.checked})}
                 className="mr-2"
               />
-              <span className="text-sm">Exclude elements that boiled off</span>
+              <span className="text-sm">{t('cascades.excludeBoiledOff')}</span>
             </label>
           </div>
         </div>
@@ -546,12 +543,12 @@ export default function CascadesAll() {
           {isRunning ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 inline animate-spin" />
-              Running...
+              {t('cascades.running')}
             </>
           ) : (
             <>
               <Play className="w-5 h-5 mr-2 inline" />
-              Run Cascade Simulation
+              {t('cascades.runSimulation')}
             </>
           )}
         </button>
@@ -560,7 +557,7 @@ export default function CascadesAll() {
           onClick={handleReset}
           disabled={isRunning}
         >
-          Reset Parameters
+          {t('cascades.resetParameters')}
         </button>
       </div>
 
@@ -577,7 +574,7 @@ export default function CascadesAll() {
           <div className="flex items-start gap-3">
             <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-red-900 dark:text-red-100 mb-1">Error</h3>
+              <h3 className="font-semibold text-red-900 dark:text-red-100 mb-1">{t('common.error')}</h3>
               <p className="text-sm text-red-700 dark:text-red-200">{error || workerError}</p>
             </div>
           </div>
@@ -594,47 +591,47 @@ export default function CascadesAll() {
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-green-900 dark:text-green-100">
-                    Cascade Complete
+                    {t('cascades.cascadeComplete')}
                   </h3>
                   <button
                     onClick={handleDownloadCSV}
                     className="flex items-center gap-2 px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
                   >
                     <Download className="w-4 h-4" />
-                    Download CSV
+                    {t('cascades.downloadCsv')}
                   </button>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Reactions Found</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('cascades.reactionsFound')}</span>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">
                       {results.reactions.length}
                     </p>
                   </div>
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Loops Executed</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('cascades.loopsExecuted')}</span>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">
                       {results.loopsExecuted}
                     </p>
                   </div>
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Total Energy</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('cascades.totalEnergy')}</span>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">
                       {results.totalEnergy.toFixed(2)} MeV
                     </p>
                   </div>
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Execution Time</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('cascades.executionTime')}</span>
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">
                       {results.executionTime.toFixed(0)} ms
                     </p>
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">
-                  <span className="font-medium">Termination: </span>
-                  {results.terminationReason === 'max_loops' && 'Reached maximum loops'}
-                  {results.terminationReason === 'no_new_products' && 'No new products generated'}
-                  {results.terminationReason === 'max_nuclides' && 'Reached maximum nuclides limit'}
+                  <span className="font-medium">{t('cascades.termination')}: </span>
+                  {results.terminationReason === 'max_loops' && t('cascades.terminationMaxLoops')}
+                  {results.terminationReason === 'no_new_products' && t('cascades.terminationNoNewProducts')}
+                  {results.terminationReason === 'max_nuclides' && t('cascades.terminationMaxNuclides')}
                 </div>
               </div>
             </div>
@@ -649,11 +646,10 @@ export default function CascadesAll() {
                 <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-1">
-                    No Reactions Found
+                    {t('cascades.noReactionsFound')}
                   </h3>
                   <p className="text-sm text-yellow-700 dark:text-yellow-200">
-                    No reactions were found matching your energy thresholds and fuel nuclides.
-                    Try adjusting your parameters or adding more fuel nuclides.
+                    {t('cascades.noReactionsFoundDescription')}
                   </p>
                 </div>
               </div>
@@ -664,13 +660,13 @@ export default function CascadesAll() {
 
       {!results && (
         <div className="card p-6 mt-6 bg-blue-50 dark:bg-blue-900/30">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">How Cascades Work</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{t('cascades.howCascadesWork')}</h3>
           <ol className="text-sm text-gray-700 dark:text-gray-300 space-y-2 list-decimal list-inside">
-            <li>Start with your specified fuel nuclides</li>
-            <li>Find all possible Fusion and 2-2 reactions between these nuclides</li>
-            <li>Products meeting energy/temperature criteria are "fed back" as new reactants</li>
-            <li>Process repeats recursively up to the max loop count</li>
-            <li>Results show the full cascade of reactions and final product distribution</li>
+            <li>{t('cascades.howStep1')}</li>
+            <li>{t('cascades.howStep2')}</li>
+            <li>{t('cascades.howStep3')}</li>
+            <li>{t('cascades.howStep4')}</li>
+            <li>{t('cascades.howStep5')}</li>
           </ol>
         </div>
       )}

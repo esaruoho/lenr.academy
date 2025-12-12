@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as d3 from 'd3-selection';
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide, SimulationNodeDatum, SimulationLinkDatum, Simulation } from 'd3-force';
 import { zoom, zoomIdentity, ZoomBehavior } from 'd3-zoom';
@@ -357,6 +358,8 @@ export default function CascadeNetworkDiagram({
   width = '100%',
   height = '600px',
 }: CascadeNetworkDiagramProps) {
+  const { t } = useTranslation();
+
   // Calculate max loop
   const maxLoop = Math.max(...reactions.map(r => r.loop), 0);
 
@@ -767,10 +770,10 @@ export default function CascadeNetworkDiagram({
           <div>
             <h3 className="text-base font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
               <Play className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              Cascade Evolution Timeline
+              {t('cascades.network.evolutionTimeline')}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Loop {currentLoop} of {maxLoop} • {reactions.length} total reactions
+              {t('cascades.network.loopStatus', { current: currentLoop, max: maxLoop, total: reactions.length })}
             </p>
           </div>
         </div>
@@ -781,7 +784,7 @@ export default function CascadeNetworkDiagram({
             onClick={handleStepBackward}
             disabled={currentLoop === 0}
             className="p-2 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title="Step backward"
+            title={t('cascades.network.stepBackward')}
           >
             <SkipBack className="w-4 h-4 text-gray-700 dark:text-gray-300" />
           </button>
@@ -790,7 +793,7 @@ export default function CascadeNetworkDiagram({
             onClick={handleStop}
             disabled={currentLoop === 0 && !isPlaying}
             className="p-2 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title="Stop (reset to beginning)"
+            title={t('cascades.network.stop')}
           >
             <StopCircle className="w-4 h-4 text-gray-700 dark:text-gray-300" />
           </button>
@@ -799,7 +802,7 @@ export default function CascadeNetworkDiagram({
             <button
               onClick={handlePause}
               className="p-2 rounded bg-blue-500 hover:bg-blue-600 text-white transition-colors"
-              title="Pause"
+              title={t('cascades.network.pause')}
             >
               <Pause className="w-4 h-4" />
             </button>
@@ -808,7 +811,7 @@ export default function CascadeNetworkDiagram({
               onClick={handlePlay}
               disabled={currentLoop >= maxLoop && maxLoop > 0}
               className="p-2 rounded bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Play"
+              title={t('cascades.network.play')}
             >
               <Play className="w-4 h-4" />
             </button>
@@ -818,7 +821,7 @@ export default function CascadeNetworkDiagram({
             onClick={handleStepForward}
             disabled={currentLoop >= maxLoop}
             className="p-2 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title="Step forward"
+            title={t('cascades.network.stepForward')}
           >
             <SkipForward className="w-4 h-4 text-gray-700 dark:text-gray-300" />
           </button>
@@ -842,10 +845,10 @@ export default function CascadeNetworkDiagram({
           <button
             onClick={handleRestart}
             className="ml-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors flex items-center gap-2"
-            title="Restart animation from beginning"
+            title={t('cascades.network.restartTooltip')}
           >
             <Play className="w-4 h-4" />
-            Restart
+            {t('cascades.network.restart')}
           </button>
         </div>
 
@@ -865,8 +868,8 @@ export default function CascadeNetworkDiagram({
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
           />
           <div className="flex justify-between text-xs text-gray-500 dark:text-gray-500 mt-1">
-            <span>Loop 0</span>
-            <span>Loop {maxLoop}</span>
+            <span>{t('cascades.network.loop', { number: 0 })}</span>
+            <span>{t('cascades.network.loop', { number: maxLoop })}</span>
           </div>
         </div>
       </div>
@@ -882,21 +885,21 @@ export default function CascadeNetworkDiagram({
           <button
             onClick={handleZoomIn}
             className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            title="Zoom in"
+            title={t('cascades.network.zoomIn')}
           >
             <ZoomIn className="w-4 h-4 text-gray-700 dark:text-gray-300" />
           </button>
           <button
             onClick={handleZoomReset}
             className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            title="Reset zoom"
+            title={t('cascades.network.zoomReset')}
           >
             <Maximize2 className="w-4 h-4 text-gray-700 dark:text-gray-300" />
           </button>
           <button
             onClick={handleZoomOut}
             className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            title="Zoom out"
+            title={t('cascades.network.zoomOut')}
           >
             <ZoomOut className="w-4 h-4 text-gray-700 dark:text-gray-300" />
           </button>
@@ -962,14 +965,14 @@ export default function CascadeNetworkDiagram({
           onClick={() => setShowFilters(!showFilters)}
           className="w-full flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-750 rounded px-2 py-1"
         >
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Advanced Settings</h3>
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('cascades.network.advancedSettings')}</h3>
           {showFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
 
         {showFilters && (
           <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
             <label className="text-sm text-gray-600 dark:text-gray-400">
-              Max Pathways: {maxPathways}
+              {t('cascades.network.maxPathways', { count: maxPathways })}
             </label>
             <input
               type="range"

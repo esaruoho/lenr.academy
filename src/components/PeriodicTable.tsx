@@ -1,4 +1,5 @@
 import { Radiation } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Element, HeatmapMode, HeatmapMetrics } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { hasOnlyRadioactiveIsotopes } from '../services/queryService'
@@ -276,6 +277,7 @@ export default function PeriodicTable({
   hideLegend = false,
   hideCardContainer = false
 }: PeriodicTableProps) {
+  const { t } = useTranslation()
   const { db } = useDatabase()
   const { theme } = useTheme()
   const isDarkMode = theme === 'dark'
@@ -509,14 +511,14 @@ export default function PeriodicTable({
           <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
             <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
               <span className="flex items-center gap-1">
-                <span className="font-semibold">Legend:</span>
+                <span className="font-semibold">{t('elements.legend')}:</span>
                 <Radiation className="w-3 h-3 text-red-600 dark:text-red-400" />
-                <span>= No stable isotopes (half-life &lt; 10⁹ years)</span>
+                <span>= {t('elements.noStableIsotopes')}</span>
               </span>
               <span className="flex items-center gap-1">
                 <span className="inline-flex items-center justify-center rounded border border-dashed border-gray-300 dark:border-gray-600 px-1.5 py-1 text-xs font-semibold leading-none">D</span>
                 <span className="inline-flex items-center justify-center rounded border border-dashed border-gray-300 dark:border-gray-600 px-1.5 py-1 text-xs font-semibold leading-none">T</span>
-                <span>= Hydrogen isotopes</span>
+                <span>= {t('elements.hydrogenIsotopes')}</span>
               </span>
             </div>
           </div>

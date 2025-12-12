@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Sparkles, RotateCcw } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -27,6 +28,7 @@ export default function ChangelogModal({
   onRetry,
   versionLabel,
 }: ChangelogModalProps) {
+  const { t } = useTranslation()
   const [isRendered, setIsRendered] = useState(false)
   const [isActive, setIsActive] = useState(false)
   const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -118,11 +120,11 @@ export default function ChangelogModal({
             </div>
             <div>
               <h2 id="changelog-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                What&apos;s New in {versionLabel}
+                {t('updates.whatsNew', { version: versionLabel })}
               </h2>
               {releaseNotes?.publishedAt && (
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Published {new Date(releaseNotes.publishedAt).toLocaleString()}
+                  {t('updates.published', { time: new Date(releaseNotes.publishedAt).toLocaleString() })}
                 </p>
               )}
             </div>
@@ -130,7 +132,7 @@ export default function ChangelogModal({
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-            aria-label="Close changelog"
+            aria-label={t('common.close')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -140,7 +142,7 @@ export default function ChangelogModal({
           {isLoading && (
             <div className="flex flex-col items-center justify-center text-sm text-gray-600 dark:text-gray-300 min-h-[200px] gap-2">
               <div className="w-6 h-6 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-              <span>Loading release notes…</span>
+              <span>{t('updates.whatsNewLoading')}</span>
             </div>
           )}
 
@@ -152,7 +154,7 @@ export default function ChangelogModal({
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
               >
                 <RotateCcw className="w-4 h-4" aria-hidden="true" />
-                Try again
+                {t('updates.tryAgain')}
               </button>
             </div>
           )}
@@ -184,11 +186,11 @@ export default function ChangelogModal({
               rel="noopener noreferrer"
               className="text-sm font-medium text-yellow-700 dark:text-yellow-300 hover:underline"
             >
-              View full release on GitHub
+              {t('updates.viewOnGitHub')}
             </a>
           ) : (
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              Release published on GitHub Releases
+              {t('updates.publishedOnGitHub')}
             </span>
           )}
 
@@ -196,7 +198,7 @@ export default function ChangelogModal({
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-md hover:bg-gray-700 transition-colors dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
           >
-            Close
+            {t('common.close')}
           </button>
         </div>
       </div>

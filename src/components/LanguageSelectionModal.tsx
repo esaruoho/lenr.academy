@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Globe, Check, MapPin, X } from 'lucide-react'
+import { Globe, Check, X } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
 import type { SupportedLanguage } from '../i18n/config'
 
@@ -13,56 +13,41 @@ export default function LanguageSelectionModal({ isOpen, onClose }: LanguageSele
   const { t } = useTranslation()
   const { language, setLanguage, supportedLanguages, markLanguageSelected } = useLanguage()
   const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>(language)
-  const [detectingLocation, setDetectingLocation] = useState(false)
   const [suggestedLanguage, setSuggestedLanguage] = useState<SupportedLanguage | null>(null)
+  const [originalLanguage, setOriginalLanguage] = useState<SupportedLanguage>(language)
 
-  // Attempt to detect user's location and suggest language
+  // Store original language when modal opens, detect suggested language
   useEffect(() => {
     if (!isOpen) return
 
-    const detectLanguageFromLocation = async () => {
-      setDetectingLocation(true)
+    // Remember the original language so we can revert on cancel
+    setOriginalLanguage(language)
+    setSelectedLanguage(language)
 
-      try {
-        // Try to get user's position
-        if ('geolocation' in navigator) {
-          await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              timeout: 5000,
-              maximumAge: 300000, // 5 minutes cache
-            })
-          })
-
-          // For now, we'll use the browser's language as the suggested language
-          // In a production app, you could use a geocoding service to determine
-          // the language based on the coordinates with the position data
-          const browserLang = navigator.language.split('-')[0]
-          if (browserLang in supportedLanguages) {
-            setSuggestedLanguage(browserLang as SupportedLanguage)
-          }
-        }
-      } catch (error) {
-        // Geolocation failed or was denied, fall back to browser language
-        const browserLang = navigator.language.split('-')[0]
-        if (browserLang in supportedLanguages) {
-          setSuggestedLanguage(browserLang as SupportedLanguage)
-        }
-      } finally {
-        setDetectingLocation(false)
-      }
+    // Use browser language to suggest a language
+    const browserLang = navigator.language.split('-')[0]
+    if (browserLang in supportedLanguages) {
+      setSuggestedLanguage(browserLang as SupportedLanguage)
     }
-
-    detectLanguageFromLocation()
-  }, [isOpen, supportedLanguages])
+  }, [isOpen, supportedLanguages, language])
 
   const handleConfirm = () => {
-    setLanguage(selectedLanguage)
     markLanguageSelected()
+    onClose()
+  }
+
+  const handleCancel = () => {
+    // Revert to original language if user cancels
+    if (selectedLanguage !== originalLanguage) {
+      setLanguage(originalLanguage)
+    }
     onClose()
   }
 
   const handleLanguageClick = (lang: SupportedLanguage) => {
     setSelectedLanguage(lang)
+    // Immediately update the UI language so user sees the change
+    setLanguage(lang)
   }
 
   if (!isOpen) return null
@@ -79,7 +64,7 @@ export default function LanguageSelectionModal({ isOpen, onClose }: LanguageSele
             </h2>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             className="p-2 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             aria-label={t('common.close')}
           >
@@ -94,19 +79,11 @@ export default function LanguageSelectionModal({ isOpen, onClose }: LanguageSele
             {t('language.firstTimeMessage')}
           </p>
 
-          {/* Location detection status */}
-          {detectingLocation && (
-            <div className="flex items-center gap-2 mb-4 text-sm text-gray-500 dark:text-gray-400">
-              <MapPin className="w-4 h-4 animate-pulse" />
-              {t('language.detectingLocation')}
-            </div>
-          )}
-
-          {/* Suggested language */}
-          {suggestedLanguage && !detectingLocation && (
+          {/* Suggested language based on browser settings */}
+          {suggestedLanguage && (
             <div className="mb-6 p-4 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg">
               <div className="flex items-center gap-2 text-sm text-primary-700 dark:text-primary-300 mb-2">
-                <MapPin className="w-4 h-4" />
+                <Globe className="w-4 h-4" />
                 {t('language.recommendedLanguage')}
               </div>
               <button
@@ -167,7 +144,7 @@ export default function LanguageSelectionModal({ isOpen, onClose }: LanguageSele
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 p-6 border-t dark:border-gray-700">
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
           >
             {t('common.cancel')}
