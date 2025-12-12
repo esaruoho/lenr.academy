@@ -19,8 +19,8 @@ test.describe('Element Data - Filtering and Sorting', () => {
 
   test.describe('Search Functionality', () => {
     test('should filter elements table by search term', async ({ page }) => {
-      // Switch to Elements tab
-      await page.getByRole('tab', { name: /Elements/i }).click();
+      // Switch to Element tab (singular, as per i18n) - tab shows count like "Element 94"
+      await page.getByRole('tab', { name: /Element/i }).click();
       await page.waitForTimeout(500);
 
       // Wait for data rows to be visible (skip header row by using nth)
@@ -74,8 +74,8 @@ test.describe('Element Data - Filtering and Sorting', () => {
     });
 
     test('should clear search with X button', async ({ page }) => {
-      // Switch to Elements tab
-      await page.getByRole('tab', { name: /Elements/i }).click();
+      // Switch to Element tab (singular, as per i18n) - tab shows count like "Element 94"
+      await page.getByRole('tab', { name: /Element/i }).click();
       await page.waitForTimeout(500);
 
       // Search for something
@@ -95,8 +95,8 @@ test.describe('Element Data - Filtering and Sorting', () => {
 
   test.describe('Table Sorting', () => {
     test('should sort elements table by clicking column headers', async ({ page }) => {
-      // Switch to Elements tab
-      await page.getByRole('tab', { name: /Elements/i }).click();
+      // Switch to Element tab (singular, as per i18n) - tab shows count like "Element 94"
+      await page.getByRole('tab', { name: /Element/i }).click();
       await page.waitForTimeout(500);
 
       // Wait for data rows to be visible
@@ -176,8 +176,8 @@ test.describe('Element Data - Filtering and Sorting', () => {
 
   test.describe('Filter Panel', () => {
     test('should collapse and expand filter panel', async ({ page }) => {
-      // Switch to Elements tab
-      await page.getByRole('tab', { name: /Elements/i }).click();
+      // Switch to Element tab (singular, as per i18n) - tab shows count like "Element 94"
+      await page.getByRole('tab', { name: /Element/i }).click();
       await page.waitForTimeout(500);
 
       // Filter panel starts collapsed by default, so first button should say "Expand"
@@ -257,8 +257,8 @@ test.describe('Element Data - Filtering and Sorting', () => {
     });
 
     test('should export data as CSV', async ({ page }) => {
-      // Switch to Elements tab
-      await page.getByRole('tab', { name: /Elements/i }).click();
+      // Switch to Element tab (singular, as per i18n) - tab shows count like "Element 94"
+      await page.getByRole('tab', { name: /Element/i }).click();
       await page.waitForTimeout(500);
 
       // Find export button
@@ -433,8 +433,8 @@ test.describe('Element Data - Filtering Mobile', () => {
   });
 
   test('should have mobile-friendly filter panel', async ({ page }) => {
-    // Switch to Elements tab
-    await page.getByRole('tab', { name: /Elements/i }).click();
+    // Switch to Element tab (singular, as per i18n) - tab shows count like "Element 94"
+    await page.getByRole('tab', { name: /Element/i }).click();
     await page.waitForTimeout(500);
 
     // Filter panel should be visible
@@ -455,8 +455,8 @@ test.describe('Element Data - Filtering Mobile', () => {
   });
 
   test('should collapse filter panel to save space on mobile', async ({ page }) => {
-    // Switch to Elements tab
-    await page.getByRole('tab', { name: /Elements/i }).click();
+    // Switch to Element tab (singular, as per i18n) - tab shows count like "Element 94"
+    await page.getByRole('tab', { name: /Element/i }).click();
     await page.waitForTimeout(500);
 
     // Filter panel starts collapsed, so first expand it

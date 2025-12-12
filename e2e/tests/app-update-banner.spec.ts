@@ -81,7 +81,8 @@ test.describe('App Update Banner', () => {
     const banner = page.getByTestId('app-update-banner');
     await expect(banner).toBeVisible();
 
-    await banner.getByRole('button', { name: /dismiss app update notification/i }).click();
+    // Dismiss button has aria-label="Close" via t('common.close')
+    await banner.getByRole('button', { name: /^close$/i }).click();
     await expect(banner).toHaveCount(0);
     await expect(page.getByTestId('database-update-banner')).toHaveCount(0);
 
@@ -104,7 +105,11 @@ test.describe('App Update Banner', () => {
     await expect(modal).toBeVisible();
     await expect(modal).toContainText('Amazing new feature');
 
-    await modal.getByRole('button', { name: /close changelog/i }).click({ timeout: 5000 });
+    // Wait for modal animation to complete before clicking
+    await page.waitForTimeout(300);
+
+    // Click the Close button in the footer (there are two close buttons - X in header and Close in footer)
+    await modal.getByRole('button', { name: /^close$/i }).last().click({ timeout: 10000 });
     await expect(modal).toBeHidden();
   });
 });
