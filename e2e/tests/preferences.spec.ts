@@ -124,6 +124,11 @@ test.describe('Privacy Banner', () => {
     // Navigate first, then clear storage to show privacy banner
     await page.goto('/');
     await clearAllStorage(page);
+    // Set language preference to avoid language selection modal blocking tests
+    await page.evaluate(() => {
+      localStorage.setItem('lenr-language-preference', 'en');
+      localStorage.setItem('lenr-language-selected', 'true');
+    });
   });
 
   test('should show privacy banner on first visit', async ({ page }) => {
@@ -245,6 +250,11 @@ test.describe('Metered Connection Preferences', () => {
     // Navigate first, then clear storage
     await page.goto('/');
     await clearAllStorage(page);
+    // Set language preference to avoid language selection modal blocking tests
+    await page.evaluate(() => {
+      localStorage.setItem('lenr-language-preference', 'en');
+      localStorage.setItem('lenr-language-selected', 'true');
+    });
   });
 
   test('should show metered warning on metered connection', async ({ page }) => {

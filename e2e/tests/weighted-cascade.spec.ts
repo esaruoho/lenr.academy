@@ -1,10 +1,19 @@
 import { test, expect } from '@playwright/test';
+import {
+  waitForDatabaseReady,
+  acceptMeteredWarningIfPresent,
+  setLanguagePreference
+} from '../fixtures/test-helpers';
 
 test.describe('Weighted Cascade (Issue #96)', () => {
   test.beforeEach(async ({ page }) => {
+    // Set language preference to avoid language selection modal
+    await setLanguagePreference(page, 'en');
     // Navigate to cascades page
     await page.goto('/cascades');
-    // Wait for database to load (may take longer on first load)
+    await acceptMeteredWarningIfPresent(page);
+    await waitForDatabaseReady(page);
+    // Wait for cascade to initialize (may take longer on first load)
     await expect(page.locator('button:has-text("Run Cascade Simulation")')).toBeEnabled({ timeout: 30000 });
   });
 
@@ -192,7 +201,11 @@ test.describe('Weighted Cascade (Issue #96)', () => {
 
 test.describe('Materials Catalog Categories', () => {
   test.beforeEach(async ({ page }) => {
+    // Set language preference to avoid language selection modal
+    await setLanguagePreference(page, 'en');
     await page.goto('/cascades');
+    await acceptMeteredWarningIfPresent(page);
+    await waitForDatabaseReady(page);
     await expect(page.locator('button:has-text("Run Cascade Simulation")')).toBeEnabled({ timeout: 30000 });
     // Open materials catalog
     await page.getByTestId('materials-catalog-button').click();

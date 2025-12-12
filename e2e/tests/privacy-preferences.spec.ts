@@ -10,6 +10,11 @@ test.describe('Privacy Preferences Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await clearAllStorage(page);
+    // Set language preference to avoid language selection modal blocking tests
+    await page.evaluate(() => {
+      localStorage.setItem('lenr-language-preference', 'en');
+      localStorage.setItem('lenr-language-selected', 'true');
+    });
   });
 
   test('should navigate to privacy preferences from sidebar', async ({ page }) => {
@@ -302,6 +307,11 @@ test.describe('Privacy Preferences - Mobile', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await clearAllStorage(page);
+    // Set language preference to avoid language selection modal blocking tests
+    await page.evaluate(() => {
+      localStorage.setItem('lenr-language-preference', 'en');
+      localStorage.setItem('lenr-language-selected', 'true');
+    });
   });
 
   test('should be accessible from mobile sidebar', async ({ page }) => {
@@ -352,6 +362,11 @@ test.describe('Privacy Preferences - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await clearAllStorage(page);
+    // Set language preference to avoid language selection modal blocking tests
+    await page.evaluate(() => {
+      localStorage.setItem('lenr-language-preference', 'en');
+      localStorage.setItem('lenr-language-selected', 'true');
+    });
   });
 
   test('privacy page should not have accessibility violations', async ({ page }) => {
@@ -388,6 +403,11 @@ test.describe('Privacy Banner - Dynamic Script Loading', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await clearAllStorage(page);
+    // Set language preference to avoid language selection modal blocking tests
+    await page.evaluate(() => {
+      localStorage.setItem('lenr-language-preference', 'en');
+      localStorage.setItem('lenr-language-selected', 'true');
+    });
   });
 
   test('should load Umami script dynamically when accepting via banner (no reload)', async ({ page }) => {
