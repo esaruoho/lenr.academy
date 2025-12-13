@@ -410,23 +410,41 @@ test.describe('Mobile Language Dropdown Positioning', () => {
     await setLanguagePreference(page, 'en');
     await acceptPrivacyConsent(page);
     await page.goto('/');
+
+    // Dismiss language modal if it still appears (mobile might handle it differently)
+    const languageModal = page.getByText(/select language/i);
+    if (await languageModal.isVisible({ timeout: 2000 }).catch(() => false)) {
+      // Click "Confirm Selection" to dismiss the modal with default selection
+      const confirmButton = page.getByRole('button', { name: /confirm selection/i });
+      if (await confirmButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await confirmButton.click();
+        await page.waitForTimeout(500); // Wait for modal to close
+      }
+    }
+
     await acceptMeteredWarningIfPresent(page);
     await waitForDatabaseReady(page);
   });
 
   test('should open language dropdown below the button on mobile', async ({ page }) => {
     // Find and click the language switcher button in the mobile header
-    const languageSwitcher = page.locator('button[aria-label*="language"]').or(
-      page.locator('header button:has(svg.lucide-globe)')
-    );
-    await expect(languageSwitcher.first()).toBeVisible();
+    // Mobile header is a div, not a header element - look for the sticky top bar
+    const mobileHeader = page.locator('div.sticky.top-0').first();
+    const headerButtons = mobileHeader.locator('button');
+
+    // Should have 3 buttons: hamburger, language (inside LanguageSwitcher component), theme
+    await expect(headerButtons).toHaveCount(3);
+
+    // Language switcher is the middle button (index 1)
+    const languageSwitcher = headerButtons.nth(1);
+    await expect(languageSwitcher).toBeVisible();
 
     // Get button position before clicking
-    const buttonBox = await languageSwitcher.first().boundingBox();
+    const buttonBox = await languageSwitcher.boundingBox();
     expect(buttonBox).not.toBeNull();
 
     // Click to open dropdown
-    await languageSwitcher.first().click();
+    await languageSwitcher.click();
 
     // Wait for dropdown to appear - look for the language options
     const dropdown = page.locator('div.fixed').filter({ hasText: /English|日本語|中文/ });
@@ -455,11 +473,11 @@ test.describe('Mobile Language Dropdown Positioning', () => {
   });
 
   test('should keep dropdown visible within viewport on mobile', async ({ page }) => {
-    // Find and click the language switcher
-    const languageSwitcher = page.locator('button[aria-label*="language"]').or(
-      page.locator('header button:has(svg.lucide-globe)')
-    );
-    await languageSwitcher.first().click();
+    // Find and click the language switcher - it's the second button in mobile header
+    const mobileHeader = page.locator('div.sticky.top-0').first();
+    const headerButtons = mobileHeader.locator('button');
+    const languageSwitcher = headerButtons.nth(1); // Middle button is language switcher
+    await languageSwitcher.click();
 
     // Wait for dropdown
     const dropdown = page.locator('div.fixed').filter({ hasText: /English|日本語|中文/ });
