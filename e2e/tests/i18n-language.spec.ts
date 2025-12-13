@@ -3,7 +3,8 @@ import {
   waitForDatabaseReady,
   acceptMeteredWarningIfPresent,
   clearAllStorage,
-  setLanguagePreference
+  setLanguagePreference,
+  acceptPrivacyConsent
 } from '../fixtures/test-helpers';
 
 /**
@@ -398,4 +399,86 @@ test.describe('All Supported Languages', () => {
       await expect(page.getByRole('link', { name: lang.navItem }).first()).toBeVisible({ timeout: 5000 });
     });
   }
+});
+
+test.describe('Mobile Language Dropdown Positioning', () => {
+  // Use mobile viewport
+  test.use({ viewport: { width: 375, height: 667 } });
+
+  test.beforeEach(async ({ page }) => {
+    // Set English preference to skip language selection modal
+    await setLanguagePreference(page, 'en');
+    await acceptPrivacyConsent(page);
+    await page.goto('/');
+    await acceptMeteredWarningIfPresent(page);
+    await waitForDatabaseReady(page);
+  });
+
+  test('should open language dropdown below the button on mobile', async ({ page }) => {
+    // Find and click the language switcher button in the mobile header
+    const languageSwitcher = page.locator('button[aria-label*="language"]').or(
+      page.locator('header button:has(svg.lucide-globe)')
+    );
+    await expect(languageSwitcher.first()).toBeVisible();
+
+    // Get button position before clicking
+    const buttonBox = await languageSwitcher.first().boundingBox();
+    expect(buttonBox).not.toBeNull();
+
+    // Click to open dropdown
+    await languageSwitcher.first().click();
+
+    // Wait for dropdown to appear - look for the language options
+    const dropdown = page.locator('div.fixed').filter({ hasText: /English|日本語|中文/ });
+    await expect(dropdown).toBeVisible({ timeout: 3000 });
+
+    // Get dropdown position
+    const dropdownBox = await dropdown.boundingBox();
+    expect(dropdownBox).not.toBeNull();
+
+    if (buttonBox && dropdownBox) {
+      // Dropdown should be BELOW the button (top of dropdown > bottom of button)
+      expect(dropdownBox.y).toBeGreaterThan(buttonBox.y + buttonBox.height - 10);
+
+      // Dropdown should not extend past the right edge of the viewport
+      expect(dropdownBox.x + dropdownBox.width).toBeLessThanOrEqual(375 + 5); // Allow 5px tolerance
+
+      // Dropdown should not extend past the left edge of the viewport
+      expect(dropdownBox.x).toBeGreaterThanOrEqual(-5); // Allow 5px tolerance
+    }
+
+    // Take screenshot for visual verification
+    await page.screenshot({
+      path: 'test-results/mobile-language-dropdown-position.png',
+      fullPage: false
+    });
+  });
+
+  test('should keep dropdown visible within viewport on mobile', async ({ page }) => {
+    // Find and click the language switcher
+    const languageSwitcher = page.locator('button[aria-label*="language"]').or(
+      page.locator('header button:has(svg.lucide-globe)')
+    );
+    await languageSwitcher.first().click();
+
+    // Wait for dropdown
+    const dropdown = page.locator('div.fixed').filter({ hasText: /English|日本語|中文/ });
+    await expect(dropdown).toBeVisible({ timeout: 3000 });
+
+    // Verify all language options are interactable (not clipped off-screen)
+    const japaneseOption = dropdown.getByText(/日本語/);
+    const chineseOption = dropdown.getByText(/中文/);
+
+    await expect(japaneseOption).toBeVisible();
+    await expect(chineseOption).toBeVisible();
+
+    // Verify we can select a language from the dropdown
+    await japaneseOption.click();
+
+    // Language should change - verify by checking localStorage
+    const preference = await page.evaluate(() => {
+      return localStorage.getItem('lenr-language-preference');
+    });
+    expect(preference).toBe('ja');
+  });
 });

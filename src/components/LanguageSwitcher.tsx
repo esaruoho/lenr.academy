@@ -22,13 +22,23 @@ export default function LanguageSwitcher({ className = '', compact = false }: La
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.top - 8, // Position above button with small gap
-        left: rect.left,
-        width: Math.max(rect.width, 200) // Minimum width of 200px
-      })
+      if (compact) {
+        // Mobile header: position below button, aligned to right edge
+        setDropdownPosition({
+          top: rect.bottom + 8, // Position below button with small gap
+          left: rect.right - Math.max(rect.width, 200), // Align right edges
+          width: Math.max(rect.width, 200) // Minimum width of 200px
+        })
+      } else {
+        // Desktop sidebar: position above button
+        setDropdownPosition({
+          top: rect.top - 8, // Position above button with small gap
+          left: rect.left,
+          width: Math.max(rect.width, 200) // Minimum width of 200px
+        })
+      }
     }
-  }, [isOpen])
+  }, [isOpen, compact])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -67,7 +77,9 @@ export default function LanguageSwitcher({ className = '', compact = false }: La
         top: dropdownPosition.top,
         left: dropdownPosition.left,
         width: dropdownPosition.width,
-        transform: 'translateY(-100%)'
+        // Desktop sidebar: translate up to appear above button
+        // Mobile header (compact): no transform needed, already positioned below
+        transform: compact ? undefined : 'translateY(-100%)'
       }}
     >
       <div className="p-2">
