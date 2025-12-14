@@ -8,9 +8,10 @@ import type { SupportedLanguage } from '../i18n/config'
 interface LanguageSwitcherProps {
   className?: string
   compact?: boolean
+  position?: 'above' | 'below'
 }
 
-export default function LanguageSwitcher({ className = '', compact = false }: LanguageSwitcherProps) {
+export default function LanguageSwitcher({ className = '', compact = false, position = 'above' }: LanguageSwitcherProps) {
   const { t } = useTranslation()
   const { language, setLanguage, supportedLanguages, markLanguageSelected } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
@@ -22,7 +23,7 @@ export default function LanguageSwitcher({ className = '', compact = false }: La
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
-      if (compact) {
+      if (position === 'below') {
         // Mobile header: position below button, aligned to right edge
         setDropdownPosition({
           top: rect.bottom + 8, // Position below button with small gap
@@ -30,7 +31,7 @@ export default function LanguageSwitcher({ className = '', compact = false }: La
           width: Math.max(rect.width, 200) // Minimum width of 200px
         })
       } else {
-        // Desktop sidebar: position above button
+        // Desktop sidebar: position above button, left-aligned
         setDropdownPosition({
           top: rect.top - 8, // Position above button with small gap
           left: rect.left,
@@ -38,7 +39,7 @@ export default function LanguageSwitcher({ className = '', compact = false }: La
         })
       }
     }
-  }, [isOpen, compact])
+  }, [isOpen, position])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -77,9 +78,9 @@ export default function LanguageSwitcher({ className = '', compact = false }: La
         top: dropdownPosition.top,
         left: dropdownPosition.left,
         width: dropdownPosition.width,
-        // Desktop sidebar: translate up to appear above button
-        // Mobile header (compact): no transform needed, already positioned below
-        transform: compact ? undefined : 'translateY(-100%)'
+        // Desktop sidebar (position='above'): translate up to appear above button
+        // Mobile header (position='below'): no transform needed, already positioned below
+        transform: position === 'below' ? undefined : 'translateY(-100%)'
       }}
     >
       <div className="p-2">

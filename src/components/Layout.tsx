@@ -337,7 +337,7 @@ export default function Layout({ children }: LayoutProps) {
                 )}
               </div>
             </button>
-            <LanguageSwitcher className={`${desktopSidebarCollapsed ? '' : 'w-full'} mb-2`} compact={desktopSidebarCollapsed} />
+            <LanguageSwitcher className={`${desktopSidebarCollapsed ? '' : 'w-full'} mb-2`} compact={desktopSidebarCollapsed} position="above" />
             <Link
               to="/privacy"
               className={`flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-3 overflow-hidden ${desktopSidebarCollapsed ? '' : 'w-full'}`}
@@ -383,7 +383,7 @@ export default function Layout({ children }: LayoutProps) {
             <Atom className="w-6 h-6 text-primary-600" />
             <span className="text-lg font-bold dark:text-white">{t('brand.appName')}</span>
           </div>
-          <LanguageSwitcher compact />
+          <LanguageSwitcher compact position="below" />
           <button
             onClick={toggleTheme}
             className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
