@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { AlertCircle, XCircle, CheckCircle, RefreshCw } from 'lucide-react'
 import { useDatabase } from '../contexts/DatabaseContext'
+import { useQueryState } from '../contexts/QueryStateContext'
 import { useCycleDiscoveryWorker } from '../hooks/useCycleDiscoveryWorker'
 import CycleDiscoverySearch from '../components/CycleDiscoverySearch'
 import CycleResultsTable from '../components/CycleResultsTable'
@@ -33,11 +34,37 @@ export default function CycleDiscovery() {
     error: workerError,
   } = useCycleDiscoveryWorker()
 
-  // TODO: use useQueryState() for state persistence (Phase 4)
+  const { getCycleDiscoveryState, updateCycleDiscoveryState } = useQueryState()
+
   const [params, setParams] = useState<CycleDiscoveryParameters>(DEFAULT_PARAMS)
   const [results, setResults] = useState<CycleDiscoveryResults | null>(null)
   const [selectedCycle, setSelectedCycle] = useState<DiscoveredCycle | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [hasRestoredFromContext, setHasRestoredFromContext] = useState(false)
+
+  // Restore state from context on mount
+  useEffect(() => {
+    if (!hasRestoredFromContext) {
+      const savedState = getCycleDiscoveryState()
+      if (savedState) {
+        setParams(savedState.params)
+        if (savedState.results) {
+          setResults(savedState.results)
+        }
+      }
+      setHasRestoredFromContext(true)
+    }
+  }, [hasRestoredFromContext, getCycleDiscoveryState])
+
+  // Save state to context whenever params or results change
+  useEffect(() => {
+    if (!hasRestoredFromContext) return
+
+    updateCycleDiscoveryState({
+      params,
+      results: results || undefined,
+    })
+  }, [hasRestoredFromContext, params, results, updateCycleDiscoveryState])
 
   const handleSearch = async () => {
     if (!db) {

@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { CycleDiscoveryParameters, CycleDiscoveryResults, CycleDiscoveryProgress } from '../types';
 import type {
-  CycleDiscoveryWorkerRequest,
+  CycleDiscoveryRunRequest,
+  CycleDiscoveryCancelRequest,
   CycleDiscoveryWorkerResponse,
   CycleDiscoveryProgressMessage,
 } from '../workers/cycleDiscoveryWorker';
@@ -116,7 +117,7 @@ export function useCycleDiscoveryWorker(): UseCycleDiscoveryWorkerReturn {
         resolveRef.current = resolve;
         rejectRef.current = reject;
 
-        const message: CycleDiscoveryWorkerRequest = {
+        const message: CycleDiscoveryRunRequest = {
           type: 'run',
           params,
           dbBuffer,
@@ -130,7 +131,8 @@ export function useCycleDiscoveryWorker(): UseCycleDiscoveryWorkerReturn {
 
   const cancelDiscovery = useCallback(() => {
     if (workerRef.current && isRunning) {
-      workerRef.current.postMessage({ type: 'cancel' });
+      const cancelMsg: CycleDiscoveryCancelRequest = { type: 'cancel' };
+      workerRef.current.postMessage(cancelMsg);
       setIsRunning(false);
       setProgress(null);
       setError('Discovery cancelled');

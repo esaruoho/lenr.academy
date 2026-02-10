@@ -10,11 +10,19 @@ import type { CycleDiscoveryParameters, CycleDiscoveryResults, CycleDiscoveryPro
 import { discoverCycles } from '../services/cycleDiscoveryService';
 
 // Message types
-export interface CycleDiscoveryWorkerRequest {
+export interface CycleDiscoveryRunRequest {
   type: 'run';
   params: CycleDiscoveryParameters;
   dbBuffer: ArrayBuffer;
 }
+
+export interface CycleDiscoveryCancelRequest {
+  type: 'cancel';
+}
+
+export type CycleDiscoveryWorkerRequest =
+  | CycleDiscoveryRunRequest
+  | CycleDiscoveryCancelRequest;
 
 export interface CycleDiscoveryProgressMessage {
   type: 'progress';
@@ -74,7 +82,7 @@ async function runDiscoveryWithProgress(params: CycleDiscoveryParameters): Promi
 /**
  * Message handler
  */
-self.onmessage = async (event: MessageEvent<CycleDiscoveryWorkerRequest | { type: 'cancel' }>) => {
+self.onmessage = async (event: MessageEvent<CycleDiscoveryWorkerRequest>) => {
   const message = event.data;
 
   if (message.type === 'cancel') {
