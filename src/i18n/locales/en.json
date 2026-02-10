@@ -39,6 +39,7 @@
     "fissionReactions": "Fission Reactions",
     "twoToTwoReactions": "Two-To-Two Reactions",
     "cascades": "Cascades",
+    "cycleDiscovery": "Cycle Discovery",
     "tablesInDetail": "Tables in Detail",
     "allTables": "All Tables",
     "privacySettings": "Privacy Settings",
@@ -874,5 +875,66 @@
     "offlineMessage": "Some features may be unavailable",
     "reconnecting": "Reconnecting...",
     "backOnline": "You are back online"
+  },
+  "cycleDiscovery": {
+    "title": "Feedback Cycle Discovery",
+    "subtitle": "Search the reaction database for closed-loop nuclear reaction cycles",
+    "search": {
+      "minFusionMeV": "Min Fusion Energy (MeV)",
+      "minTwoToTwoMeV": "Min Two-to-Two Energy (MeV)",
+      "minFissionMeV": "Min Fission Energy (MeV)",
+      "maxCycleDepth": "Max Cycle Depth",
+      "maxCycles": "Max Cycles to Display",
+      "includeFission": "Include Fission Reactions",
+      "advancedFilters": "Advanced Filters",
+      "abundantOnly": "Abundant nuclides only",
+      "excludeRadioactive": "Exclude radioactive nuclides",
+      "allowedElements": "Allowed elements (comma-separated)",
+      "allowedElementsPlaceholder": "e.g. H,Li,B,C,N,O,Ni",
+      "discover": "Discover Cycles",
+      "cancel": "Cancel",
+      "searching": "Searching for cycles..."
+    },
+    "progress": {
+      "buildingGraph": "Building reaction graph...",
+      "searchingCycles": "Searching for cycles...",
+      "ranking": "Ranking and scoring cycles...",
+      "cyclesFound": "{{count}} cycles found",
+      "fuelCombinations": "{{checked}} of {{total}} fuel combinations checked"
+    },
+    "results": {
+      "title": "Discovered Cycles",
+      "noCycles": "No cycles found with current parameters. Try lowering energy thresholds or increasing max depth.",
+      "fuel": "Fuel",
+      "depth": "Depth",
+      "totalEnergy": "Total Energy",
+      "feedbackRatio": "Feedback %",
+      "abundance": "Abundance",
+      "stability": "Stability",
+      "view": "View cycle details",
+      "simulate": "Run cascade simulation",
+      "cyclesFound": "{{count}} cycles discovered",
+      "sortBy": "Sort by"
+    },
+    "visualization": {
+      "backToResults": "Back to Results",
+      "runCascade": "Run Full Cascade",
+      "totalEnergy": "Total Energy",
+      "feedbackRatio": "Feedback Ratio",
+      "abundanceScore": "Abundance Score",
+      "stabilityScore": "Stability Score",
+      "reactionSteps": "Reaction Steps",
+      "reactionFlow": "Reaction Flow",
+      "feedback": "Feedback",
+      "fusion": "Fusion",
+      "twotwo": "Two-to-Two",
+      "fission": "Fission",
+      "meV": "MeV",
+      "step": "Step {{number}}"
+    },
+    "empty": {
+      "title": "Discover Reaction Cycles",
+      "description": "Configure search parameters above and click 'Discover Cycles' to find closed-loop nuclear reaction pathways."
+    }
   }
 }
