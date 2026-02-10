@@ -94,10 +94,9 @@ self.onmessage = async (event: MessageEvent<CycleDiscoveryWorkerRequest>) => {
     try {
       shouldCancel = false;
 
-      // Initialize database if needed
-      if (!db) {
-        await initDatabase(message.dbBuffer);
-      }
+      // Always (re-)initialize the database from the provided buffer
+      // so reruns after a DB update don't use a stale copy
+      await initDatabase(message.dbBuffer);
 
       // Run cycle discovery with progress updates
       const results = await runDiscoveryWithProgress(message.params);

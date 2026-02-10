@@ -191,7 +191,7 @@ function buildReactionGraph(
 
   // Query fusion reactions: A + B -> C
   const fusionQuery = `
-    SELECT E1, Z1, A1, E2, Z2, A2, E, Z, A, MeV, neutrino
+    SELECT E1, Z1, A1, E2, Z2, A2, E, Z, A, MeV
     FROM FusionAll
     WHERE E1 IN (${elementsStr}) AND E2 IN (${elementsStr})
       AND MeV >= ${params.minFusionMeV}
@@ -202,7 +202,7 @@ function buildReactionGraph(
     for (const row of fusionResults[0].values) {
       const [E1, Z1, A1, E2, Z2, A2, E, Z, A, MeV] = row as [
         string, number, number, string, number, number,
-        string, number, number, number, string
+        string, number, number, number
       ];
       addEdge({
         type: 'fusion',
@@ -222,7 +222,7 @@ function buildReactionGraph(
 
   // Query two-to-two reactions: A + B -> C + D
   const twoToTwoQuery = `
-    SELECT E1, Z1, A1, E2, Z2, A2, E3, Z3, A3, E4, Z4, A4, MeV, neutrino
+    SELECT E1, Z1, A1, E2, Z2, A2, E3, Z3, A3, E4, Z4, A4, MeV
     FROM TwoToTwoAll
     WHERE E1 IN (${elementsStr}) AND E2 IN (${elementsStr})
       AND MeV >= ${params.minTwoToTwoMeV}
@@ -233,7 +233,7 @@ function buildReactionGraph(
     for (const row of twoToTwoResults[0].values) {
       const [E1, Z1, A1, E2, Z2, A2, E3, Z3, A3, E4, Z4, A4, MeV] = row as [
         string, number, number, string, number, number,
-        string, number, number, string, number, number, number, string
+        string, number, number, string, number, number, number
       ];
       addEdge({
         type: 'twotwo',
@@ -258,7 +258,7 @@ function buildReactionGraph(
   if (params.includeFission) {
     const minFissionMeV = params.minFissionMeV ?? 0;
     const fissionQuery = `
-      SELECT E, Z, A, E1, Z1, A1, E2, Z2, A2, MeV, neutrino
+      SELECT E, Z, A, E1, Z1, A1, E2, Z2, A2, MeV
       FROM FissionAll
       WHERE E IN (${elementsStr})
         AND MeV >= ${minFissionMeV}
@@ -269,7 +269,7 @@ function buildReactionGraph(
       for (const row of fissionResults[0].values) {
         const [E, Z, A, E1, Z1, A1, E2, Z2, A2, MeV] = row as [
           string, number, number, string, number, number,
-          string, number, number, number, string
+          string, number, number, number
         ];
         addEdge({
           type: 'fission',
