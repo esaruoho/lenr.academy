@@ -376,7 +376,9 @@ function findCyclesFromFuel(
   const consumed = new Set<string>();
   // Path of reactions taken so far
   const path: ReactionEdge[] = [];
-  // Track visited states to prune search (reaction signature at each depth)
+  // Track what each reaction in the path consumed (parallel array)
+  const pathConsumed: string[][] = [];
+  // Track visited states to prune search (reaction + pool signature at each depth)
   const visitedAtDepth = new Set<string>();
 
   function dfs(): void {
@@ -401,8 +403,9 @@ function findCyclesFromFuel(
         if (seen.has(sig)) continue;
         seen.add(sig);
 
-        // Avoid repeating exact same state at same depth
-        const stateSig = `${path.length}:${sig}`;
+        // Avoid repeating exact same reaction with the same pool state at same depth
+        const poolSig = Array.from(pool).sort().join(',');
+        const stateSig = `${path.length}:${sig}:${poolSig}`;
         if (visitedAtDepth.has(stateSig)) continue;
         visitedAtDepth.add(stateSig);
 
@@ -441,15 +444,17 @@ function findCyclesFromFuel(
       }
 
       path.push(edge);
+      pathConsumed.push(newlyConsumed);
 
       // Check for cycle: an output regenerates a previously consumed nuclide
-      const regenerated = outputIds.filter(id => consumed.has(id));
-      if (regenerated.length > 0 && path.length >= 2) {
+      const regenerated = new Set(outputIds.filter(id => consumed.has(id)));
+      if (regenerated.size > 0 && path.length >= 2) {
         // We found a cycle -- build the CycleCandidate
+        // Mark isFeedback only on reactions whose outputs actually regenerate
+        // a nuclide that was consumed earlier in the path
         const reactions: CycleReaction[] = path.map((e) => {
-          // Determine if this reaction's output regenerates a consumed nuclide
           const outputsOfReaction = e.outputs.map(r => refToId(r));
-          const isFeedback = outputsOfReaction.some(id => consumed.has(id));
+          const isFeedback = outputsOfReaction.some(id => regenerated.has(id));
 
           return {
             type: e.type,
@@ -477,6 +482,7 @@ function findCyclesFromFuel(
 
       // Backtrack: restore pool state
       path.pop();
+      pathConsumed.pop();
       for (const id of addedOutputs) {
         pool.delete(id);
       }
