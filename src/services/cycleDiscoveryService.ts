@@ -86,10 +86,22 @@ function generateCycleId(reactions: CycleReaction[]): string {
 }
 
 /**
+ * Validate that a string is a valid element symbol (1-3 letters only).
+ * Valid examples: H, He, Li, Uue. This strict validation prevents SQL
+ * injection since element symbols are interpolated into SQL IN() clauses.
+ */
+function isValidElementSymbol(symbol: string): boolean {
+  return /^[A-Za-z]{1,3}$/.test(symbol);
+}
+
+/**
  * Build an SQL-safe quoted element list string from an array of element symbols.
+ * Each symbol is validated to contain only letters (1-3 chars) before inclusion,
+ * preventing SQL injection even though values are interpolated into queries.
  */
 function quotedElementList(elements: string[]): string {
-  return elements.map(e => `'${e}'`).join(',');
+  const sanitized = elements.filter(isValidElementSymbol);
+  return sanitized.map(e => `'${e}'`).join(',');
 }
 
 // ---------------------------------------------------------------------------
@@ -113,7 +125,8 @@ function loadNuclideMetadata(db: Database): Map<string, NuclideMetadata> {
 function buildReactionGraph(
   db: Database,
   params: CycleDiscoveryParameters,
-  nuclideMetadata: Map<string, NuclideMetadata>
+  nuclideMetadata: Map<string, NuclideMetadata>,
+  shouldCancel?: () => boolean
 ): ReactionGraph {
   const graph: ReactionGraph = new Map();
 
@@ -195,6 +208,10 @@ function buildReactionGraph(
     }
   }
 
+  if (shouldCancel?.()) {
+    throw new Error('Cycle discovery cancelled');
+  }
+
   // Query two-to-two reactions: A + B -> C + D
   const twoToTwoQuery = `
     SELECT E1, Z1, A1, E2, Z2, A2, E3, Z3, A3, E4, Z4, A4, MeV, neutrino
@@ -225,6 +242,10 @@ function buildReactionGraph(
     }
   }
 
+  if (shouldCancel?.()) {
+    throw new Error('Cycle discovery cancelled');
+  }
+
   // Query fission reactions: A -> B + C (if enabled)
   if (params.includeFission) {
     const minFissionMeV = params.minFissionMeV ?? 0;
@@ -253,6 +274,10 @@ function buildReactionGraph(
         });
       }
     }
+
+    if (shouldCancel?.()) {
+      throw new Error('Cycle discovery cancelled');
+    }
   }
 
   return graph;
@@ -266,7 +291,10 @@ interface FuelCandidate {
   nuclides: string[];
 }
 
-function generateFuelCandidates(graph: ReactionGraph): FuelCandidate[] {
+function generateFuelCandidates(
+  graph: ReactionGraph,
+  shouldCancel?: () => boolean
+): FuelCandidate[] {
   const candidates: FuelCandidate[] = [];
   const allNuclides = Array.from(graph.keys());
 
@@ -283,6 +311,9 @@ function generateFuelCandidates(graph: ReactionGraph): FuelCandidate[] {
     .map(n => n.id);
 
   for (let i = 0; i < sortedByConnections.length; i++) {
+    if (shouldCancel?.()) {
+      throw new Error('Cycle discovery cancelled');
+    }
     for (let j = i + 1; j < sortedByConnections.length; j++) {
       candidates.push({ nuclides: [sortedByConnections[i], sortedByConnections[j]] });
     }
@@ -313,7 +344,8 @@ interface CycleCandidate {
 function findCyclesFromFuel(
   graph: ReactionGraph,
   fuelSet: string[],
-  maxDepth: number
+  maxDepth: number,
+  shouldCancel?: () => boolean
 ): CycleCandidate[] {
   const found: CycleCandidate[] = [];
   // Limit total cycles found per fuel set to avoid excessive computation
@@ -371,6 +403,9 @@ function findCyclesFromFuel(
 
     for (const edge of candidateReactions) {
       if (found.length >= maxPerFuel) return;
+      if (shouldCancel?.()) {
+        throw new Error('Cycle discovery cancelled');
+      }
 
       // "Execute" the reaction
       const inputIds = edge.inputs.map(r => refToId(r));
@@ -538,7 +573,8 @@ function deduplicateCycles(cycles: CycleCandidate[]): CycleCandidate[] {
 export function discoverCycles(
   db: Database,
   params: CycleDiscoveryParameters,
-  onProgress?: (progress: CycleDiscoveryProgress) => void
+  onProgress?: (progress: CycleDiscoveryProgress) => void,
+  shouldCancel?: () => boolean
 ): CycleDiscoveryResults {
   const startTime = performance.now();
 
@@ -554,10 +590,10 @@ export function discoverCycles(
     percentage: 0,
   });
 
-  const graph = buildReactionGraph(db, params, nuclideMetadata);
+  const graph = buildReactionGraph(db, params, nuclideMetadata, shouldCancel);
 
   // Phase 2: Search for cycles
-  const fuelCandidates = generateFuelCandidates(graph);
+  const fuelCandidates = generateFuelCandidates(graph, shouldCancel);
   const totalCombinations = fuelCandidates.length;
 
   onProgress?.({
@@ -571,8 +607,11 @@ export function discoverCycles(
   const allCandidates: CycleCandidate[] = [];
 
   for (let i = 0; i < fuelCandidates.length; i++) {
+    if (shouldCancel?.()) {
+      throw new Error('Cycle discovery cancelled');
+    }
     const candidate = fuelCandidates[i];
-    const cycles = findCyclesFromFuel(graph, candidate.nuclides, params.maxCycleDepth);
+    const cycles = findCyclesFromFuel(graph, candidate.nuclides, params.maxCycleDepth, shouldCancel);
     allCandidates.push(...cycles);
 
     // Report progress periodically (every 50 candidates or when cycles are found)

@@ -66,11 +66,7 @@ async function runDiscoveryWithProgress(params: CycleDiscoveryParameters): Promi
     } as CycleDiscoveryProgressMessage);
   };
 
-  const results = discoverCycles(db, params, onProgress);
-
-  if (shouldCancel) {
-    throw new Error('Cycle discovery cancelled');
-  }
+  const results = discoverCycles(db, params, onProgress, () => shouldCancel);
 
   return results;
 }
