@@ -43,6 +43,7 @@ interface ReactionEdge {
 type ReactionGraph = Map<string, ReactionEdge[]>;
 
 interface NuclideMetadata {
+  Z: number;
   ppmNSolar: number | null;
   LHL: number | null;
 }
@@ -114,9 +115,9 @@ function loadNuclideMetadata(db: Database): Map<string, NuclideMetadata> {
   const results = db.exec(sql);
   if (results.length > 0) {
     for (const row of results[0].values) {
-      const [, A, E, ppmNSolar, LHL] = row as [number, number, string, number | null, number | null];
+      const [Z, A, E, ppmNSolar, LHL] = row as [number, number, string, number | null, number | null];
       const id = nuclideId(E, A);
-      meta.set(id, { ppmNSolar, LHL });
+      meta.set(id, { Z, ppmNSolar, LHL });
     }
   }
   return meta;
@@ -173,6 +174,13 @@ function buildReactionGraph(
   let elementsStr: string;
   if (allowedElements && allowedElements.length > 0) {
     elementsStr = quotedElementList(allowedElements);
+    // If all user-provided elements were invalid, fall back to all elements
+    if (elementsStr === '') {
+      const elemResult = db.exec('SELECT DISTINCT E FROM NuclidesPlus');
+      if (elemResult.length === 0) return graph;
+      const allElements = elemResult[0].values.map(row => row[0] as string);
+      elementsStr = quotedElementList(allElements);
+    }
   } else {
     // Get all distinct elements from the database
     const elemResult = db.exec('SELECT DISTINCT E FROM NuclidesPlus');
@@ -345,6 +353,7 @@ function findCyclesFromFuel(
   graph: ReactionGraph,
   fuelSet: string[],
   maxDepth: number,
+  nuclideMetadata: Map<string, NuclideMetadata>,
   shouldCancel?: () => boolean
 ): CycleCandidate[] {
   const found: CycleCandidate[] = [];
@@ -453,7 +462,11 @@ function findCyclesFromFuel(
 
         const fuelNuclides = fuelSet.map(id => {
           const ref = nuclideRefMap.get(id);
-          return ref ? { ...ref } : { E: id.split('-')[0], Z: 0, A: parseInt(id.split('-')[1], 10) };
+          if (ref) return { ...ref };
+          const [E, aStr] = id.split('-');
+          const A = parseInt(aStr, 10);
+          const meta = nuclideMetadata.get(id);
+          return { E, Z: meta?.Z ?? 0, A };
         });
 
         found.push({ reactions, fuelNuclides });
@@ -605,23 +618,25 @@ export function discoverCycles(
   });
 
   const allCandidates: CycleCandidate[] = [];
+  let checkedCount = 0;
 
   for (let i = 0; i < fuelCandidates.length; i++) {
     if (shouldCancel?.()) {
       throw new Error('Cycle discovery cancelled');
     }
     const candidate = fuelCandidates[i];
-    const cycles = findCyclesFromFuel(graph, candidate.nuclides, params.maxCycleDepth, shouldCancel);
+    const cycles = findCyclesFromFuel(graph, candidate.nuclides, params.maxCycleDepth, nuclideMetadata, shouldCancel);
     allCandidates.push(...cycles);
+    checkedCount = i + 1;
 
     // Report progress periodically (every 50 candidates or when cycles are found)
     if (i % 50 === 0 || cycles.length > 0) {
       onProgress?.({
         phase: 'searching_cycles',
         cyclesFound: allCandidates.length,
-        fuelCombinationsChecked: i + 1,
+        fuelCombinationsChecked: checkedCount,
         totalCombinations,
-        percentage: Math.round(((i + 1) / totalCombinations) * 100),
+        percentage: Math.round((checkedCount / totalCombinations) * 100),
       });
     }
 
@@ -633,7 +648,7 @@ export function discoverCycles(
   onProgress?.({
     phase: 'ranking',
     cyclesFound: allCandidates.length,
-    fuelCombinationsChecked: Math.min(fuelCandidates.length, allCandidates.length >= params.maxCycles * 3 ? fuelCandidates.length : fuelCandidates.length),
+    fuelCombinationsChecked: checkedCount,
     totalCombinations,
     percentage: 95,
   });
