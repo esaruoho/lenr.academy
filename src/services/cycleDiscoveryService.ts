@@ -102,7 +102,7 @@ function loadNuclideMetadata(db: Database): Map<string, NuclideMetadata> {
   const results = db.exec(sql);
   if (results.length > 0) {
     for (const row of results[0].values) {
-      const [_Z, A, E, ppmNSolar, LHL] = row as [number, number, string, number | null, number | null];
+      const [, A, E, ppmNSolar, LHL] = row as [number, number, string, number | null, number | null];
       const id = nuclideId(E, A);
       meta.set(id, { ppmNSolar, LHL });
     }
@@ -402,7 +402,7 @@ function findCyclesFromFuel(
       const regenerated = outputIds.filter(id => consumed.has(id));
       if (regenerated.length > 0 && path.length >= 2) {
         // We found a cycle -- build the CycleCandidate
-        const reactions: CycleReaction[] = path.map((e, _idx) => {
+        const reactions: CycleReaction[] = path.map((e) => {
           // Determine if this reaction's output regenerates a consumed nuclide
           const outputsOfReaction = e.outputs.map(r => refToId(r));
           const isFeedback = outputsOfReaction.some(id => consumed.has(id));
