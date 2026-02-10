@@ -379,6 +379,8 @@ function findCyclesFromFuel(
   const path: ReactionEdge[] = [];
   // Track what each reaction in the path consumed (parallel array)
   const pathConsumed: string[][] = [];
+  // Track reaction signatures already in the current path to prevent repeats
+  const pathReactionSigs = new Set<string>();
   // Track visited states to prune search (reaction + pool signature at each depth)
   const visitedAtDepth = new Set<string>();
 
@@ -399,10 +401,14 @@ function findCyclesFromFuel(
         const allInputsAvailable = edge.inputs.every(inp => pool.has(refToId(inp)));
         if (!allInputsAvailable) continue;
 
-        // Create a signature to avoid processing the same reaction twice
+        // Create a signature to avoid processing the same reaction twice at this depth
         const sig = `${edge.type}:${edge.inputs.map(r => refToId(r)).sort().join('+')}=>${edge.outputs.map(r => refToId(r)).sort().join('+')}`;
         if (seen.has(sig)) continue;
         seen.add(sig);
+
+        // Skip reactions already used in the current path (prevents repeats
+        // when fuel nuclides stay in pool and the same reaction could fire again)
+        if (pathReactionSigs.has(sig)) continue;
 
         // Avoid repeating exact same reaction with the same pool state at same depth
         const poolSig = Array.from(pool).sort().join(',');
@@ -421,6 +427,7 @@ function findCyclesFromFuel(
       }
 
       // "Execute" the reaction
+      const edgeSig = `${edge.type}:${edge.inputs.map(r => refToId(r)).sort().join('+')}=>${edge.outputs.map(r => refToId(r)).sort().join('+')}`;
       const inputIds = edge.inputs.map(r => refToId(r));
       const outputIds = edge.outputs.map(r => refToId(r));
 
@@ -446,6 +453,7 @@ function findCyclesFromFuel(
 
       path.push(edge);
       pathConsumed.push(newlyConsumed);
+      pathReactionSigs.add(edgeSig);
 
       // Check for cycle: an output regenerates a previously consumed nuclide
       const regenerated = new Set(outputIds.filter(id => consumed.has(id)));
@@ -484,6 +492,7 @@ function findCyclesFromFuel(
       // Backtrack: restore pool state
       path.pop();
       pathConsumed.pop();
+      pathReactionSigs.delete(edgeSig);
       for (const id of addedOutputs) {
         pool.delete(id);
       }
