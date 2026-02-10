@@ -155,8 +155,9 @@ function buildReactionGraph(
   }
 
   function addEdge(edge: ReactionEdge): void {
-    // Check all nuclides in the reaction are allowed
-    for (const ref of [...edge.inputs, ...edge.outputs]) {
+    // Only filter on inputs — outputs/byproducts may be radioactive or rare
+    // without invalidating the reaction as a cycle candidate
+    for (const ref of edge.inputs) {
       if (!isNuclideAllowed(ref)) return;
     }
 
