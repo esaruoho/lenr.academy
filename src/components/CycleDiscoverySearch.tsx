@@ -201,7 +201,7 @@ export default function CycleDiscoverySearch({
         </label>
 
         {params.includeFission && (
-          <div className="mt-3 ml-13 max-w-xs">
+          <div className="mt-3 ml-12 max-w-xs">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('cycleDiscovery.minFissionEnergy')}
             </label>

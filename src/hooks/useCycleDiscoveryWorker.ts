@@ -41,6 +41,9 @@ export function useCycleDiscoveryWorker(): UseCycleDiscoveryWorkerReturn {
     worker.onmessage = (event: MessageEvent<CycleDiscoveryWorkerResponse>) => {
       const message = event.data;
 
+      // Ignore stale messages from a cancelled run
+      if (!resolveRef.current && !rejectRef.current) return;
+
       if (message.type === 'progress') {
         const progressMsg = message as CycleDiscoveryProgressMessage;
         setProgress(progressMsg.progress);
