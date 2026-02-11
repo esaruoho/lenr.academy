@@ -75,11 +75,11 @@ function analyzeFlow(
       }
     }
 
-    // Check if this step regenerates a fuel nuclide
+    // Check if this step regenerates a previously-consumed nuclide
     if (reactions[i].isFeedback) {
       for (const out of reactions[i].outputs) {
         const key = nKey(out)
-        if (fuelKeys.has(key)) {
+        if (consumed.has(key) || fuelKeys.has(key)) {
           feedbackNuclides.add(key)
         }
       }
