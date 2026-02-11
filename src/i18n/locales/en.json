@@ -933,6 +933,22 @@
     "metricStability": "Stability Score",
     "reactionSteps": "Reaction Steps",
     "feedbackLabel": "FEEDBACK",
-    "transformationChain": "Transformation Chain"
+    "transformationChain": "Transformation Chain",
+    "transformationChainDesc": "Hover over any nuclide to trace its path through the cycle. Colored lines show how each intermediate product flows from one reaction to the next.",
+    "reactionStepsDesc": "Annotations show which products flow to subsequent steps. Hover over a nuclide to highlight it across all steps.",
+    "legendFuel": "Fuel / Catalyst",
+    "legendIntermediary": "Intermediary (flows between steps)",
+    "legendByproduct": "Byproduct",
+    "legendRegenerated": "Regenerated catalyst",
+    "regeneratesCatalyst": "↻ REGENERATES CATALYST",
+    "catalyticCycleLabel": "Catalytic Cycle",
+    "flowFromStep": "↓ step {{step}}",
+    "flowToStep": "→ step {{step}}",
+    "flowRegenerated": "↻ regenerated",
+    "flowByproduct": "byproduct",
+    "reactionTypeFusion": "FUSION",
+    "reactionTypeTwoToTwo": "TWO-TO-TWO",
+    "reactionTypeFission": "FISSION",
+    "reactionTypeTwoToTwoShort": "2→2"
   }
 }
