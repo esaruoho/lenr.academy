@@ -92,7 +92,19 @@ export default function CycleDiscovery() {
 
   const handleViewCycle = (cycle: DiscoveredCycle) => {
     setSelectedCycle(cycle)
+    window.history.pushState({ cycleDetail: true }, '')
   }
+
+  // Listen for browser back button to return from cycle detail to list
+  useEffect(() => {
+    const onPopState = (e: PopStateEvent) => {
+      if (selectedCycle && !e.state?.cycleDetail) {
+        setSelectedCycle(null)
+      }
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [selectedCycle])
 
   const handleRunSimulation = (cycle: DiscoveredCycle) => {
     // Navigate to cascades page with pre-filled fuel nuclides
@@ -103,7 +115,7 @@ export default function CycleDiscovery() {
   }
 
   const handleBack = () => {
-    setSelectedCycle(null)
+    window.history.back()
   }
 
   const displayError = error || workerError
