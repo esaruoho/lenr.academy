@@ -91,20 +91,23 @@ export default function CycleDiscovery() {
   }
 
   const handleViewCycle = (cycle: DiscoveredCycle) => {
+    const cycleIndex = results?.cycles.indexOf(cycle) ?? -1
     setSelectedCycle(cycle)
-    window.history.pushState({ cycleDetail: true }, '')
+    window.history.pushState({ cycleDetail: true, cycleIndex }, '')
   }
 
-  // Listen for browser back button to return from cycle detail to list
+  // Listen for browser back/forward to toggle cycle detail view
   useEffect(() => {
     const onPopState = (e: PopStateEvent) => {
-      if (selectedCycle && !e.state?.cycleDetail) {
+      if (e.state?.cycleDetail && e.state.cycleIndex >= 0 && results?.cycles) {
+        setSelectedCycle(results.cycles[e.state.cycleIndex] ?? null)
+      } else {
         setSelectedCycle(null)
       }
     }
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
-  }, [selectedCycle])
+  }, [results])
 
   const handleRunSimulation = (cycle: DiscoveredCycle) => {
     // Navigate to cascades page with pre-filled fuel nuclides
