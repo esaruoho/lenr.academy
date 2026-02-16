@@ -53,10 +53,10 @@ export function exportToJSON(
           ? reactions.reduce((sum, r) => sum + (r.MeV || 0), 0) / reactions.length
           : 0,
         minEnergy: reactions.length > 0
-          ? Math.min(...reactions.map(r => r.MeV || 0))
+          ? reactions.reduce((min, r) => Math.min(min, r.MeV || 0), Infinity)
           : 0,
         maxEnergy: reactions.length > 0
-          ? Math.max(...reactions.map(r => r.MeV || 0))
+          ? reactions.reduce((max, r) => Math.max(max, r.MeV || 0), -Infinity)
           : 0,
         executionTime: metadata.executionTime,
       },
@@ -114,6 +114,11 @@ function getReactionTitle(queryType: ReactionType): string {
 function formatFilterSummary(filter: QueryFilter, queryType: ReactionType): string[] {
   const lines: string[] = []
 
+  // Fission input element
+  if (filter.elements?.length) {
+    lines.push(`Input Element: ${filter.elements.join(', ')}`)
+  }
+  // Fusion/TwoToTwo input elements
   if (filter.element1List?.length) {
     const label = queryType === 'fission' ? 'Input Element' : 'Input Element 1'
     lines.push(`${label}: ${filter.element1List.join(', ')}`)
@@ -121,8 +126,23 @@ function formatFilterSummary(filter: QueryFilter, queryType: ReactionType): stri
   if (filter.element2List?.length) {
     lines.push(`Input Element 2: ${filter.element2List.join(', ')}`)
   }
+  // Fusion output element
   if (filter.outputElementList?.length) {
     lines.push(`Output Element: ${filter.outputElementList.join(', ')}`)
+  }
+  // Fission output elements
+  if (filter.outputElement1List?.length) {
+    lines.push(`Output Element 1: ${filter.outputElement1List.join(', ')}`)
+  }
+  if (filter.outputElement2List?.length) {
+    lines.push(`Output Element 2: ${filter.outputElement2List.join(', ')}`)
+  }
+  // TwoToTwo output elements
+  if (filter.outputElement3List?.length) {
+    lines.push(`Output Element 3: ${filter.outputElement3List.join(', ')}`)
+  }
+  if (filter.outputElement4List?.length) {
+    lines.push(`Output Element 4: ${filter.outputElement4List.join(', ')}`)
   }
   if (filter.minMeV !== undefined) {
     lines.push(`Min Energy: ${filter.minMeV} MeV`)

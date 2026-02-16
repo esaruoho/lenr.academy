@@ -92,6 +92,13 @@ export default function FissionQuery() {
   const [selectedElement, setSelectedElement] = useState<string[]>(getInitialElement())
   const [selectedOutputElement1, setSelectedOutputElement1] = useState<string[]>(getInitialOutputElement1())
   const [selectedOutputElement2, setSelectedOutputElement2] = useState<string[]>(getInitialOutputElement2())
+
+  const queryFilter = useMemo<QueryFilter>(() => ({
+    ...filter,
+    elements: selectedElement.length > 0 ? selectedElement : undefined,
+    outputElement1List: selectedOutputElement1.length > 0 ? selectedOutputElement1 : undefined,
+    outputElement2List: selectedOutputElement2.length > 0 ? selectedOutputElement2 : undefined,
+  }), [filter, selectedElement, selectedOutputElement1, selectedOutputElement2])
   const [elements, setElements] = useState<Element[]>([])
   const [nuclides, setNuclides] = useState<Nuclide[]>([])
   const [radioactiveNuclides, setRadioactiveNuclides] = useState<Set<string>>(new Set())
@@ -492,14 +499,6 @@ export default function FissionQuery() {
 
     setIsQuerying(true)
     try {
-      // Build filter with selected elements
-      const queryFilter: QueryFilter = {
-        ...filter,
-        elements: selectedElement.length > 0 ? selectedElement : undefined,
-        outputElement1List: selectedOutputElement1.length > 0 ? selectedOutputElement1 : undefined,
-        outputElement2List: selectedOutputElement2.length > 0 ? selectedOutputElement2 : undefined
-      }
-
       const result = queryFission(db, queryFilter)
 
       setResults(result.reactions)
@@ -1136,7 +1135,7 @@ export default function FissionQuery() {
                   {t('reactions.exportCsv')}
                 </button>
                 <button
-                  onClick={() => exportToJSON(results, { queryType: 'fission', filter, executionTime: queryTime, rowCount: results.length, totalCount })}
+                  onClick={() => exportToJSON(results, { queryType: 'fission', filter: queryFilter, executionTime: queryTime, rowCount: results.length, totalCount })}
                   className="btn btn-secondary px-4 py-2 text-sm"
                   disabled={results.length === 0}
                 >
@@ -1144,7 +1143,7 @@ export default function FissionQuery() {
                   {t('reactions.exportJson')}
                 </button>
                 <button
-                  onClick={() => exportToPDF(results, { queryType: 'fission', filter, executionTime: queryTime, rowCount: results.length, totalCount })}
+                  onClick={() => exportToPDF(results, { queryType: 'fission', filter: queryFilter, executionTime: queryTime, rowCount: results.length, totalCount })}
                   className="btn btn-secondary px-4 py-2 text-sm"
                   disabled={results.length === 0}
                 >
