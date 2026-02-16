@@ -15,6 +15,8 @@ import FilterPanel, { FilterConfig, FilterPreset } from '../components/FilterPan
 import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import Tooltip from '../components/Tooltip'
 import DecayChainDiagram from '../components/DecayChainDiagram'
+import ColumnToggle from '../components/ColumnToggle'
+import { useColumnVisibility } from '../hooks/useColumnVisibility'
 import {
   getAllNuclidesByElement,
   getAtomicRadii,
@@ -1602,6 +1604,11 @@ export default function ShowElementData() {
     }
   ]
 
+  // Column visibility hooks for each table
+  const elementsColumnVis = useColumnVisibility(elementsColumns, 'elements')
+  const nuclidesColumnVis = useColumnVisibility(nuclidesColumns, 'nuclides')
+  const decaysColumnVis = useColumnVisibility(decaysColumns, 'decays')
+
   if (dbLoading) {
     return <DatabaseLoadingCard downloadProgress={downloadProgress} />
   }
@@ -2021,10 +2028,15 @@ export default function ShowElementData() {
           <div className="card p-6">
             <SortableTable
               data={filteredElements}
-              columns={elementsColumns}
+              columns={elementsColumnVis.visibleColumns}
               expandedRows={elementsExpandedRows}
               onExpandedRowsChange={setElementsExpandedRows}
-              title="Elements Table"
+              title={
+                <div className="flex items-center justify-between w-full">
+                  <span>Elements Table</span>
+                  <ColumnToggle {...elementsColumnVis} />
+                </div>
+              }
               description="Browse and search all chemical elements. Click any row to view detailed properties in the Integrated tab."
               autoFillHeight
               autoFillHeightOffset={80}
@@ -2166,10 +2178,15 @@ export default function ShowElementData() {
           <div className="card p-6">
             <SortableTable
               data={filteredNuclides}
-              columns={nuclidesColumns}
+              columns={nuclidesColumnVis.visibleColumns}
               expandedRows={nuclidesExpandedRows}
               onExpandedRowsChange={setNuclidesExpandedRows}
-              title="Nuclides Table"
+              title={
+                <div className="flex items-center justify-between w-full">
+                  <span>Nuclides Table</span>
+                  <ColumnToggle {...nuclidesColumnVis} />
+                </div>
+              }
               description="Browse all nuclear isotopes with binding energies, boson/fermion classifications, and stability indicators. Click any row to view detailed properties in the Integrated tab."
               autoFillHeight
               autoFillHeightOffset={80}
@@ -2353,10 +2370,15 @@ export default function ShowElementData() {
           <div className="card p-6">
             <SortableTable
               data={filteredDecays}
-              columns={decaysColumns}
+              columns={decaysColumnVis.visibleColumns}
               expandedRows={decaysExpandedRows}
               onExpandedRowsChange={handleDecaysExpandedRowsChange}
-              title="Radioactive Decays Table"
+              title={
+                <div className="flex items-center justify-between w-full">
+                  <span>Radioactive Decays Table</span>
+                  <ColumnToggle {...decaysColumnVis} />
+                </div>
+              }
               description="Browse radioactive decay modes, half-lives, energies, and intensities for all unstable isotopes. Click any row to view the parent nuclide in the Integrated tab."
               autoFillHeight
               autoFillHeightOffset={80}

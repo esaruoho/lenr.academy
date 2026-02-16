@@ -870,6 +870,13 @@
     "downloadingUpdate": "Downloading database update in background...",
     "downloadUpdate": "Download Update"
   },
+  "columnToggle": {
+    "title": "Customize visible columns",
+    "columns": "Columns",
+    "showHide": "Show/Hide Columns",
+    "resetToDefault": "Reset to default columns",
+    "reset": "Reset"
+  },
   "offline": {
     "youAreOffline": "You are offline",
     "offlineMessage": "Some features may be unavailable",
