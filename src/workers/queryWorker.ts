@@ -47,6 +47,9 @@ async function initDatabase(buffer: ArrayBuffer): Promise<void> {
   const SQL = await initSqlJs({
     locateFile: (file: string) => `/${file}`,
   });
+  if (db) {
+    db.close();
+  }
   db = new SQL.Database(new Uint8Array(buffer));
 }
 
@@ -165,9 +168,10 @@ function buildWhereClause(filter: QueryFilter, tableType: 'fusion' | 'fission' |
 }
 
 function buildOrderClause(filter: QueryFilter): string {
-  const orderBy = filter.orderBy || 'MeV';
-  const direction = filter.orderDirection || 'desc';
-  return `ORDER BY ${orderBy} ${direction.toUpperCase()}`;
+  const validColumns = ['MeV', 'E', 'E1', 'E2', 'E3', 'E4', 'Z', 'A', 'Z1', 'A1', 'Z2', 'A2', 'Z3', 'A3', 'Z4', 'A4', 'neutrino'];
+  const orderBy = validColumns.includes(filter.orderBy || 'MeV') ? (filter.orderBy || 'MeV') : 'MeV';
+  const direction = filter.orderDirection === 'asc' ? 'ASC' : 'DESC';
+  return `ORDER BY ${orderBy} ${direction}`;
 }
 
 /**
@@ -328,7 +332,7 @@ function executeQuery(queryType: 'fusion' | 'fission' | 'twotwo', filter: QueryF
 }
 
 // Worker message handler
-self.onmessage = async (event: MessageEvent<QueryWorkerRequest | { type: 'cancel' }>) => {
+self.onmessage = async (event: MessageEvent<QueryWorkerRequest>) => {
   const message = event.data;
 
   if (message.type === 'query') {

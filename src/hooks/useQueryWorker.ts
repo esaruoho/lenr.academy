@@ -113,7 +113,7 @@ export function useQueryWorker(): UseQueryWorkerReturn {
           dbBuffer,
         };
 
-        workerRef.current.postMessage(message);
+        workerRef.current.postMessage(message, [message.dbBuffer]);
       });
     },
     [isRunning]
