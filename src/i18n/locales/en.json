@@ -369,6 +369,8 @@
     "hideBFTypes": "Hide B/F Types",
     "showBFTypes": "Show B/F Types",
     "exportCsv": "Export CSV",
+    "exportJson": "Export JSON",
+    "exportPdf": "Export PDF",
     "inputs": "Inputs",
     "output": "Output",
     "outputs": "Outputs",

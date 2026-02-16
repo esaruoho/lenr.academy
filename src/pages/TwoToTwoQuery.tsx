@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Download, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
+import { Download, FileJson, FileText, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
 import { useSearchParams, Link } from 'react-router-dom'
 import type { TwoToTwoReaction, QueryFilter, Element, Nuclide, HeatmapMode, HeatmapMetrics, AtomicRadiiData, NeutrinoType } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
@@ -13,6 +13,7 @@ import NuclideDetailsCard from '../components/NuclideDetailsCard'
 import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import { VirtualizedList } from '../components/VirtualizedList'
 import LimitSelector from '../components/LimitSelector'
+import { exportToJSON, exportToPDF } from '../utils/exportUtils'
 
 // Default values
 const DEFAULT_ELEMENT1 = ['D']
@@ -1035,6 +1036,22 @@ export default function TwoToTwoQuery() {
                 >
                   <Download className="w-4 h-4 mr-2 inline" />
                   {t('reactions.exportCsv')}
+                </button>
+                <button
+                  onClick={() => exportToJSON(results, { queryType: 'twotwo', filter, executionTime, rowCount: results.length, totalCount })}
+                  className="btn btn-secondary px-4 py-2 text-sm"
+                  disabled={results.length === 0}
+                >
+                  <FileJson className="w-4 h-4 mr-2 inline" />
+                  {t('reactions.exportJson')}
+                </button>
+                <button
+                  onClick={() => exportToPDF(results, { queryType: 'twotwo', filter, executionTime, rowCount: results.length, totalCount })}
+                  className="btn btn-secondary px-4 py-2 text-sm"
+                  disabled={results.length === 0}
+                >
+                  <FileText className="w-4 h-4 mr-2 inline" />
+                  {t('reactions.exportPdf')}
                 </button>
               </div>
             </div>
