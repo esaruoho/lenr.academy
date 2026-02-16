@@ -13,12 +13,17 @@ export default function ShareQueryButton() {
       setTimeout(() => setCopied(false), 2000)
     } catch {
       // Fallback for older browsers / non-HTTPS contexts
-      const input = document.createElement('input')
-      input.value = window.location.href
-      document.body.appendChild(input)
-      input.select()
-      document.execCommand('copy')
-      document.body.removeChild(input)
+      const textarea = document.createElement('textarea')
+      textarea.value = window.location.href
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      try {
+        document.execCommand('copy')
+      } finally {
+        document.body.removeChild(textarea)
+      }
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
