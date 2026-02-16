@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
+import ShareQueryButton from '../components/ShareQueryButton'
 import { useSearchParams, Link } from 'react-router-dom'
 import type { TwoToTwoReaction, QueryFilter, Element, Nuclide, HeatmapMode, HeatmapMetrics, AtomicRadiiData, NeutrinoType } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
@@ -1036,6 +1037,7 @@ export default function TwoToTwoQuery() {
                   <Download className="w-4 h-4 mr-2 inline" />
                   {t('reactions.exportCsv')}
                 </button>
+                <ShareQueryButton />
               </div>
             </div>
 

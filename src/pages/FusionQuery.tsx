@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
 import { useSearchParams, Link } from 'react-router-dom'
+import ShareQueryButton from '../components/ShareQueryButton'
 import type { FusionReaction, QueryFilter, Nuclide, Element, HeatmapMode, HeatmapMetrics, AtomicRadiiData } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useQueryState } from '../contexts/QueryStateContext'
@@ -970,6 +971,7 @@ export default function FusionQuery() {
                   <Download className="w-4 h-4 mr-2 inline" />
                   {t('reactions.exportCsv')}
                 </button>
+                <ShareQueryButton />
               </div>
             </div>
 
