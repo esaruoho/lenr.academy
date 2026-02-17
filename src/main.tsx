@@ -1,3 +1,17 @@
+// Polyfill Object.hasOwn for older browsers (Safari <15.4, Chrome <93, Firefox <92)
+// Required by react-markdown which uses Object.hasOwn internally (ES2022)
+// See: https://github.com/Episk-pos/lenr.academy/issues/64
+if (!('hasOwn' in Object)) {
+  Object.defineProperty(Object, 'hasOwn', {
+    value(obj: object, prop: PropertyKey): boolean {
+      return Object.prototype.hasOwnProperty.call(obj, prop)
+    },
+    writable: true,
+    configurable: true,
+    enumerable: false,
+  })
+}
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import * as Sentry from '@sentry/react'
