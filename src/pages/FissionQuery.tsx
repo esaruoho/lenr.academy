@@ -15,6 +15,8 @@ import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import { VirtualizedList } from '../components/VirtualizedList'
 import LimitSelector from '../components/LimitSelector'
 import { exportToJSON, exportToPDF } from '../utils/exportUtils'
+import { useQueryHistory } from '../hooks/useQueryHistory'
+import QueryHistoryPanel from '../components/QueryHistoryPanel'
 
 // Default values
 const DEFAULT_ELEMENT: string[] = []
@@ -30,6 +32,7 @@ export default function FissionQuery() {
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const [searchParams, setSearchParams] = useSearchParams()
   const { getFissionState, updateFissionState } = useQueryState()
+  const { addToHistory, getHistoryForType, toggleBookmark, removeFromHistory, clearHistory } = useQueryHistory()
   const [availableElements, setAvailableElements] = useState<Element[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
   const [hasRestoredFromContext, setHasRestoredFromContext] = useState(false)
@@ -510,6 +513,9 @@ export default function FissionQuery() {
       setTotalCount(result.totalCount)
       setShowResults(true)
 
+      // Save to query history
+      addToHistory('fission', queryFilter, result.totalCount)
+
       // Also fetch unlimited results for heatmap if toggle is enabled
       if (useAllResultsForHeatmap && result.totalCount > result.reactions.length) {
         const unlimitedQuery = { ...queryFilter, limit: undefined }
@@ -765,9 +771,23 @@ export default function FissionQuery() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('reactions.fissionTitle')}</h1>
-        <p className="text-gray-600 dark:text-gray-400">{t('reactions.fissionDescription')}</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('reactions.fissionTitle')}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{t('reactions.fissionDescription')}</p>
+        </div>
+        <QueryHistoryPanel
+          history={getHistoryForType('fission')}
+          onLoadQuery={(loadedFilter) => {
+            if (loadedFilter.elements) setSelectedElement(loadedFilter.elements)
+            if (loadedFilter.outputElement1List) setSelectedOutputElement1(loadedFilter.outputElement1List)
+            if (loadedFilter.outputElement2List) setSelectedOutputElement2(loadedFilter.outputElement2List)
+            setFilter(prev => ({ ...prev, ...loadedFilter }))
+          }}
+          onToggleBookmark={toggleBookmark}
+          onRemove={removeFromHistory}
+          onClearHistory={() => clearHistory(true)}
+        />
       </div>
 
       {/* Query Builder */}

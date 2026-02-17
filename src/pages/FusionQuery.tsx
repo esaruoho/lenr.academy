@@ -15,6 +15,8 @@ import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import { VirtualizedList } from '../components/VirtualizedList'
 import LimitSelector from '../components/LimitSelector'
 import { exportToJSON, exportToPDF } from '../utils/exportUtils'
+import { useQueryHistory } from '../hooks/useQueryHistory'
+import QueryHistoryPanel from '../components/QueryHistoryPanel'
 
 // Default values
 const DEFAULT_ELEMENT1: string[] = []
@@ -30,6 +32,7 @@ export default function FusionQuery() {
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const [searchParams, setSearchParams] = useSearchParams()
   const { getFusionState, updateFusionState } = useQueryState()
+  const { addToHistory, getHistoryForType, toggleBookmark, removeFromHistory, clearHistory } = useQueryHistory()
   const [elements, setElements] = useState<Element[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
   const [queryError, setQueryError] = useState<Error | null>(null)
@@ -517,6 +520,9 @@ export default function FusionQuery() {
       setTotalCount(result.totalCount)
       setShowResults(true)
 
+      // Save to query history
+      addToHistory('fusion', queryFilter, result.totalCount)
+
       // Also fetch unlimited results for heatmap if toggle is enabled
       if (useAllResultsForHeatmap && result.totalCount > result.reactions.length) {
         const unlimitedQuery = { ...queryFilter, limit: undefined }
@@ -623,9 +629,23 @@ export default function FusionQuery() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('reactions.fusionTitle')}</h1>
-        <p className="text-gray-600 dark:text-gray-400">{t('reactions.fusionDescription')}</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('reactions.fusionTitle')}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{t('reactions.fusionDescription')}</p>
+        </div>
+        <QueryHistoryPanel
+          history={getHistoryForType('fusion')}
+          onLoadQuery={(loadedFilter) => {
+            if (loadedFilter.element1List) setSelectedElement1(loadedFilter.element1List)
+            if (loadedFilter.element2List) setSelectedElement2(loadedFilter.element2List)
+            if (loadedFilter.outputElementList) setSelectedOutputElement(loadedFilter.outputElementList)
+            setFilter(prev => ({ ...prev, ...loadedFilter }))
+          }}
+          onToggleBookmark={toggleBookmark}
+          onRemove={removeFromHistory}
+          onClearHistory={() => clearHistory(true)}
+        />
       </div>
 
       {/* Query Builder */}

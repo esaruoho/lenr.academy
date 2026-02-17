@@ -205,6 +205,15 @@
     "results": "Results",
     "details": "Details"
   },
+  "queryHistory": {
+    "title": "History",
+    "recent": "Recent",
+    "bookmarked": "Bookmarked",
+    "clearHistory": "Clear",
+    "noHistory": "No query history yet",
+    "loadQuery": "Load query",
+    "querySaved": "Query saved to history"
+  },
   "elements": {
     "element": "Element",
     "isotope": "Isotope",
