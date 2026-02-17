@@ -3,9 +3,7 @@
  * CSV export is already implemented inline in each query page.
  */
 
-import type { QueryFilter } from '../types'
-
-type ReactionType = 'fusion' | 'fission' | 'twotwo'
+import type { QueryFilter, ReactionType } from '../types'
 
 interface ExportMetadata {
   queryType: ReactionType
@@ -114,8 +112,8 @@ function getReactionTitle(queryType: ReactionType): string {
 function formatFilterSummary(filter: QueryFilter, queryType: ReactionType): string[] {
   const lines: string[] = []
 
-  // Fission input element
-  if (filter.elements?.length) {
+  // Fission input element (skip if specific element lists are present to avoid redundancy)
+  if (filter.elements?.length && !filter.element1List?.length && !filter.element2List?.length) {
     lines.push(`Input Element: ${filter.elements.join(', ')}`)
   }
   // Fusion/TwoToTwo input elements
