@@ -19,11 +19,13 @@ export default function ShareQueryButton() {
       textarea.style.opacity = '0'
       document.body.appendChild(textarea)
       textarea.select()
+      let success = false
       try {
-        document.execCommand('copy')
+        success = document.execCommand('copy')
       } finally {
         document.body.removeChild(textarea)
       }
+      if (!success) return
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
