@@ -637,10 +637,10 @@ export default function FusionQuery() {
         <QueryHistoryPanel
           history={getHistoryForType('fusion')}
           onLoadQuery={(loadedFilter) => {
-            if (loadedFilter.element1List) setSelectedElement1(loadedFilter.element1List)
-            if (loadedFilter.element2List) setSelectedElement2(loadedFilter.element2List)
-            if (loadedFilter.outputElementList) setSelectedOutputElement(loadedFilter.outputElementList)
-            setFilter(prev => ({ ...prev, ...loadedFilter }))
+            setSelectedElement1(loadedFilter.element1List || [])
+            setSelectedElement2(loadedFilter.element2List || [])
+            setSelectedOutputElement(loadedFilter.outputElementList || [])
+            setFilter(loadedFilter)
           }}
           onToggleBookmark={toggleBookmark}
           onRemove={removeFromHistory}

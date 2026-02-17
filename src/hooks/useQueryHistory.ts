@@ -87,11 +87,12 @@ export function useQueryHistory() {
         updated = [newQuery, ...prev];
       }
 
-      // Trim to max size, keeping bookmarks
+      // Trim to max size, always keeping all bookmarks
       if (updated.length > MAX_HISTORY_SIZE) {
         const bookmarked = updated.filter(q => q.isBookmarked);
         const nonBookmarked = updated.filter(q => !q.isBookmarked);
-        updated = [...bookmarked, ...nonBookmarked].slice(0, MAX_HISTORY_SIZE);
+        const nonBookmarkedToKeep = nonBookmarked.slice(0, Math.max(0, MAX_HISTORY_SIZE - bookmarked.length));
+        updated = [...bookmarked, ...nonBookmarkedToKeep];
       }
 
       saveHistory(updated);

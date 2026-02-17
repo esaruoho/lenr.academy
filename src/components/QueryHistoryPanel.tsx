@@ -29,6 +29,10 @@ function formatFilter(filter: QueryFilter): string {
   if (filter.element2List?.length) parts.push(`E2: ${filter.element2List.join(', ')}`);
   if (filter.elements?.length) parts.push(`E: ${filter.elements.join(', ')}`);
   if (filter.outputElementList?.length) parts.push(`Out: ${filter.outputElementList.join(', ')}`);
+  if (filter.outputElement1List?.length) parts.push(`Out1: ${filter.outputElement1List.join(', ')}`);
+  if (filter.outputElement2List?.length) parts.push(`Out2: ${filter.outputElement2List.join(', ')}`);
+  if (filter.outputElement3List?.length) parts.push(`Out3: ${filter.outputElement3List.join(', ')}`);
+  if (filter.outputElement4List?.length) parts.push(`Out4: ${filter.outputElement4List.join(', ')}`);
   if (filter.minMeV !== undefined) parts.push(`≥${filter.minMeV} MeV`);
   if (filter.maxMeV !== undefined) parts.push(`≤${filter.maxMeV} MeV`);
   if (filter.limit) parts.push(`limit: ${filter.limit}`);

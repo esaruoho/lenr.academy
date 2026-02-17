@@ -667,11 +667,11 @@ export default function TwoToTwoQuery() {
         <QueryHistoryPanel
           history={getHistoryForType('twotwo')}
           onLoadQuery={(loadedFilter) => {
-            if (loadedFilter.element1List) setSelectedElement1(loadedFilter.element1List)
-            if (loadedFilter.element2List) setSelectedElement2(loadedFilter.element2List)
-            if (loadedFilter.outputElement3List) setSelectedOutputElement3(loadedFilter.outputElement3List)
-            if (loadedFilter.outputElement4List) setSelectedOutputElement4(loadedFilter.outputElement4List)
-            setFilter(prev => ({ ...prev, ...loadedFilter }))
+            setSelectedElement1(loadedFilter.element1List || [])
+            setSelectedElement2(loadedFilter.element2List || [])
+            setSelectedOutputElement3(loadedFilter.outputElement3List || [])
+            setSelectedOutputElement4(loadedFilter.outputElement4List || [])
+            setFilter(loadedFilter)
           }}
           onToggleBookmark={toggleBookmark}
           onRemove={removeFromHistory}

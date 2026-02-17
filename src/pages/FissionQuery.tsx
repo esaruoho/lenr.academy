@@ -779,10 +779,10 @@ export default function FissionQuery() {
         <QueryHistoryPanel
           history={getHistoryForType('fission')}
           onLoadQuery={(loadedFilter) => {
-            if (loadedFilter.elements) setSelectedElement(loadedFilter.elements)
-            if (loadedFilter.outputElement1List) setSelectedOutputElement1(loadedFilter.outputElement1List)
-            if (loadedFilter.outputElement2List) setSelectedOutputElement2(loadedFilter.outputElement2List)
-            setFilter(prev => ({ ...prev, ...loadedFilter }))
+            setSelectedElement(loadedFilter.elements || [])
+            setSelectedOutputElement1(loadedFilter.outputElement1List || [])
+            setSelectedOutputElement2(loadedFilter.outputElement2List || [])
+            setFilter(loadedFilter)
           }}
           onToggleBookmark={toggleBookmark}
           onRemove={removeFromHistory}
