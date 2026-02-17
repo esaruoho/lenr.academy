@@ -8,10 +8,6 @@ export interface ExampleQuery {
   element1List?: string[];
   element2List?: string[];
   outputElementList?: string[];
-  outputElement1List?: string[];
-  outputElement2List?: string[];
-  outputElement3List?: string[];
-  outputElement4List?: string[];
 }
 
 export const EXAMPLE_QUERIES: ExampleQuery[] = [

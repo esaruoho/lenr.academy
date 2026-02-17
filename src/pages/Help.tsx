@@ -29,7 +29,7 @@ export default function Help() {
     const params = new URLSearchParams();
     if (query.element1List?.length) params.set('e1', query.element1List.join(','));
     if (query.element2List?.length) params.set('e2', query.element2List.join(','));
-    if (query.outputElementList?.length) params.set('out', query.outputElementList.join(','));
+    if (query.outputElementList?.length) params.set('e', query.outputElementList.join(','));
     if (query.filter.elements?.length) params.set('e', query.filter.elements.join(','));
     if (query.filter.minMeV !== undefined) params.set('minMeV', String(query.filter.minMeV));
     if (query.filter.maxMeV !== undefined) params.set('maxMeV', String(query.filter.maxMeV));
@@ -118,7 +118,7 @@ export default function Help() {
             {Object.entries(GLOSSARY_CATEGORIES).map(([key, label]) => (
               <CategoryButton
                 key={key}
-                label={label}
+                label={t(label)}
                 active={selectedCategory === key}
                 onClick={() => setSelectedCategory(key)}
               />
@@ -162,6 +162,7 @@ function CategoryButton({ label, active, onClick }: { label: string; active: boo
 }
 
 function GlossaryItem({ entry }: { entry: GlossaryEntry }) {
+  const { t } = useTranslation()
   return (
     <div className="card p-3">
       <div className="flex items-start justify-between gap-2">
@@ -186,7 +187,7 @@ function GlossaryItem({ entry }: { entry: GlossaryEntry }) {
           )}
         </div>
         <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shrink-0">
-          {GLOSSARY_CATEGORIES[entry.category]}
+          {t(GLOSSARY_CATEGORIES[entry.category])}
         </span>
       </div>
     </div>

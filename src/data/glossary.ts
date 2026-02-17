@@ -220,8 +220,8 @@ export const GLOSSARY: GlossaryEntry[] = [
 ];
 
 export const GLOSSARY_CATEGORIES = {
-  nuclear: 'Nuclear Physics',
-  reaction: 'Reaction Types',
-  database: 'Database Fields',
-  measurement: 'Measurements & Units',
+  nuclear: 'help.category.nuclear',
+  reaction: 'help.category.reaction',
+  database: 'help.category.database',
+  measurement: 'help.category.measurement',
 } as const;

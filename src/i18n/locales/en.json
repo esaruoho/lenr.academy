@@ -887,6 +887,12 @@
     "searchGlossary": "Search terms...",
     "allCategories": "All",
     "noResults": "No matching terms found.",
-    "glossaryCount": "{{count}} terms"
+    "glossaryCount": "{{count}} terms",
+    "category": {
+      "nuclear": "Nuclear Physics",
+      "reaction": "Reaction Types",
+      "database": "Database Fields",
+      "measurement": "Measurements & Units"
+    }
   }
 }
