@@ -185,16 +185,21 @@ export async function exportToPDF(
   doc.setTextColor(0, 0, 0)
   doc.text(getReactionTitle(metadata.queryType), 14, 24)
 
-  // Query parameters
+  // Query parameters - use splitTextToSize to prevent overflow
   doc.setFontSize(9)
   doc.setTextColor(100, 100, 100)
   const filterLines = formatFilterSummary(metadata.filter, metadata.queryType)
-  doc.text(`Query Parameters: ${filterLines.join(' | ')}`, 14, 31)
-  doc.text(`${metadata.rowCount} of ${metadata.totalCount} results | Exported ${new Date().toLocaleDateString()}`, 14, 36)
+  const filterText = `Query Parameters: ${filterLines.join(' | ')}`
+  const maxTextWidth = pageWidth - 28 // 14mm margin each side
+  const wrappedFilterLines: string[] = doc.splitTextToSize(filterText, maxTextWidth)
+  doc.text(wrappedFilterLines, 14, 31)
+  const filterEndY = 31 + (wrappedFilterLines.length - 1) * 4
+  doc.text(`${metadata.rowCount} of ${metadata.totalCount} results | Exported ${new Date().toLocaleDateString()}`, 14, filterEndY + 5)
 
   // Divider line
+  const dividerY = filterEndY + 8
   doc.setDrawColor(200, 200, 200)
-  doc.line(14, 38, pageWidth - 14, 38)
+  doc.line(14, dividerY, pageWidth - 14, dividerY)
 
   // Results table
   const { headers, mapRow } = getColumnsForType(metadata.queryType)
@@ -203,7 +208,7 @@ export async function exportToPDF(
   autoTable(doc, {
     head: [headers],
     body,
-    startY: 41,
+    startY: dividerY + 3,
     margin: { left: 14, right: 14 },
     styles: {
       fontSize: 7,

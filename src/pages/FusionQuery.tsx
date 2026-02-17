@@ -980,7 +980,7 @@ export default function FusionQuery() {
                   {t('reactions.exportJson')}
                 </button>
                 <button
-                  onClick={() => exportToPDF(results, { queryType: 'fusion', filter: queryFilter, executionTime, rowCount: results.length, totalCount })}
+                  onClick={() => exportToPDF(results, { queryType: 'fusion', filter: queryFilter, executionTime, rowCount: results.length, totalCount }).catch((err) => console.error('PDF export failed:', err))}
                   className="btn btn-secondary px-4 py-2 text-sm"
                   disabled={results.length === 0}
                 >
