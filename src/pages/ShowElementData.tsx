@@ -647,9 +647,9 @@ export default function ShowElementData() {
 
   // Export handlers
   const handleElementsExport = () => {
-    const headers = elementsColumns.map(col => col.label)
+    const headers = elementsColumnVis.visibleColumns.map(col => col.label)
     const rows = filteredElements.map(row =>
-      elementsColumns.map(col => {
+      elementsColumnVis.visibleColumns.map(col => {
         const value = row[col.key as keyof Element]
         const str = value == null ? '' : String(value)
         return str.includes(',') || str.includes('"') ? `"${str.replace(/"/g, '""')}"` : str
@@ -666,9 +666,9 @@ export default function ShowElementData() {
   }
 
   const handleNuclidesExport = () => {
-    const headers = nuclidesColumns.map(col => col.label)
+    const headers = nuclidesColumnVis.visibleColumns.map(col => col.label)
     const rows = filteredNuclides.map(row =>
-      nuclidesColumns.map(col => {
+      nuclidesColumnVis.visibleColumns.map(col => {
         const value = row[col.key as keyof Nuclide]
         const str = value == null ? '' : String(value)
         return str.includes(',') || str.includes('"') ? `"${str.replace(/"/g, '""')}"` : str
@@ -685,9 +685,9 @@ export default function ShowElementData() {
   }
 
   const handleDecaysExport = () => {
-    const headers = decaysColumns.map(col => col.label)
+    const headers = decaysColumnVis.visibleColumns.map(col => col.label)
     const rows = filteredDecays.map(row =>
-      decaysColumns.map(col => {
+      decaysColumnVis.visibleColumns.map(col => {
         const value = row[col.key as keyof RadioactiveDecay]
         const str = value == null ? '' : String(value)
         return str.includes(',') || str.includes('"') ? `"${str.replace(/"/g, '""')}"` : str
