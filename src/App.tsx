@@ -15,6 +15,7 @@ import TablesInDetail from './pages/TablesInDetail'
 import AllTables from './pages/AllTables'
 import CascadesAll from './pages/CascadesAll'
 import PrivacyPreferences from './pages/PrivacyPreferences'
+import Help from './pages/Help'
 import SentryTest from './pages/SentryTest'
 import ErrorDisplay from './components/ErrorDisplay'
 import PWAUpdatePrompt from './components/PWAUpdatePrompt'
@@ -65,6 +66,7 @@ function App() {
                 <Route path="/tables" element={<TablesInDetail />} />
                 <Route path="/all-tables" element={<AllTables />} />
                 <Route path="/cascades" element={<CascadesAll />} />
+                <Route path="/help" element={<Help />} />
                 <Route path="/privacy" element={<PrivacyPreferences />} />
                 {/* Sentry test page - only available in development or with ?debug=true */}
                 {(import.meta.env.MODE === 'development' || new URLSearchParams(window.location.search).get('debug') === 'true') && (
