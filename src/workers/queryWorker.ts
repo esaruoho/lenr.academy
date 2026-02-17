@@ -170,7 +170,7 @@ function buildWhereClause(filter: QueryFilter, tableType: 'fusion' | 'fission' |
 function buildOrderClause(filter: QueryFilter): string {
   const validColumns = ['MeV', 'E', 'E1', 'E2', 'E3', 'E4', 'Z', 'A', 'Z1', 'A1', 'Z2', 'A2', 'Z3', 'A3', 'Z4', 'A4', 'neutrino'];
   const orderBy = validColumns.includes(filter.orderBy || 'MeV') ? (filter.orderBy || 'MeV') : 'MeV';
-  const direction = filter.orderDirection === 'asc' ? 'ASC' : 'DESC';
+  const direction = (filter.orderDirection === 'asc' || filter.orderDirection === 'desc') ? filter.orderDirection.toUpperCase() : 'DESC';
   return `ORDER BY ${orderBy} ${direction}`;
 }
 
