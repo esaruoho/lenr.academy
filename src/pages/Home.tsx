@@ -6,7 +6,7 @@ export default function Home() {
   const { t } = useTranslation()
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto select-none">
       <div className="text-center mb-12">
         <div className="flex justify-center mb-4">
           <Atom className="w-16 h-16 text-primary-600" />
