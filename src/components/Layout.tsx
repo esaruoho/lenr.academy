@@ -242,7 +242,7 @@ export default function Layout({ children }: LayoutProps) {
           </nav>
           <div className="p-4 border-t dark:border-gray-700">
             <Link
-              to="/privacy"
+              to={location.pathname === '/privacy' ? '/' : '/privacy'}
               onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors mb-3"
             >
@@ -339,7 +339,7 @@ export default function Layout({ children }: LayoutProps) {
             </button>
             <LanguageSwitcher className={`${desktopSidebarCollapsed ? '' : 'w-full'} mb-2`} compact={desktopSidebarCollapsed} position="above" />
             <Link
-              to="/privacy"
+              to={location.pathname === '/privacy' ? '/' : '/privacy'}
               className={`flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-3 overflow-hidden ${desktopSidebarCollapsed ? '' : 'w-full'}`}
               title={desktopSidebarCollapsed ? t('navigation.privacySettings') : undefined}
             >
