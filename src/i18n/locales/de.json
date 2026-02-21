@@ -434,6 +434,21 @@
     "radioactive": "Radioaktiv",
     "querying": "Abfrage läuft..."
   },
+  "histogram": {
+    "title": "Energy Distribution",
+    "description": "Histogram of reaction energy (MeV) values with statistical summary",
+    "xAxisLabel": "Energy (MeV)",
+    "yAxisLabel": "Count",
+    "reactions": "Reactions",
+    "mean": "Mean",
+    "median": "Median",
+    "min": "Min",
+    "max": "Max",
+    "stddev": "Std Dev",
+    "count": "Total",
+    "collapse": "Collapse histogram",
+    "expand": "Expand histogram"
+  },
   "cascades": {
     "title": "Kaskaden",
     "description": "Erkunden Sie Reaktionskaskaden und Pfade",

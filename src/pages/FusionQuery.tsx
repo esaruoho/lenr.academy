@@ -17,6 +17,7 @@ import LimitSelector from '../components/LimitSelector'
 import { exportToJSON, exportToPDF } from '../utils/exportUtils'
 import { useQueryHistory } from '../hooks/useQueryHistory'
 import QueryHistoryPanel from '../components/QueryHistoryPanel'
+import EnergyHistogram from '../components/EnergyHistogram'
 
 // Default values
 const DEFAULT_ELEMENT1: string[] = []
@@ -960,6 +961,9 @@ export default function FusionQuery() {
               </div>
             </div>
           </div>
+
+          {/* Energy Distribution Histogram */}
+          <EnergyHistogram reactions={filteredResults} />
 
           {/* Results Table */}
           <div className="card p-6 pb-0 sm:pb-6">

@@ -436,6 +436,21 @@
     "radioactive": "放射性",
     "querying": "查询中..."
   },
+  "histogram": {
+    "title": "Energy Distribution",
+    "description": "Histogram of reaction energy (MeV) values with statistical summary",
+    "xAxisLabel": "Energy (MeV)",
+    "yAxisLabel": "Count",
+    "reactions": "Reactions",
+    "mean": "Mean",
+    "median": "Median",
+    "min": "Min",
+    "max": "Max",
+    "stddev": "Std Dev",
+    "count": "Total",
+    "collapse": "Collapse histogram",
+    "expand": "Expand histogram"
+  },
   "cascades": {
     "title": "级联",
     "description": "探索反应级联和途径",

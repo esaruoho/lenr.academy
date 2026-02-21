@@ -17,6 +17,7 @@ import LimitSelector from '../components/LimitSelector'
 import { exportToJSON, exportToPDF } from '../utils/exportUtils'
 import { useQueryHistory } from '../hooks/useQueryHistory'
 import QueryHistoryPanel from '../components/QueryHistoryPanel'
+import EnergyHistogram from '../components/EnergyHistogram'
 
 // Default values
 const DEFAULT_ELEMENT: string[] = []
@@ -1124,6 +1125,9 @@ export default function FissionQuery() {
               </div>
             </div>
           </div>
+
+          {/* Energy Distribution Histogram */}
+          <EnergyHistogram reactions={filteredResults} />
 
           <div className="card p-6 pb-0 sm:pb-6">
             <div className="flex justify-between items-center mb-4">
