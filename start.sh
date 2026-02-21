@@ -3,6 +3,10 @@ set -e
 
 # LENR Academy - Development Server Startup
 # Usage: ./start.sh
+#
+# Windows users: run via WSL or Git Bash (https://gitforwindows.org)
+
+cd "$(dirname "$0")"
 
 # Colors
 RED='\033[0;31m'
