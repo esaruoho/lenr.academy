@@ -34,6 +34,7 @@
   "navigation": {
     "home": "Главная",
     "showElementData": "Данные об элементах",
+    "segreChart": "Segre Chart",
     "fusionReactions": "Реакции синтеза",
     "fissionReactions": "Реакции деления",
     "twoToTwoReactions": "Реакции два-в-два",
@@ -448,6 +449,20 @@
     "count": "Всего",
     "collapse": "Свернуть гистограмму",
     "expand": "Развернуть гистограмму"
+  },
+  "segreChart": {
+    "title": "Segre Chart (N-Z Diagram)",
+    "description": "Interactive chart of nuclides plotted by proton number (Z) vs neutron number (N), color-coded by stability",
+    "stable": "Stable (>10\u2079 years)",
+    "longHalfLife": "Long half-life (>100 years)",
+    "shortHalfLife": "Short half-life (<100 years)",
+    "unknown": "Unknown half-life",
+    "magicNumbers": "Magic Numbers",
+    "valleyOfStability": "Valley of Stability",
+    "legend": "Legend",
+    "nuclideCount": "{{count}} nuclides displayed",
+    "clickToView": "Click any nuclide to view details",
+    "zoomControls": "Scroll to zoom, drag to pan, double-click to zoom in"
   },
   "cascades": {
     "title": "Каскады",

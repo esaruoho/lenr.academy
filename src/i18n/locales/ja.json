@@ -34,6 +34,7 @@
   "navigation": {
     "home": "ホーム",
     "showElementData": "元素データを表示",
+    "segreChart": "Segre Chart",
     "fusionReactions": "核融合反応",
     "fissionReactions": "核分裂反応",
     "twoToTwoReactions": "2対2反応",
@@ -450,6 +451,20 @@
     "count": "合計",
     "collapse": "ヒストグラムを折りたたむ",
     "expand": "ヒストグラムを展開"
+  },
+  "segreChart": {
+    "title": "Segre Chart (N-Z Diagram)",
+    "description": "Interactive chart of nuclides plotted by proton number (Z) vs neutron number (N), color-coded by stability",
+    "stable": "Stable (>10\u2079 years)",
+    "longHalfLife": "Long half-life (>100 years)",
+    "shortHalfLife": "Short half-life (<100 years)",
+    "unknown": "Unknown half-life",
+    "magicNumbers": "Magic Numbers",
+    "valleyOfStability": "Valley of Stability",
+    "legend": "Legend",
+    "nuclideCount": "{{count}} nuclides displayed",
+    "clickToView": "Click any nuclide to view details",
+    "zoomControls": "Scroll to zoom, drag to pan, double-click to zoom in"
   },
   "cascades": {
     "title": "カスケード",
