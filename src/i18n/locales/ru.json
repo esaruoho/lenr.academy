@@ -462,7 +462,9 @@
     "legend": "Legend",
     "nuclideCount": "{{count}} nuclides displayed",
     "clickToView": "Click any nuclide to view details",
-    "zoomControls": "Scroll to zoom, drag to pan, double-click to zoom in"
+    "zoomControls": "Scroll to zoom, drag to pan, double-click to zoom in",
+    "protonNumberAxis": "Proton Number (Z)",
+    "neutronNumberAxis": "Neutron Number (N)"
   },
   "cascades": {
     "title": "Каскады",

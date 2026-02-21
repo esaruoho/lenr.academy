@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '../contexts/ThemeContext'
 
 type StabilityCategory = 'stable' | 'long' | 'short' | 'unknown'
@@ -39,6 +40,7 @@ function valleyOfStabilityN(Z: number): number {
 
 export default function SegreChartDiagram({ nuclides }: SegreChartDiagramProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [hovered, setHovered] = useState<ChartNuclide | null>(null)
@@ -243,7 +245,7 @@ export default function SegreChartDiagram({ nuclides }: SegreChartDiagramProps) 
                   fontSize={11}
                   fontWeight="500"
                 >
-                  Proton Number (Z)
+                  {t('segreChart.protonNumberAxis')}
                 </text>
                 <text
                   x={12}
@@ -254,7 +256,7 @@ export default function SegreChartDiagram({ nuclides }: SegreChartDiagramProps) 
                   fontWeight="500"
                   transform={`rotate(-90, 12, ${svgHeight / 2 - AXIS_MARGIN / 2})`}
                 >
-                  Neutron Number (N)
+                  {t('segreChart.neutronNumberAxis')}
                 </text>
               </svg>
             </TransformComponent>
