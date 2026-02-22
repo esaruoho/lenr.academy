@@ -138,6 +138,17 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
   const handleRefresh = () => {
     setIsUpdating(true)
 
+    // Clear the fallback timer when the page is about to unload.
+    // This handles the case where updateServiceWorker() successfully
+    // triggers a reload — the timer is no longer needed.
+    const clearFallback = () => {
+      if (fallbackTimerRef.current) {
+        clearTimeout(fallbackTimerRef.current)
+        fallbackTimerRef.current = null
+      }
+    }
+    window.addEventListener('beforeunload', clearFallback, { once: true })
+
     // Coordinate with the service worker: tell the waiting SW to
     // skip waiting, activate, and reload the page once ready.
     // This prevents the double-reload caused by calling reload()
@@ -147,6 +158,7 @@ export default function AppUpdateBanner({ className = '', onVisibilityChange, on
     // Fallback: if no service worker is waiting or update doesn't
     // trigger a reload within 3 seconds, reload manually.
     fallbackTimerRef.current = setTimeout(() => {
+      window.removeEventListener('beforeunload', clearFallback)
       window.location.reload()
     }, 3000)
   }
