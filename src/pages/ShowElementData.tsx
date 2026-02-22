@@ -2032,7 +2032,7 @@ export default function ShowElementData() {
               expandedRows={elementsExpandedRows}
               onExpandedRowsChange={setElementsExpandedRows}
               title={
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
                   <span>Elements Table</span>
                   <ColumnToggle {...elementsColumnVis} />
                 </div>
@@ -2182,7 +2182,7 @@ export default function ShowElementData() {
               expandedRows={nuclidesExpandedRows}
               onExpandedRowsChange={setNuclidesExpandedRows}
               title={
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
                   <span>Nuclides Table</span>
                   <ColumnToggle {...nuclidesColumnVis} />
                 </div>
@@ -2374,7 +2374,7 @@ export default function ShowElementData() {
               expandedRows={decaysExpandedRows}
               onExpandedRowsChange={handleDecaysExpandedRowsChange}
               title={
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
                   <span>Radioactive Decays Table</span>
                   <ColumnToggle {...decaysColumnVis} />
                 </div>
