@@ -54,6 +54,14 @@ describe('queryService', () => {
       expect(sql).toContain("neutrino = 'left'");
     });
 
+    it('should include neutrino filter for right', () => {
+      const filter: QueryFilter = {
+        neutrinoType: 'right',
+      };
+      const sql = getFusionSqlPreview(filter);
+      expect(sql).toContain("neutrino = 'right'");
+    });
+
     it('should include neutrino filter for left-right', () => {
       const filter: QueryFilter = {
         neutrinoType: 'left-right',
@@ -138,6 +146,26 @@ describe('queryService', () => {
       };
       const sql = getFusionSqlPreview(filter);
       expect(sql).toContain("aBorF1 = 'f'");
+    });
+
+    it('should include both boson/fermion nuclear and atomic filters together', () => {
+      const filter: QueryFilter = {
+        bosonFermionFilter: {
+          nuclear: 'b',
+          atomic: 'f',
+        },
+      };
+      const sql = getFusionSqlPreview(filter);
+      expect(sql).toContain("nBorF1 = 'b'");
+      expect(sql).toContain("aBorF1 = 'f'");
+    });
+
+    it('should treat limit of 0 as default (100)', () => {
+      const filter: QueryFilter = {
+        limit: 0,
+      };
+      const sql = getFusionSqlPreview(filter);
+      expect(sql).toContain('LIMIT 100');
     });
   });
 });
