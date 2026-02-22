@@ -36,6 +36,7 @@ export default function ShareQueryButton() {
       onClick={copyToClipboard}
       className="btn btn-secondary px-4 py-2 text-sm"
       title={t('reactions.copyShareLinkTitle')}
+      aria-live="polite"
     >
       {copied ? (
         <>
