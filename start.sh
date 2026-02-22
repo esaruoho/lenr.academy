@@ -42,8 +42,8 @@ if [ ! -d "node_modules" ]; then
   warn "node_modules not found — running npm install (this also downloads the ~161MB database)..."
   npm install
 elif [ ! -f "public/parkhomov.db" ]; then
-  warn "Database not found — running npm install to trigger download..."
-  npm install
+  warn "Database not found — downloading..."
+  npm run db:download
 else
   ok "Dependencies and database ready"
 fi
