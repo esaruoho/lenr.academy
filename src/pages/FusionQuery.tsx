@@ -604,6 +604,7 @@ export default function FusionQuery() {
     a.href = url
     a.download = `fusion_reactions_${Date.now()}.csv`
     a.click()
+    window.URL.revokeObjectURL(url)
   }
 
   if (dbLoading) {

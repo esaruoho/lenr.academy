@@ -579,6 +579,7 @@ export default function TwoToTwoQuery() {
     a.href = url
     a.download = `twotwo_reactions_${Date.now()}.csv`
     a.click()
+    window.URL.revokeObjectURL(url)
   }
 
   // Table resize handlers (supporting both mouse and touch)

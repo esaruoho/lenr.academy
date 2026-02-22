@@ -542,6 +542,7 @@ export default function FissionQuery() {
     a.href = url
     a.download = `fission_reactions_${new Date().toISOString().split('T')[0]}.csv`
     a.click()
+    window.URL.revokeObjectURL(url)
   }
 
   // Table resize handlers (supporting both mouse and touch)
