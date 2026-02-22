@@ -52,7 +52,7 @@ export const EXAMPLE_QUERIES: ExampleQuery[] = [
   },
   {
     name: 'Iron Fission',
-    description: 'Fission products of iron isotopes. Iron-56 has the highest binding energy per nucleon, making fission endothermic.',
+    description: 'Exothermic fission pathways from iron isotopes. Iron-56 has near-peak binding energy per nucleon, so fewer exothermic fission pathways exist compared to heavier elements.',
     queryType: 'fission',
     filter: { elements: ['Fe'] },
   },
