@@ -8,17 +8,21 @@ set -e
 
 cd "$(dirname "$0")"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;36m'
-NC='\033[0m'
+# Colors (disabled when stdout is not a terminal)
+if [ -t 1 ]; then
+  RED='\033[0;31m'
+  GREEN='\033[0;32m'
+  YELLOW='\033[1;33m'
+  BLUE='\033[0;36m'
+  NC='\033[0m'
+else
+  RED='' GREEN='' YELLOW='' BLUE='' NC=''
+fi
 
-log()   { echo -e "${BLUE}$1${NC}"; }
-ok()    { echo -e "${GREEN}$1${NC}"; }
-warn()  { echo -e "${YELLOW}$1${NC}"; }
-fail()  { echo -e "${RED}$1${NC}"; exit 1; }
+log()   { printf '%b%s%b\n' "$BLUE" "$1" "$NC"; }
+ok()    { printf '%b%s%b\n' "$GREEN" "$1" "$NC"; }
+warn()  { printf '%b%s%b\n' "$YELLOW" "$1" "$NC"; }
+fail()  { printf '%b%s%b\n' "$RED" "$1" "$NC" >&2; exit 1; }
 
 # Check Node.js
 if ! command -v node &> /dev/null; then
