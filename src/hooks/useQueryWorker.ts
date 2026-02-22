@@ -80,6 +80,13 @@ export function useQueryWorker(): UseQueryWorkerReturn {
     return () => {
       workerRef.current?.terminate();
       workerRef.current = null;
+
+      // Reject any pending promise so callers don't hang forever
+      if (rejectRef.current) {
+        rejectRef.current(new Error('Worker terminated on unmount'));
+        resolveRef.current = null;
+        rejectRef.current = null;
+      }
     };
   }, []);
 

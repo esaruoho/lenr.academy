@@ -41,15 +41,17 @@ export type QueryWorkerResponse = QueryWorkerCompleteMessage | QueryWorkerErrorM
 let db: SqlJsDatabase | null = null;
 
 /**
- * Initialize the database from an ArrayBuffer
+ * Initialize the database from an ArrayBuffer.
+ * Caches the db instance so subsequent queries skip re-initialization.
  */
 async function initDatabase(buffer: ArrayBuffer): Promise<void> {
+  // Skip if already initialized (buffer is transferred so we cannot compare,
+  // but re-init is unnecessary when the worker already holds a valid db)
+  if (db) return;
+
   const SQL = await initSqlJs({
     locateFile: (file: string) => `/${file}`,
   });
-  if (db) {
-    db.close();
-  }
   db = new SQL.Database(new Uint8Array(buffer));
 }
 
