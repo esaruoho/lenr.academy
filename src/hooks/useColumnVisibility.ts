@@ -22,7 +22,10 @@ export function useColumnVisibility<T>(
       if (stored) {
         const parsed = JSON.parse(stored)
         if (Array.isArray(parsed)) {
-          return new Set(parsed)
+          // Filter out stale keys that no longer match any column definition
+          const validKeys = new Set(columns.map(c => c.key))
+          const filtered = parsed.filter((k: string) => validKeys.has(k))
+          return new Set(filtered)
         }
       }
     } catch {

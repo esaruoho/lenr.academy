@@ -1410,8 +1410,8 @@ export default function ShowElementData() {
     }
   ]
 
-  // Elements table columns
-  const elementsColumns: TableColumn<Element>[] = [
+  // Elements table columns (memoized to avoid unnecessary re-renders in useColumnVisibility)
+  const elementsColumns: TableColumn<Element>[] = useMemo(() => [
     { key: 'Z', label: 'Z', sortable: true },
     {
       key: 'E',
@@ -1450,10 +1450,10 @@ export default function ShowElementData() {
       sortable: true,
       render: (val) => val != null ? Number(val).toFixed(3) : '-'
     }
-  ]
+  ], [])
 
-  // Nuclides table columns
-  const nuclidesColumns: TableColumn<Nuclide>[] = [
+  // Nuclides table columns (memoized; depends on radioactiveNuclides for stability render)
+  const nuclidesColumns: TableColumn<Nuclide>[] = useMemo(() => [
     {
       key: 'E',
       label: 'Element',
@@ -1540,10 +1540,10 @@ export default function ShowElementData() {
         )
       }
     }
-  ]
+  ], [radioactiveNuclides])
 
-  // Decays table columns
-  const decaysColumns: TableColumn<RadioactiveDecay>[] = [
+  // Decays table columns (memoized to avoid unnecessary re-renders in useColumnVisibility)
+  const decaysColumns: TableColumn<RadioactiveDecay>[] = useMemo(() => [
     {
       key: 'E',
       label: 'Element',
@@ -1602,7 +1602,7 @@ export default function ShowElementData() {
       sortable: true,
       render: (val) => val != null ? Number(val).toFixed(2) : '-'
     }
-  ]
+  ], [])
 
   // Column visibility hooks for each table
   const elementsColumnVis = useColumnVisibility(elementsColumns, 'elements')
