@@ -437,19 +437,19 @@
     "querying": "查询中..."
   },
   "histogram": {
-    "title": "Energy Distribution",
-    "description": "Histogram of reaction energy (MeV) values with statistical summary",
-    "xAxisLabel": "Energy (MeV)",
-    "yAxisLabel": "Count",
-    "reactions": "Reactions",
-    "mean": "Mean",
-    "median": "Median",
-    "min": "Min",
-    "max": "Max",
-    "stddev": "Std Dev",
-    "count": "Total",
-    "collapse": "Collapse histogram",
-    "expand": "Expand histogram"
+    "title": "能量分布",
+    "description": "反应能量（MeV）值的直方图及统计摘要",
+    "xAxisLabel": "能量（MeV）",
+    "yAxisLabel": "数量",
+    "reactions": "反应数",
+    "mean": "平均值",
+    "median": "中位数",
+    "min": "最小值",
+    "max": "最大值",
+    "stddev": "标准差",
+    "count": "总计",
+    "collapse": "折叠直方图",
+    "expand": "展开直方图"
   },
   "cascades": {
     "title": "级联",

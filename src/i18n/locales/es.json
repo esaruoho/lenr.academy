@@ -435,19 +435,19 @@
     "querying": "Consultando..."
   },
   "histogram": {
-    "title": "Energy Distribution",
-    "description": "Histogram of reaction energy (MeV) values with statistical summary",
-    "xAxisLabel": "Energy (MeV)",
-    "yAxisLabel": "Count",
-    "reactions": "Reactions",
-    "mean": "Mean",
-    "median": "Median",
+    "title": "Distribucion de energia",
+    "description": "Histograma de valores de energia de reaccion (MeV) con resumen estadistico",
+    "xAxisLabel": "Energia (MeV)",
+    "yAxisLabel": "Cantidad",
+    "reactions": "Reacciones",
+    "mean": "Media",
+    "median": "Mediana",
     "min": "Min",
     "max": "Max",
-    "stddev": "Std Dev",
+    "stddev": "Desv. Est.",
     "count": "Total",
-    "collapse": "Collapse histogram",
-    "expand": "Expand histogram"
+    "collapse": "Contraer histograma",
+    "expand": "Expandir histograma"
   },
   "cascades": {
     "title": "Cascadas",

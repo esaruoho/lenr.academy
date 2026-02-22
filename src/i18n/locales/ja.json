@@ -437,19 +437,19 @@
     "querying": "クエリ実行中..."
   },
   "histogram": {
-    "title": "Energy Distribution",
-    "description": "Histogram of reaction energy (MeV) values with statistical summary",
-    "xAxisLabel": "Energy (MeV)",
-    "yAxisLabel": "Count",
-    "reactions": "Reactions",
-    "mean": "Mean",
-    "median": "Median",
-    "min": "Min",
-    "max": "Max",
-    "stddev": "Std Dev",
-    "count": "Total",
-    "collapse": "Collapse histogram",
-    "expand": "Expand histogram"
+    "title": "エネルギー分布",
+    "description": "反応エネルギー（MeV）値のヒストグラムと統計サマリー",
+    "xAxisLabel": "エネルギー（MeV）",
+    "yAxisLabel": "件数",
+    "reactions": "反応数",
+    "mean": "平均",
+    "median": "中央値",
+    "min": "最小",
+    "max": "最大",
+    "stddev": "標準偏差",
+    "count": "合計",
+    "collapse": "ヒストグラムを折りたたむ",
+    "expand": "ヒストグラムを展開"
   },
   "cascades": {
     "title": "カスケード",
