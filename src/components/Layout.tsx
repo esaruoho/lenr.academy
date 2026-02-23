@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useCallback, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Atom, Moon, Sun, ChevronLeft, ChevronRight, Home as HomeIcon, GitMerge, Scissors, ArrowLeftRight, FlaskConical, Table, TableProperties, Shield, Workflow } from 'lucide-react'
+import { Menu, X, Atom, Moon, Sun, ChevronLeft, ChevronRight, Home as HomeIcon, GitMerge, Scissors, ArrowLeftRight, FlaskConical, Table, TableProperties, Shield, Workflow, HelpCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../contexts/ThemeContext'
 import { useLayout } from '../contexts/LayoutContext'
@@ -33,6 +33,7 @@ const navigationItems: NavigationItem[] = [
   { nameKey: 'navigation.cascades', path: '/cascades', icon: Workflow },
   { nameKey: 'navigation.tablesInDetail', path: '/tables', icon: Table },
   { nameKey: 'navigation.allTables', path: '/all-tables', icon: TableProperties },
+  { nameKey: 'navigation.help', path: '/help', icon: HelpCircle },
 ]
 
 export default function Layout({ children }: LayoutProps) {
@@ -242,7 +243,7 @@ export default function Layout({ children }: LayoutProps) {
           </nav>
           <div className="p-4 border-t dark:border-gray-700">
             <Link
-              to="/privacy"
+              to={location.pathname === '/privacy' ? '/' : '/privacy'}
               onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors mb-3"
             >
@@ -339,7 +340,7 @@ export default function Layout({ children }: LayoutProps) {
             </button>
             <LanguageSwitcher className={`${desktopSidebarCollapsed ? '' : 'w-full'} mb-2`} compact={desktopSidebarCollapsed} position="above" />
             <Link
-              to="/privacy"
+              to={location.pathname === '/privacy' ? '/' : '/privacy'}
               className={`flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mb-3 overflow-hidden ${desktopSidebarCollapsed ? '' : 'w-full'}`}
               title={desktopSidebarCollapsed ? t('navigation.privacySettings') : undefined}
             >

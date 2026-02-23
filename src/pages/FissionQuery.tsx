@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, FileJson, FileText, Info, Loader, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
+import ShareQueryButton from '../components/ShareQueryButton'
 import { useSearchParams, Link } from 'react-router-dom'
 import type { FissionReaction, QueryFilter, Element, Nuclide, HeatmapMode, HeatmapMetrics, AtomicRadiiData } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
@@ -1135,6 +1136,7 @@ export default function FissionQuery() {
                   <Download className="w-4 h-4 mr-2 inline" />
                   {t('reactions.exportCsv')}
                 </button>
+                <ShareQueryButton />
                 <button
                   onClick={() => exportToJSON(results, { queryType: 'fission', filter: queryFilter, executionTime: queryTime, rowCount: results.length, totalCount })}
                   className="btn btn-secondary px-4 py-2 text-sm"
