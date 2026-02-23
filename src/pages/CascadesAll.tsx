@@ -9,13 +9,14 @@ import CascadeTabs from '../components/CascadeTabs'
 import PeriodicTableSelector from '../components/PeriodicTableSelector'
 import ProportionInput from '../components/ProportionInput'
 import MaterialsCatalog from '../components/MaterialsCatalog'
+import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import { getAllElements } from '../services/queryService'
 import { createEqualProportions } from '../services/proportionService'
 import type { CascadeResults, Element, WeightedNuclide, ProportionFormat } from '../types'
 
 export default function CascadesAll() {
   const { t } = useTranslation()
-  const { db } = useDatabase()
+  const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const { getCascadeState, updateCascadeState } = useQueryState()
   const { runCascade, cancelCascade, progress, isRunning, error: workerError } = useCascadeWorker()
   const [hasRestoredFromContext, setHasRestoredFromContext] = useState(false)
@@ -292,6 +293,14 @@ export default function CascadesAll() {
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
+  }
+
+  if (dbLoading) {
+    return <DatabaseLoadingCard downloadProgress={downloadProgress} />
+  }
+
+  if (dbError) {
+    throw dbError
   }
 
   return (
