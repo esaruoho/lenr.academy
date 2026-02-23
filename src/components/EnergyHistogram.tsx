@@ -147,6 +147,9 @@ export default function EnergyHistogram({ reactions }: EnergyHistogramProps) {
                   borderRadius: '0.375rem',
                   color: isDark ? '#f3f4f6' : '#1f2937',
                 }}
+                labelStyle={{ color: isDark ? '#f3f4f6' : '#1f2937' }}
+                itemStyle={{ color: isDark ? '#d1d5db' : '#374151' }}
+                cursor={{ fill: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)' }}
                 formatter={(value: number) => [value, t('histogram.reactions')]}
                 labelFormatter={(label: string) => `${label} MeV`}
               />
