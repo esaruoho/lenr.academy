@@ -42,6 +42,7 @@
     "tablesInDetail": "Tables in Detail",
     "allTables": "All Tables",
     "privacySettings": "Privacy Settings",
+    "help": "Help & Glossary",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
   },
@@ -882,5 +883,23 @@
     "offlineMessage": "Some features may be unavailable",
     "reconnecting": "Reconnecting...",
     "backOnline": "You are back online"
+  },
+  "help": {
+    "title": "Help & Glossary",
+    "subtitle": "Learn about nuclear physics terms, database fields, and try example queries to explore LENR transmutation data.",
+    "exampleQueries": "Example Queries",
+    "exampleQueriesDescription": "Click any example to load it into the query page and run it.",
+    "tryQuery": "Try this query",
+    "glossary": "Glossary",
+    "searchGlossary": "Search terms...",
+    "allCategories": "All",
+    "noResults": "No matching terms found.",
+    "glossaryCount": "{{count}} terms",
+    "category": {
+      "nuclear": "Nuclear Physics",
+      "reaction": "Reaction Types",
+      "database": "Database Fields",
+      "measurement": "Measurements & Units"
+    }
   }
 }
