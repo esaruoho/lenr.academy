@@ -212,7 +212,11 @@
     "clearHistory": "Clear",
     "noHistory": "No query history yet",
     "loadQuery": "Load query",
-    "querySaved": "Query saved to history"
+    "querySaved": "Query saved to history",
+    "filterAll": "All",
+    "filterFusion": "Fusion",
+    "filterFission": "Fission",
+    "filterTwoToTwo": "2\u21922"
   },
   "elements": {
     "element": "Element",

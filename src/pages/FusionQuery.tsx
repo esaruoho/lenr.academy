@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, FileJson, FileText, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'
 import ShareQueryButton from '../components/ShareQueryButton'
 import type { FusionReaction, QueryFilter, Nuclide, Element, HeatmapMode, HeatmapMetrics, AtomicRadiiData } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
@@ -31,8 +31,9 @@ export default function FusionQuery() {
   const { t } = useTranslation()
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const { getFusionState, updateFusionState } = useQueryState()
-  const { addToHistory, getHistoryForType, toggleBookmark, removeFromHistory, clearHistory } = useQueryHistory()
+  const { history, addToHistory, toggleBookmark, removeFromHistory, clearHistory } = useQueryHistory()
   const [elements, setElements] = useState<Element[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
   const [queryError, setQueryError] = useState<Error | null>(null)
@@ -635,8 +636,14 @@ export default function FusionQuery() {
           <p className="text-gray-600 dark:text-gray-400">{t('reactions.fusionDescription')}</p>
         </div>
         <QueryHistoryPanel
-          history={getHistoryForType('fusion')}
-          onLoadQuery={(loadedFilter) => {
+          history={history}
+          currentQueryType="fusion"
+          onLoadQuery={(loadedFilter, queryType) => {
+            if (queryType !== 'fusion') {
+              const routeMap = { fission: '/fission', twotwo: '/twotwo', fusion: '/fusion' }
+              navigate(routeMap[queryType])
+              return
+            }
             setSelectedElement1(loadedFilter.element1List || [])
             setSelectedElement2(loadedFilter.element2List || [])
             setSelectedOutputElement(loadedFilter.outputElementList || [])

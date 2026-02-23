@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, FileJson, FileText, Info, Loader, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
 import ShareQueryButton from '../components/ShareQueryButton'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'
 import type { FissionReaction, QueryFilter, Element, Nuclide, HeatmapMode, HeatmapMetrics, AtomicRadiiData } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useQueryState } from '../contexts/QueryStateContext'
@@ -31,8 +31,9 @@ export default function FissionQuery() {
   const { t } = useTranslation()
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const { getFissionState, updateFissionState } = useQueryState()
-  const { addToHistory, getHistoryForType, toggleBookmark, removeFromHistory, clearHistory } = useQueryHistory()
+  const { history, addToHistory, toggleBookmark, removeFromHistory, clearHistory } = useQueryHistory()
   const [availableElements, setAvailableElements] = useState<Element[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
   const [hasRestoredFromContext, setHasRestoredFromContext] = useState(false)
@@ -777,8 +778,14 @@ export default function FissionQuery() {
           <p className="text-gray-600 dark:text-gray-400">{t('reactions.fissionDescription')}</p>
         </div>
         <QueryHistoryPanel
-          history={getHistoryForType('fission')}
-          onLoadQuery={(loadedFilter) => {
+          history={history}
+          currentQueryType="fission"
+          onLoadQuery={(loadedFilter, queryType) => {
+            if (queryType !== 'fission') {
+              const routeMap = { fusion: '/fusion', twotwo: '/twotwo', fission: '/fission' }
+              navigate(routeMap[queryType])
+              return
+            }
             setSelectedElement(loadedFilter.elements || [])
             setSelectedOutputElement1(loadedFilter.outputElement1List || [])
             setSelectedOutputElement2(loadedFilter.outputElement2List || [])

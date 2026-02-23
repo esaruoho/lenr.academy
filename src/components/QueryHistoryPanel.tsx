@@ -5,7 +5,8 @@ import { SavedQuery, QueryFilter } from '../types';
 
 interface QueryHistoryPanelProps {
   history: SavedQuery[];
-  onLoadQuery: (filter: QueryFilter) => void;
+  currentQueryType: 'fusion' | 'fission' | 'twotwo';
+  onLoadQuery: (filter: QueryFilter, queryType: 'fusion' | 'fission' | 'twotwo') => void;
   onToggleBookmark: (id: string) => void;
   onRemove: (id: string) => void;
   onClearHistory: () => void;
@@ -35,12 +36,28 @@ function formatFilter(filter: QueryFilter): string {
   if (filter.outputElement4List?.length) parts.push(`Out4: ${filter.outputElement4List.join(', ')}`);
   if (filter.minMeV !== undefined) parts.push(`≥${filter.minMeV} MeV`);
   if (filter.maxMeV !== undefined) parts.push(`≤${filter.maxMeV} MeV`);
+  if (filter.neutrinoType && filter.neutrinoType !== 'any') parts.push(`ν: ${filter.neutrinoType}`);
   if (filter.limit) parts.push(`limit: ${filter.limit}`);
   return parts.join(' · ') || 'No filters';
 }
 
+type FilterType = 'all' | 'fusion' | 'fission' | 'twotwo';
+
+const TYPE_BADGE_STYLES: Record<'fusion' | 'fission' | 'twotwo', string> = {
+  fusion: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+  fission: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
+  twotwo: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
+};
+
+const TYPE_BADGE_LABELS: Record<'fusion' | 'fission' | 'twotwo', string> = {
+  fusion: 'Fusion',
+  fission: 'Fission',
+  twotwo: '2\u21922',
+};
+
 export default function QueryHistoryPanel({
   history,
+  currentQueryType: _,
   onLoadQuery,
   onToggleBookmark,
   onRemove,
@@ -48,11 +65,23 @@ export default function QueryHistoryPanel({
 }: QueryHistoryPanelProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [filterType, setFilterType] = useState<FilterType>('all');
 
-  const bookmarked = history.filter(q => q.isBookmarked);
-  const recent = history.filter(q => !q.isBookmarked);
+  const displayedHistory = filterType === 'all'
+    ? history
+    : history.filter(q => q.queryType === filterType);
+
+  const bookmarked = displayedHistory.filter(q => q.isBookmarked);
+  const recent = displayedHistory.filter(q => !q.isBookmarked);
 
   if (history.length === 0) return null;
+
+  const filterOptions: { value: FilterType; labelKey: string }[] = [
+    { value: 'all', labelKey: 'queryHistory.filterAll' },
+    { value: 'fusion', labelKey: 'queryHistory.filterFusion' },
+    { value: 'fission', labelKey: 'queryHistory.filterFission' },
+    { value: 'twotwo', labelKey: 'queryHistory.filterTwoToTwo' },
+  ];
 
   return (
     <div className="relative">
@@ -93,6 +122,23 @@ export default function QueryHistoryPanel({
             </div>
           </div>
 
+          {/* Filter toggle pills */}
+          <div className="sticky top-[41px] bg-white dark:bg-gray-800 px-3 py-2 flex gap-1 border-b border-gray-200 dark:border-gray-700">
+            {filterOptions.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setFilterType(opt.value)}
+                className={`px-2 py-0.5 text-xs rounded-full font-medium transition-colors ${
+                  filterType === opt.value
+                    ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                }`}
+              >
+                {t(opt.labelKey)}
+              </button>
+            ))}
+          </div>
+
           {/* Bookmarked section */}
           {bookmarked.length > 0 && (
             <div>
@@ -130,6 +176,13 @@ export default function QueryHistoryPanel({
               ))}
             </div>
           )}
+
+          {/* Empty state for filtered view */}
+          {displayedHistory.length === 0 && (
+            <div className="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+              {t('queryHistory.noHistory')}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -143,7 +196,7 @@ function QueryHistoryItem({
   onRemove,
 }: {
   query: SavedQuery;
-  onLoad: (filter: QueryFilter) => void;
+  onLoad: (filter: QueryFilter, queryType: 'fusion' | 'fission' | 'twotwo') => void;
   onToggleBookmark: (id: string) => void;
   onRemove: (id: string) => void;
 }) {
@@ -151,11 +204,14 @@ function QueryHistoryItem({
     <div className="group px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
       <div className="flex items-start justify-between gap-2">
         <button
-          onClick={() => onLoad(query.filter)}
+          onClick={() => onLoad(query.filter, query.queryType)}
           className="flex-1 text-left min-w-0"
         >
-          <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-            {query.name}
+          <div className="text-sm font-medium text-gray-900 dark:text-white truncate flex items-center gap-1.5">
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium inline-block flex-shrink-0 ${TYPE_BADGE_STYLES[query.queryType]}`}>
+              {TYPE_BADGE_LABELS[query.queryType]}
+            </span>
+            <span className="truncate">{query.name}</span>
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
             {formatFilter(query.filter)}

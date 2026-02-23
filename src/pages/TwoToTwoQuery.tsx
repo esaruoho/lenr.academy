@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, FileJson, FileText, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
 import ShareQueryButton from '../components/ShareQueryButton'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'
 import type { TwoToTwoReaction, QueryFilter, Element, Nuclide, HeatmapMode, HeatmapMetrics, AtomicRadiiData, NeutrinoType } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useQueryState } from '../contexts/QueryStateContext'
@@ -32,8 +32,9 @@ export default function TwoToTwoQuery() {
   const { t } = useTranslation()
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const { getTwoToTwoState, updateTwoToTwoState } = useQueryState()
-  const { addToHistory, getHistoryForType, toggleBookmark, removeFromHistory, clearHistory } = useQueryHistory()
+  const { history, addToHistory, toggleBookmark, removeFromHistory, clearHistory } = useQueryHistory()
   const [elements, setElements] = useState<Element[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
   const [hasRestoredFromContext, setHasRestoredFromContext] = useState(false)
@@ -665,8 +666,14 @@ export default function TwoToTwoQuery() {
           <p className="text-gray-600 dark:text-gray-400">{t('reactions.twoToTwoDescription')}</p>
         </div>
         <QueryHistoryPanel
-          history={getHistoryForType('twotwo')}
-          onLoadQuery={(loadedFilter) => {
+          history={history}
+          currentQueryType="twotwo"
+          onLoadQuery={(loadedFilter, queryType) => {
+            if (queryType !== 'twotwo') {
+              const routeMap = { fusion: '/fusion', fission: '/fission', twotwo: '/twotwo' }
+              navigate(routeMap[queryType])
+              return
+            }
             setSelectedElement1(loadedFilter.element1List || [])
             setSelectedElement2(loadedFilter.element2List || [])
             setSelectedOutputElement3(loadedFilter.outputElement3List || [])
