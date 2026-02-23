@@ -890,6 +890,7 @@
     "updateNow": "Update Now",
     "updateLater": "Later",
     "refreshNow": "Refresh Now",
+    "updating": "Updating...",
     "refreshToUpdate": "Refresh to Update",
     "viewWhatsNew": "View What's New",
     "changelog": "View Changelog",
