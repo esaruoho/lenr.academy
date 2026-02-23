@@ -34,6 +34,7 @@
   "navigation": {
     "home": "主页",
     "showElementData": "显示元素数据",
+    "segreChart": "Segre Chart",
     "fusionReactions": "聚变反应",
     "fissionReactions": "裂变反应",
     "twoToTwoReactions": "二对二反应",
@@ -450,6 +451,26 @@
     "count": "总计",
     "collapse": "折叠直方图",
     "expand": "展开直方图"
+  },
+  "segreChart": {
+    "title": "Segre Chart (N-Z Diagram)",
+    "description": "Interactive chart of nuclides plotted by proton number (Z) vs neutron number (N), color-coded by stability",
+    "stable": "Stable (>10\u2079 years)",
+    "longHalfLife": "Long half-life (>100 years)",
+    "shortHalfLife": "Short half-life (<100 years)",
+    "unknown": "Unknown half-life",
+    "magicNumbers": "Magic Numbers",
+    "valleyOfStability": "Valley of Stability",
+    "legend": "Legend",
+    "nuclideCount": "{{count}} nuclides displayed",
+    "clickToView": "Click any nuclide to view details",
+    "zoomControls": "Scroll to zoom, drag to pan, double-click to zoom in",
+    "protonNumberAxis": "Proton Number (Z)",
+    "neutronNumberAxis": "Neutron Number (N)",
+    "years": "年",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "resetZoom": "重置缩放"
   },
   "cascades": {
     "title": "级联",

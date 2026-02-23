@@ -34,6 +34,7 @@
   "navigation": {
     "home": "Startseite",
     "showElementData": "Elementdaten anzeigen",
+    "segreChart": "Segre Chart",
     "fusionReactions": "Fusionsreaktionen",
     "fissionReactions": "Spaltungsreaktionen",
     "twoToTwoReactions": "Zwei-zu-Zwei-Reaktionen",
@@ -448,6 +449,26 @@
     "count": "Gesamt",
     "collapse": "Histogramm zuklappen",
     "expand": "Histogramm aufklappen"
+  },
+  "segreChart": {
+    "title": "Segre Chart (N-Z Diagram)",
+    "description": "Interactive chart of nuclides plotted by proton number (Z) vs neutron number (N), color-coded by stability",
+    "stable": "Stable (>10\u2079 years)",
+    "longHalfLife": "Long half-life (>100 years)",
+    "shortHalfLife": "Short half-life (<100 years)",
+    "unknown": "Unknown half-life",
+    "magicNumbers": "Magic Numbers",
+    "valleyOfStability": "Valley of Stability",
+    "legend": "Legend",
+    "nuclideCount": "{{count}} nuclides displayed",
+    "clickToView": "Click any nuclide to view details",
+    "zoomControls": "Scroll to zoom, drag to pan, double-click to zoom in",
+    "protonNumberAxis": "Proton Number (Z)",
+    "neutronNumberAxis": "Neutron Number (N)",
+    "years": "Jahre",
+    "zoomIn": "Vergroessern",
+    "zoomOut": "Verkleinern",
+    "resetZoom": "Zoom zuruecksetzen"
   },
   "cascades": {
     "title": "Kaskaden",
