@@ -387,6 +387,32 @@
         { "type": "scroll", "y": 200 }
       ],
       "output": "russell-historical-dark.png"
+    },
+    "russell-wave-view": {
+      "name": "Russell Wave Amplitude View",
+      "description": "Shows the Russell Wave View — elements as points on octave wave envelope with Carbon at peak",
+      "page": "/element-data?tab=russell",
+      "viewport": "desktop-16:9-small",
+      "theme": "light",
+      "actions": [
+        { "type": "wait", "timeout": 2000 },
+        { "type": "click", "selector": "button:has-text('Wave View')" },
+        { "type": "wait", "timeout": 500 }
+      ],
+      "output": "russell-wave-view.png"
+    },
+    "russell-wave-view-dark": {
+      "name": "Russell Wave Amplitude View - Dark Mode",
+      "description": "Shows the Russell Wave View in dark mode",
+      "page": "/element-data?tab=russell",
+      "viewport": "desktop-16:9-small",
+      "theme": "dark",
+      "actions": [
+        { "type": "wait", "timeout": 2000 },
+        { "type": "click", "selector": "button:has-text('Wave View')" },
+        { "type": "wait", "timeout": 500 }
+      ],
+      "output": "russell-wave-view-dark.png"
     }
   }
 }

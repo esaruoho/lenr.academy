@@ -33,6 +33,7 @@ import {
 } from '../services/queryService'
 import { traceDecayChain } from '../services/decayChainService'
 import RussellChartDiagram from '../components/RussellChartDiagram'
+import RussellWaveDiagram from '../components/RussellWaveDiagram'
 import RussellHistoricalContext from '../components/RussellHistoricalContext'
 import { RUSSELL_COLORS, getPredictedElements } from '../constants/russellElements'
 import { expandHalfLifeUnit, normalizeElementSymbol } from '../utils/formatUtils'
@@ -193,6 +194,9 @@ export default function ShowElementData() {
   const [customElementsPresets, setCustomElementsPresets] = useState<FilterPreset[]>([])
   const [customNuclidesPresets, setCustomNuclidesPresets] = useState<FilterPreset[]>([])
   const [customDecaysPresets, setCustomDecaysPresets] = useState<FilterPreset[]>([])
+
+  // Russell tab: grid vs wave view toggle
+  const [russellView, setRussellView] = useState<'grid' | 'wave'>('grid')
 
   // Expanded row state (per tab, session-only - NOT in URL)
   const [elementsExpandedRows, setElementsExpandedRows] = useState<Set<string | number>>(new Set())
@@ -2064,17 +2068,47 @@ export default function ShowElementData() {
       {/* Russell Tab */}
       {activeTab === 'russell' && (
         <div className="space-y-4">
+          {/* View toggle */}
+          <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg w-fit">
+            <button
+              onClick={() => setRussellView('grid')}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                russellView === 'grid'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              {t('russellChart.gridView')}
+            </button>
+            <button
+              onClick={() => setRussellView('wave')}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                russellView === 'wave'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              {t('russellChart.waveView')}
+            </button>
+          </div>
+
           {/* Diagram card */}
           <div className="card p-6">
-            <RussellChartDiagram onElementClick={(Z) => {
-              const newParams = new URLSearchParams(searchParams)
-              newParams.set('Z', String(Z))
-              newParams.set('tab', 'integrated')
-              setSearchParams(newParams)
-            }} />
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 text-center">
-              {t('russellChart.zoomControls')}
-            </p>
+            {russellView === 'grid' ? (
+              <RussellChartDiagram onElementClick={(Z) => {
+                const newParams = new URLSearchParams(searchParams)
+                newParams.set('Z', String(Z))
+                newParams.set('tab', 'integrated')
+                setSearchParams(newParams)
+              }} />
+            ) : (
+              <RussellWaveDiagram onElementClick={(Z) => {
+                const newParams = new URLSearchParams(searchParams)
+                newParams.set('Z', String(Z))
+                newParams.set('tab', 'integrated')
+                setSearchParams(newParams)
+              }} />
+            )}
           </div>
 
           {/* Legend card */}

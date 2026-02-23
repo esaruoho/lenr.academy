@@ -1,7 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
-import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../contexts/ThemeContext'
 import {
@@ -163,36 +161,13 @@ export default function RussellChartDiagram({ onElementClick }: RussellChartDiag
 
   return (
     <div className="russell-chart-container relative">
-      <TransformWrapper
-        initialScale={0.85}
-        minScale={0.3}
-        maxScale={4}
-        centerOnInit
-        wheel={{ step: 0.08 }}
-        doubleClick={{ mode: 'zoomIn' }}
-        panning={{ velocityDisabled: false }}
-      >
-        {({ zoomIn, zoomOut, resetTransform }) => (
-          <>
-            <div className="flex gap-1 mb-2">
-              <button onClick={() => zoomIn()} className="btn btn-secondary p-1.5" title="Zoom in">
-                <ZoomIn className="w-4 h-4" />
-              </button>
-              <button onClick={() => zoomOut()} className="btn btn-secondary p-1.5" title="Zoom out">
-                <ZoomOut className="w-4 h-4" />
-              </button>
-              <button onClick={() => resetTransform()} className="btn btn-secondary p-1.5" title="Reset zoom">
-                <Maximize2 className="w-4 h-4" />
-              </button>
-            </div>
-
-            <TransformComponent wrapperStyle={{ width: '100%', height: '700px', overflow: 'hidden' }}>
-              <svg
-                width={svgWidth}
-                height={svgHeight}
-                viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-                className="select-none"
-              >
+      <div className="overflow-x-auto">
+        <svg
+          width={svgWidth}
+          height={svgHeight}
+          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+          className="select-none"
+        >
                 {/* Background zone labels */}
                 <text
                   x={LEFT_MARGIN + genZoneWidth / 2 - CELL_W / 2}
@@ -427,10 +402,7 @@ export default function RussellChartDiagram({ onElementClick }: RussellChartDiag
                   )
                 })}
               </svg>
-            </TransformComponent>
-          </>
-        )}
-      </TransformWrapper>
+      </div>
 
       {/* Tooltip */}
       {hovered && (
