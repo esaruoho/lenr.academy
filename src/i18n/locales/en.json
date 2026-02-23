@@ -495,12 +495,7 @@
     "legendSerpentine": "Serpentine Flow Path",
     "clickToView": "Click any known element to view its properties and isotopes in the database",
     "clickToViewDetails": "Click to view element details",
-    "gridView": "Grid View",
-    "waveView": "Wave View",
-    "waveDescription": "Elements as points on Russell's octave wave — amplitude rises through generation (compression) to Carbon at the peak, then descends through radiation (expansion)",
-    "amplitude": "Amplitude",
-    "octaveAxis": "Octave",
-    "carbonPeak": "Carbon (Peak)",
+    "zoomControls": "Scroll to zoom, drag to pan, double-click to zoom in",
     "predictionsTitle": "Russell's Predictions",
     "predictionsDescription": "Walter Russell predicted several elements before their official discovery, demonstrating the predictive power of his wave-based periodic system.",
     "aboutTitle": "About Russell's Periodic Table",
@@ -508,45 +503,6 @@
     "aboutParagraph2": "In Russell's cosmology, matter is created by opposing spiraling vortices of compression (generation) and expansion (radiation). Carbon sits at the amplitude — the point of maximum compression — making it the most balanced and stable element. The serpentine S-curve pattern shows how each octave reverses direction, creating a continuous wave from the lightest hypothetical substances to the heaviest known elements.",
     "aboutParagraph3": "Russell notably predicted the existence of Deuterium (which he called \"Ethlogen\"), Tritium (\"Bebegen\"), Neptunium, and Plutonium years before their official laboratory discovery — validating his wave-based model's predictive capacity.",
     "experimentalNote": "This visualization is based on Russell's original 1926 chart. Russell's system differs significantly from the modern periodic table — it represents his philosophical and cosmological model of matter rather than the quantum mechanical model used in contemporary chemistry."
-  },
-  "russellHistory": {
-    "title": "Historical Background",
-    "subtitle": "The story behind the nine-octave periodic table — from a polymath painter to verified transmutation.",
-    "expandAll": "Expand all",
-    "collapseAll": "Collapse all",
-    "whoWasRussell": {
-      "title": "Who Was Walter Russell (1871–1963)?",
-      "p1": "Walter Russell was a portrait painter, sculptor, architect, composer, figure skater, and horse breeder who achieved international recognition in each field. He designed the Mark Twain Hotel and sculpted busts of Edison, Roosevelt, Mark Twain, and Gershwin. He was President of the Society of Arts and Sciences, and lectured at IBM on business ethics.",
-      "p2": "With almost no formal scientific education, Russell published a completely new periodic table of elements in 1926, organized in nine octaves like a musical scale. On those charts he placed four elements that had not yet been discovered in any laboratory.",
-      "p3": "Sir Oliver Lodge had said: \"No scientist could make the supreme discovery. It would have to be the supreme inspiration of some poet, painter, philosopher or saint.\" Russell was a painter, a philosopher, and more.",
-      "highlight": "Russell received an honorary doctorate from the American Academy of Sciences for his element predictions."
-    },
-    "nineOctaveStructure": {
-      "title": "The Nine-Octave Structure",
-      "p1": "Russell arranged all elements into nine octaves, like notes on a musical scale. Each octave has a generation (charging/compressing) side and a radiation (discharging/expanding) side, with an inert gas at the fulcrum — the balance point of each octave.",
-      "p2": "Carbon sits at the amplitude of the fourth octave — the point of maximum compression and perfect stability. From hydrogen's steep vortex cone to carbon's flat spiral, element positions map onto a continuous wave of increasing density. The pattern then reverses through the radiation side.",
-      "p3": "The standard periodic table describes WHAT elements are (atomic number, electron configuration). Russell's nine-octave table describes WHY they exist — as conditions of compression along a continuous spectrum, not as separate, disconnected things."
-    },
-    "westinghouse": {
-      "title": "The Westinghouse Transmutation Experiment (1927)",
-      "p1": "In 1927, Russell demonstrated transmutation at the Westinghouse Lampblack Laboratory in Bloomfield, New Jersey. The apparatus used two asymmetric solenoid coils mounted at adjustable angles inside an evacuated quartz tube filled with nitrogen.",
-      "p2": "By adjusting the angular offset of the coils (controlling three broken symmetries: angular, polarity, and temporal), Russell converted water vapor into nitrogen and hydrogen, and shifted nitrogen toward other elements. The results were verified by the Westinghouse chemical laboratory.",
-      "p3": "The key insight: geometry selects the element. By changing the angle of the magnetic field (replicating the vortex cone angle for each element's position on the octave chart), Russell could select which elemental condition would manifest. This is dual polarity control — the same principle his nine-octave chart is built on.",
-      "highlight": "Westinghouse chemist M. Hoyt verified the results: 69.1% of the original nitrogen was converted. The experiment was witnessed by multiple Westinghouse staff."
-    },
-    "modernReplication": {
-      "title": "Modern Replication & LENR Connection (1992–1994)",
-      "p1": "In 1992, Toby Grotz (Tesla Engineering Laboratories) replicated the Russell transmutation using modern equipment with Tim Binder of the University of Science and Philosophy. They detected fluorine (spectral lines at 7311/7398 Angstroms) at a 44° solenoid angle — exactly where Russell's chart places it.",
-      "p2": "In 1994, Ron Kovac achieved a more dramatic result: starting from nitrogen, his mass spectrometry showed Helium-4 at 3.75% and Lithium-5 at 2.50%. This is directly relevant to LENR research — Julian Schwinger (Nobel laureate) independently predicted that Li-5 should be a product of the cold fusion process.",
-      "p3": "The Grotz-Kovac results were presented at SAE International (paper 929470). They provide independent verification of Russell's core claim: elements are conditions of compression that can be shifted by changing field geometry.",
-      "highlight": "Kovac's detection of Li-5 — predicted by Schwinger's cold fusion theory and produced by Russell's transmutation method — bridges 1920s cosmogony with modern LENR research."
-    },
-    "vortexCone": {
-      "title": "The Vortex Cone Model",
-      "p1": "In Russell's model, each element corresponds to a specific angle on a spiral vortex cone. Hydrogen sits at the steep end of the cone (nearly vertical). As compression increases, the spiral flattens. Russell wrote: \"Shorten the cone gradually until these lines are as flat as a watch spring and you then have the carbon atom.\"",
-      "p2": "This is why solenoid angle matters in the transmutator: setting the coils to a specific angle replicates the vortex cone geometry for that element's position. The 44° angle that produced fluorine in Grotz's 1992 experiment corresponds to fluorine's position on the unwound octave cone.",
-      "p3": "The vortex cone model unifies the periodic table with field geometry. It predicts that any element can be produced from any other by changing the compression ratio — which is exactly what the transmutation experiments demonstrated."
-    }
   },
   "segreChart": {
     "title": "Segre Chart (N-Z Diagram)",
