@@ -99,8 +99,8 @@ export default function EnergyHistogram({ reactions }: EnergyHistogramProps) {
 
   if (reactions.length === 0) return null
 
-  const axisColor = isDark ? '#9ca3af' : '#6b7280'
-  const gridColor = isDark ? '#374151' : '#e5e7eb'
+  const axisColor = isDark ? '#d1d5db' : '#4b5563'
+  const gridColor = isDark ? '#4b5563' : '#e5e7eb'
   const tooltipBg = isDark ? '#1f2937' : '#ffffff'
   const tooltipBorder = isDark ? '#4b5563' : '#e5e7eb'
 
