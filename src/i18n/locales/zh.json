@@ -436,6 +436,21 @@
     "radioactive": "放射性",
     "querying": "查询中..."
   },
+  "histogram": {
+    "title": "能量分布",
+    "description": "反应能量（MeV）值的直方图及统计摘要",
+    "xAxisLabel": "能量（MeV）",
+    "yAxisLabel": "数量",
+    "reactions": "反应数",
+    "mean": "平均值",
+    "median": "中位数",
+    "min": "最小值",
+    "max": "最大值",
+    "stddev": "标准差",
+    "count": "总计",
+    "collapse": "折叠直方图",
+    "expand": "展开直方图"
+  },
   "cascades": {
     "title": "级联",
     "description": "探索反应级联和途径",

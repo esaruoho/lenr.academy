@@ -434,6 +434,21 @@
     "radioactive": "Radiactivo",
     "querying": "Consultando..."
   },
+  "histogram": {
+    "title": "Distribucion de energia",
+    "description": "Histograma de valores de energia de reaccion (MeV) con resumen estadistico",
+    "xAxisLabel": "Energia (MeV)",
+    "yAxisLabel": "Cantidad",
+    "reactions": "Reacciones",
+    "mean": "Media",
+    "median": "Mediana",
+    "min": "Min",
+    "max": "Max",
+    "stddev": "Desv. Est.",
+    "count": "Total",
+    "collapse": "Contraer histograma",
+    "expand": "Expandir histograma"
+  },
   "cascades": {
     "title": "Cascadas",
     "description": "Explore cascadas de reacciones y rutas",
