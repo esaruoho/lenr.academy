@@ -9,6 +9,11 @@ describe('decayChainService', () => {
       expect(result).toEqual({ Z: 90, A: 234, E: '' });
     });
 
+    it('should calculate alpha decay for Ra-226 → Rn-222', () => {
+      const result = getDaughterNuclide(88, 226, 'Ra', 'A');
+      expect(result).toEqual({ Z: 86, A: 222, E: '' });
+    });
+
     it('should calculate beta minus decay: Z+1, A same', () => {
       // Th-234 beta- decay -> Pa-234
       const result = getDaughterNuclide(90, 234, 'Th', 'B-');
@@ -36,6 +41,16 @@ describe('decayChainService', () => {
     it('should handle lowercase decay modes', () => {
       const result = getDaughterNuclide(92, 238, 'U', 'a');
       expect(result).toEqual({ Z: 90, A: 234, E: '' });
+    });
+
+    it('should handle lowercase beta-minus notation', () => {
+      const result = getDaughterNuclide(90, 234, 'Th', 'b-');
+      expect(result).toEqual({ Z: 91, A: 234, E: '' });
+    });
+
+    it('should handle hydrogen beta-minus (Z=1 → Z=2)', () => {
+      const result = getDaughterNuclide(1, 3, 'T', 'B-');
+      expect(result).toEqual({ Z: 2, A: 3, E: '' });
     });
 
     it('should return null for unicode beta symbols (known limitation)', () => {
