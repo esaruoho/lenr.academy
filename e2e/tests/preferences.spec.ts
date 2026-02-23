@@ -319,14 +319,14 @@ test.describe('User Preferences Persistence', () => {
     await page.waitForFunction(
       () => {
         const htmlElement = document.documentElement;
-        return htmlElement.classList.contains('dark') || htmlElement.classList.contains('light');
+        return htmlElement.classList.contains('dark');
       },
-      { timeout: 2000 }
+      { timeout: 5000 }
     );
 
     // Check theme persisted
     const html = page.locator('html');
-    await expect(html).toHaveClass(/dark/);
+    await expect(html).toHaveClass(/dark/, { timeout: 5000 });
 
     // Check privacy consent persisted
     const consent = await page.evaluate(() => {

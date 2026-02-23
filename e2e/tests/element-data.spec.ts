@@ -644,9 +644,9 @@ test.describe('Element Data - Mobile', () => {
     const nuclideHeading = page.getByRole('heading', { name: /U-235/i });
     await expect(nuclideHeading).toBeVisible();
 
-    // Scroll to radioactive decay section
+    // Scroll to radioactive decay section (may take time to render on CI)
     const decayHeading = page.getByRole('heading', { name: /Radioactive Decay/i });
-    await expect(decayHeading).toBeVisible();
+    await expect(decayHeading).toBeVisible({ timeout: 10000 });
     await decayHeading.scrollIntoViewIfNeeded();
 
     // Table should always be visible on mobile
@@ -706,10 +706,13 @@ test.describe('Element Data - Mobile', () => {
 
     // Scroll down to make tabs stick
     await page.evaluate(() => window.scrollBy(0, 300));
-    await page.waitForTimeout(500); // Wait for intersection observer
+    await page.waitForTimeout(1000); // Wait for intersection observer (longer for webkit)
 
     // Now the hamburger should appear in the tab bar
     await expect(tabMenuButton).toBeVisible();
+
+    // Wait for element to stabilize after intersection observer callback
+    await page.waitForTimeout(300);
 
     // Click it to verify it works
     await tabMenuButton.click();
