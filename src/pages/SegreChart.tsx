@@ -71,7 +71,7 @@ export default function SegreChart() {
 
       {loading ? (
         <div className="card p-6 text-center text-gray-500 dark:text-gray-400">
-          Loading nuclide data...
+          {t('common.loading')}
         </div>
       ) : (
         <>

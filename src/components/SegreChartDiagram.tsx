@@ -279,9 +279,9 @@ export default function SegreChartDiagram({ nuclides }: SegreChartDiagramProps) 
           <div className="font-semibold">{hovered.E}-{hovered.A}</div>
           <div className="text-xs opacity-75">Z={hovered.Z}, N={hovered.N}</div>
           <div className="text-xs opacity-75">
-            {hovered.stability === 'stable' ? 'Stable' :
-             hovered.stability === 'long' ? 'Long half-life' :
-             hovered.stability === 'short' ? 'Short half-life' : 'Unknown'}
+            {hovered.stability === 'stable' ? t('segreChart.stable') :
+             hovered.stability === 'long' ? t('segreChart.longHalfLife') :
+             hovered.stability === 'short' ? t('segreChart.shortHalfLife') : t('segreChart.unknown')}
           </div>
           {hovered.logHalfLife !== undefined && hovered.logHalfLife !== null && hovered.stability !== 'stable' && (
             <div className="text-xs opacity-75">
