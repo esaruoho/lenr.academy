@@ -10,8 +10,16 @@ import {
   Atom,
   Settings2,
   Filter,
+  Sparkles,
 } from 'lucide-react'
-import type { CycleDiscoveryParameters, CycleDiscoveryProgress } from '../types'
+import type {
+  CycleDiscoveryParameters,
+  CycleDiscoveryProgress,
+  Element,
+} from '../types'
+import type { CyclePreset } from '../constants/cyclePresets'
+import { CYCLE_PRESETS } from '../constants/cyclePresets'
+import PeriodicTableSelector from './PeriodicTableSelector'
 
 interface CycleDiscoverySearchProps {
   params: CycleDiscoveryParameters
@@ -20,6 +28,8 @@ interface CycleDiscoverySearchProps {
   onCancel: () => void
   isSearching: boolean
   progress: CycleDiscoveryProgress | null
+  availableElements: Element[]
+  onPresetSelect?: (preset: CyclePreset) => void
 }
 
 export default function CycleDiscoverySearch({
@@ -29,6 +39,8 @@ export default function CycleDiscoverySearch({
   onCancel,
   isSearching,
   progress,
+  availableElements,
+  onPresetSelect,
 }: CycleDiscoverySearchProps) {
   const { t } = useTranslation()
   const [showAdvanced, setShowAdvanced] = useState(false)
@@ -74,6 +86,30 @@ export default function CycleDiscoverySearch({
           {t('cycleDiscovery.searchTitle')}
         </h2>
       </div>
+
+      {/* Quick-start presets */}
+      {onPresetSelect && (
+        <div className="mb-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+            <Sparkles className="w-3.5 h-3.5 inline mr-1" />
+            {t('cycleDiscovery.quickStart')}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {CYCLE_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => onPresetSelect(preset)}
+                disabled={isSearching}
+                className="px-3 py-1.5 text-sm rounded-full border border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title={t(preset.descriptionKey)}
+              >
+                {t(preset.labelKey)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Energy thresholds */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
@@ -269,31 +305,17 @@ export default function CycleDiscoverySearch({
             </label>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {t('cycleDiscovery.allowedElements')}
-              </label>
-              <input
-                type="text"
-                className="input"
-                placeholder={t('cycleDiscovery.allowedElementsPlaceholder')}
-                value={
-                  params.elementFilters?.allowedElements?.join(', ') ?? ''
-                }
-                onChange={(e) => {
-                  const val = e.target.value.trim()
-                  if (val === '') {
-                    updateFilter('allowedElements', undefined)
-                  } else {
-                    updateFilter(
-                      'allowedElements',
-                      val
-                        .split(',')
-                        .map((s) => s.trim())
-                        .filter(Boolean)
-                    )
-                  }
+              <PeriodicTableSelector
+                label={t('cycleDiscovery.allowedElements')}
+                availableElements={availableElements}
+                selectedElements={params.elementFilters?.allowedElements ?? []}
+                onSelectionChange={(elements) => {
+                  updateFilter(
+                    'allowedElements',
+                    elements.length > 0 ? elements : undefined
+                  )
                 }}
-                disabled={isSearching}
+                testId="cycle-discovery-element-filter"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {t('cycleDiscovery.allowedElementsHint')}

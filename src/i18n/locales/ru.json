@@ -921,6 +921,19 @@
     "metricStability": "Показатель стабильности",
     "reactionSteps": "Шаги реакции",
     "feedbackLabel": "ОБРАТНАЯ СВЯЗЬ",
-    "transformationChain": "Цепочка превращений"
+    "transformationChain": "Цепочка превращений",
+    "quickStart": "Быстрый старт — нажмите на шаблон для настройки и запуска:",
+    "presetLightElements": "Лёгкие элементы",
+    "presetLightElementsDesc": "Поиск H до O — быстро, сфокусировано на частых кандидатах топлива LENR",
+    "presetLENRClassics": "Классика LENR",
+    "presetLENRClassicsDesc": "H, D, Li, Ni, Pd, C, N, O — наиболее изученные системы LENR",
+    "presetDeepSearch": "Глубокий поиск",
+    "presetDeepSearchDesc": "Все элементы, глубокие циклы, включая деление — медленнее, но всесторонне",
+    "presetHydrogenOnly": "Только водород",
+    "presetHydrogenOnlyDesc": "Только изотопы H, D, T — чистые водородные циклы синтеза",
+    "topDiscoveries": "Лучшие открытия",
+    "topBestEnergy": "Наибольшая энергия",
+    "topBestFeedback": "Лучшая обратная связь",
+    "topMostPractical": "Наиболее практичный"
   }
 }

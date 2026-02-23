@@ -921,6 +921,19 @@
     "metricStability": "Stabilitätswert",
     "reactionSteps": "Reaktionsschritte",
     "feedbackLabel": "RÜCKKOPPLUNG",
-    "transformationChain": "Umwandlungskette"
+    "transformationChain": "Umwandlungskette",
+    "quickStart": "Schnellstart — Klicken Sie auf eine Vorlage zum Konfigurieren und Starten:",
+    "presetLightElements": "Leichte Elemente",
+    "presetLightElementsDesc": "Suche H bis O — schnell, fokussiert auf häufige LENR-Brennstoffkandidaten",
+    "presetLENRClassics": "LENR-Klassiker",
+    "presetLENRClassicsDesc": "H, D, Li, Ni, Pd, C, N, O — die am meisten untersuchten LENR-Systeme",
+    "presetDeepSearch": "Tiefensuche",
+    "presetDeepSearchDesc": "Alle Elemente, tiefere Zyklen, einschließlich Spaltung — langsamer aber umfassend",
+    "presetHydrogenOnly": "Nur Wasserstoff",
+    "presetHydrogenOnlyDesc": "Nur H, D, T Isotope — reine Wasserstoff-Fusionszyklen",
+    "topDiscoveries": "Top-Entdeckungen",
+    "topBestEnergy": "Höchste Energie",
+    "topBestFeedback": "Beste Rückkopplung",
+    "topMostPractical": "Am praktischsten"
   }
 }
