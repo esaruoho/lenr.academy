@@ -464,7 +464,11 @@
     "clickToView": "Click any nuclide to view details",
     "zoomControls": "Scroll to zoom, drag to pan, double-click to zoom in",
     "protonNumberAxis": "Proton Number (Z)",
-    "neutronNumberAxis": "Neutron Number (N)"
+    "neutronNumberAxis": "Neutron Number (N)",
+    "years": "лет",
+    "zoomIn": "Увеличить",
+    "zoomOut": "Уменьшить",
+    "resetZoom": "Сбросить масштаб"
   },
   "cascades": {
     "title": "Каскады",

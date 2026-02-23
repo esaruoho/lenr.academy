@@ -107,13 +107,13 @@ export default function SegreChartDiagram({ nuclides }: SegreChartDiagramProps) 
         {({ zoomIn, zoomOut, resetTransform }) => (
           <>
             <div className="flex gap-1 mb-2">
-              <button onClick={() => zoomIn()} className="btn btn-secondary p-1.5" title="Zoom in">
+              <button onClick={() => zoomIn()} className="btn btn-secondary p-1.5" title={t('segreChart.zoomIn')}>
                 <ZoomIn className="w-4 h-4" />
               </button>
-              <button onClick={() => zoomOut()} className="btn btn-secondary p-1.5" title="Zoom out">
+              <button onClick={() => zoomOut()} className="btn btn-secondary p-1.5" title={t('segreChart.zoomOut')}>
                 <ZoomOut className="w-4 h-4" />
               </button>
-              <button onClick={() => resetTransform()} className="btn btn-secondary p-1.5" title="Reset zoom">
+              <button onClick={() => resetTransform()} className="btn btn-secondary p-1.5" title={t('segreChart.resetZoom')}>
                 <Maximize2 className="w-4 h-4" />
               </button>
             </div>
@@ -285,7 +285,7 @@ export default function SegreChartDiagram({ nuclides }: SegreChartDiagramProps) 
           </div>
           {hovered.logHalfLife !== undefined && hovered.logHalfLife !== null && hovered.stability !== 'stable' && (
             <div className="text-xs opacity-75">
-              log(t½) = {hovered.logHalfLife.toFixed(2)} years
+              log(t½) = {hovered.logHalfLife.toFixed(2)} {t('segreChart.years')}
             </div>
           )}
         </div>
