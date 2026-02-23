@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Download, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
+import { Download, FileJson, FileText, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
 import { useSearchParams, Link } from 'react-router-dom'
 import ShareQueryButton from '../components/ShareQueryButton'
 import type { FusionReaction, QueryFilter, Nuclide, Element, HeatmapMode, HeatmapMetrics, AtomicRadiiData } from '../types'
@@ -14,6 +14,7 @@ import NuclideDetailsCard from '../components/NuclideDetailsCard'
 import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import { VirtualizedList } from '../components/VirtualizedList'
 import LimitSelector from '../components/LimitSelector'
+import { exportToJSON, exportToPDF } from '../utils/exportUtils'
 
 // Default values
 const DEFAULT_ELEMENT1: string[] = []
@@ -604,6 +605,7 @@ export default function FusionQuery() {
     a.href = url
     a.download = `fusion_reactions_${Date.now()}.csv`
     a.click()
+    window.URL.revokeObjectURL(url)
   }
 
   if (dbLoading) {
@@ -972,6 +974,22 @@ export default function FusionQuery() {
                   {t('reactions.exportCsv')}
                 </button>
                 <ShareQueryButton />
+                <button
+                  onClick={() => exportToJSON(results, { queryType: 'fusion', filter: queryFilter, executionTime, rowCount: results.length, totalCount })}
+                  className="btn btn-secondary px-4 py-2 text-sm"
+                  disabled={results.length === 0}
+                >
+                  <FileJson className="w-4 h-4 mr-2 inline" />
+                  {t('reactions.exportJson')}
+                </button>
+                <button
+                  onClick={() => exportToPDF(results, { queryType: 'fusion', filter: queryFilter, executionTime, rowCount: results.length, totalCount }).catch((err) => console.error('PDF export failed:', err))}
+                  className="btn btn-secondary px-4 py-2 text-sm"
+                  disabled={results.length === 0}
+                >
+                  <FileText className="w-4 h-4 mr-2 inline" />
+                  {t('reactions.exportPdf')}
+                </button>
               </div>
             </div>
 

@@ -170,7 +170,7 @@ test.describe('Two-to-Two Query Page', () => {
     await waitForReactionResults(page, 'twotwo');
 
     // Find export button
-    const exportButton = page.getByRole('button', { name: /export|CSV/i });
+    const exportButton = page.getByRole('button', { name: /Export CSV/i });
 
     if (await exportButton.isVisible()) {
       const downloadPromise = page.waitForEvent('download');

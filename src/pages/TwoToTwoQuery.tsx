@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Download, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
+import { Download, FileJson, FileText, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
 import ShareQueryButton from '../components/ShareQueryButton'
 import { useSearchParams, Link } from 'react-router-dom'
 import type { TwoToTwoReaction, QueryFilter, Element, Nuclide, HeatmapMode, HeatmapMetrics, AtomicRadiiData, NeutrinoType } from '../types'
@@ -14,6 +14,7 @@ import NuclideDetailsCard from '../components/NuclideDetailsCard'
 import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import { VirtualizedList } from '../components/VirtualizedList'
 import LimitSelector from '../components/LimitSelector'
+import { exportToJSON, exportToPDF } from '../utils/exportUtils'
 
 // Default values
 const DEFAULT_ELEMENT1 = ['D']
@@ -102,6 +103,18 @@ export default function TwoToTwoQuery() {
   const [selectedElement2, setSelectedElement2] = useState<string[]>(getInitialElement2())
   const [selectedOutputElement3, setSelectedOutputElement3] = useState<string[]>(getInitialOutputElement3())
   const [selectedOutputElement4, setSelectedOutputElement4] = useState<string[]>(getInitialOutputElement4())
+
+  const queryFilter = useMemo<QueryFilter>(() => {
+    const allSelectedElements = [...selectedElement1, ...selectedElement2]
+    return {
+      ...filter,
+      elements: allSelectedElements.length > 0 ? allSelectedElements : undefined,
+      element1List: selectedElement1.length > 0 ? selectedElement1 : undefined,
+      element2List: selectedElement2.length > 0 ? selectedElement2 : undefined,
+      outputElement3List: selectedOutputElement3.length > 0 ? selectedOutputElement3 : undefined,
+      outputElement4List: selectedOutputElement4.length > 0 ? selectedOutputElement4 : undefined,
+    }
+  }, [filter, selectedElement1, selectedElement2, selectedOutputElement3, selectedOutputElement4])
   const [resultElements, setResultElements] = useState<Element[]>([])
   const [nuclides, setNuclides] = useState<Nuclide[]>([])
   const [radioactiveNuclides, setRadioactiveNuclides] = useState<Set<string>>(new Set())
@@ -524,17 +537,6 @@ export default function TwoToTwoQuery() {
 
     setIsQuerying(true)
     try {
-      // Build filter with selected elements
-      const allSelectedElements = [...selectedElement1, ...selectedElement2]
-      const queryFilter: QueryFilter = {
-        ...filter,
-        elements: allSelectedElements.length > 0 ? allSelectedElements : undefined,
-        element1List: selectedElement1.length > 0 ? selectedElement1 : undefined,
-        element2List: selectedElement2.length > 0 ? selectedElement2 : undefined,
-        outputElement3List: selectedOutputElement3.length > 0 ? selectedOutputElement3 : undefined,
-        outputElement4List: selectedOutputElement4.length > 0 ? selectedOutputElement4 : undefined
-      }
-
       const result = queryTwoToTwo(db, queryFilter)
 
       setResults(result.reactions)
@@ -578,6 +580,7 @@ export default function TwoToTwoQuery() {
     a.href = url
     a.download = `twotwo_reactions_${Date.now()}.csv`
     a.click()
+    window.URL.revokeObjectURL(url)
   }
 
   // Table resize handlers (supporting both mouse and touch)
@@ -1038,6 +1041,22 @@ export default function TwoToTwoQuery() {
                   {t('reactions.exportCsv')}
                 </button>
                 <ShareQueryButton />
+                <button
+                  onClick={() => exportToJSON(results, { queryType: 'twotwo', filter: queryFilter, executionTime, rowCount: results.length, totalCount })}
+                  className="btn btn-secondary px-4 py-2 text-sm"
+                  disabled={results.length === 0}
+                >
+                  <FileJson className="w-4 h-4 mr-2 inline" />
+                  {t('reactions.exportJson')}
+                </button>
+                <button
+                  onClick={() => exportToPDF(results, { queryType: 'twotwo', filter: queryFilter, executionTime, rowCount: results.length, totalCount }).catch((err) => console.error('PDF export failed:', err))}
+                  className="btn btn-secondary px-4 py-2 text-sm"
+                  disabled={results.length === 0}
+                >
+                  <FileText className="w-4 h-4 mr-2 inline" />
+                  {t('reactions.exportPdf')}
+                </button>
               </div>
             </div>
 

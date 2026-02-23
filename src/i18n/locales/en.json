@@ -373,6 +373,8 @@
     "copyShareLink": "Copy Share Link",
     "copyShareLinkTitle": "Copy a shareable URL for this query to clipboard",
     "linkCopied": "Link Copied!",
+    "exportJson": "Export JSON",
+    "exportPdf": "Export PDF",
     "inputs": "Inputs",
     "output": "Output",
     "outputs": "Outputs",
