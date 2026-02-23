@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, FileJson, FileText, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'
 import ShareQueryButton from '../components/ShareQueryButton'
 import type { FusionReaction, QueryFilter, Nuclide, Element, HeatmapMode, HeatmapMetrics, AtomicRadiiData } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
@@ -15,6 +15,8 @@ import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import { VirtualizedList } from '../components/VirtualizedList'
 import LimitSelector from '../components/LimitSelector'
 import { exportToJSON, exportToPDF } from '../utils/exportUtils'
+import { useQueryHistory } from '../hooks/useQueryHistory'
+import QueryHistoryPanel from '../components/QueryHistoryPanel'
 
 // Default values
 const DEFAULT_ELEMENT1: string[] = []
@@ -29,7 +31,9 @@ export default function FusionQuery() {
   const { t } = useTranslation()
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const { getFusionState, updateFusionState } = useQueryState()
+  const { history, addToHistory, toggleBookmark, removeFromHistory, clearHistory } = useQueryHistory()
   const [elements, setElements] = useState<Element[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
   const [queryError, setQueryError] = useState<Error | null>(null)
@@ -517,6 +521,9 @@ export default function FusionQuery() {
       setTotalCount(result.totalCount)
       setShowResults(true)
 
+      // Save to query history
+      addToHistory('fusion', queryFilter, result.totalCount)
+
       // Also fetch unlimited results for heatmap if toggle is enabled
       if (useAllResultsForHeatmap && result.totalCount > result.reactions.length) {
         const unlimitedQuery = { ...queryFilter, limit: undefined }
@@ -623,9 +630,29 @@ export default function FusionQuery() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('reactions.fusionTitle')}</h1>
-        <p className="text-gray-600 dark:text-gray-400">{t('reactions.fusionDescription')}</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('reactions.fusionTitle')}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{t('reactions.fusionDescription')}</p>
+        </div>
+        <QueryHistoryPanel
+          history={history}
+          currentQueryType="fusion"
+          onLoadQuery={(loadedFilter, queryType) => {
+            if (queryType !== 'fusion') {
+              const routeMap = { fission: '/fission', twotwo: '/twotwo', fusion: '/fusion' }
+              navigate(routeMap[queryType])
+              return
+            }
+            setSelectedElement1(loadedFilter.element1List || [])
+            setSelectedElement2(loadedFilter.element2List || [])
+            setSelectedOutputElement(loadedFilter.outputElementList || [])
+            setFilter(loadedFilter)
+          }}
+          onToggleBookmark={toggleBookmark}
+          onRemove={removeFromHistory}
+          onClearHistory={() => clearHistory(true)}
+        />
       </div>
 
       {/* Query Builder */}

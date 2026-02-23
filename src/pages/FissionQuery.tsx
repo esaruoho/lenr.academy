@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, FileJson, FileText, Info, Loader, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
 import ShareQueryButton from '../components/ShareQueryButton'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'
 import type { FissionReaction, QueryFilter, Element, Nuclide, HeatmapMode, HeatmapMetrics, AtomicRadiiData } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useQueryState } from '../contexts/QueryStateContext'
@@ -15,6 +15,8 @@ import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import { VirtualizedList } from '../components/VirtualizedList'
 import LimitSelector from '../components/LimitSelector'
 import { exportToJSON, exportToPDF } from '../utils/exportUtils'
+import { useQueryHistory } from '../hooks/useQueryHistory'
+import QueryHistoryPanel from '../components/QueryHistoryPanel'
 
 // Default values
 const DEFAULT_ELEMENT: string[] = []
@@ -29,7 +31,9 @@ export default function FissionQuery() {
   const { t } = useTranslation()
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const { getFissionState, updateFissionState } = useQueryState()
+  const { history, addToHistory, toggleBookmark, removeFromHistory, clearHistory } = useQueryHistory()
   const [availableElements, setAvailableElements] = useState<Element[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
   const [hasRestoredFromContext, setHasRestoredFromContext] = useState(false)
@@ -510,6 +514,9 @@ export default function FissionQuery() {
       setTotalCount(result.totalCount)
       setShowResults(true)
 
+      // Save to query history
+      addToHistory('fission', queryFilter, result.totalCount)
+
       // Also fetch unlimited results for heatmap if toggle is enabled
       if (useAllResultsForHeatmap && result.totalCount > result.reactions.length) {
         const unlimitedQuery = { ...queryFilter, limit: undefined }
@@ -765,9 +772,29 @@ export default function FissionQuery() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('reactions.fissionTitle')}</h1>
-        <p className="text-gray-600 dark:text-gray-400">{t('reactions.fissionDescription')}</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('reactions.fissionTitle')}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{t('reactions.fissionDescription')}</p>
+        </div>
+        <QueryHistoryPanel
+          history={history}
+          currentQueryType="fission"
+          onLoadQuery={(loadedFilter, queryType) => {
+            if (queryType !== 'fission') {
+              const routeMap = { fusion: '/fusion', twotwo: '/twotwo', fission: '/fission' }
+              navigate(routeMap[queryType])
+              return
+            }
+            setSelectedElement(loadedFilter.elements || [])
+            setSelectedOutputElement1(loadedFilter.outputElement1List || [])
+            setSelectedOutputElement2(loadedFilter.outputElement2List || [])
+            setFilter(loadedFilter)
+          }}
+          onToggleBookmark={toggleBookmark}
+          onRemove={removeFromHistory}
+          onClearHistory={() => clearHistory(true)}
+        />
       </div>
 
       {/* Query Builder */}

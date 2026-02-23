@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, FileJson, FileText, Info, Loader2, Eye, EyeOff, Radiation, ChevronDown } from 'lucide-react'
 import ShareQueryButton from '../components/ShareQueryButton'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'
 import type { TwoToTwoReaction, QueryFilter, Element, Nuclide, HeatmapMode, HeatmapMetrics, AtomicRadiiData, NeutrinoType } from '../types'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useQueryState } from '../contexts/QueryStateContext'
@@ -15,6 +15,8 @@ import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import { VirtualizedList } from '../components/VirtualizedList'
 import LimitSelector from '../components/LimitSelector'
 import { exportToJSON, exportToPDF } from '../utils/exportUtils'
+import { useQueryHistory } from '../hooks/useQueryHistory'
+import QueryHistoryPanel from '../components/QueryHistoryPanel'
 
 // Default values
 const DEFAULT_ELEMENT1 = ['D']
@@ -30,7 +32,9 @@ export default function TwoToTwoQuery() {
   const { t } = useTranslation()
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const { getTwoToTwoState, updateTwoToTwoState } = useQueryState()
+  const { history, addToHistory, toggleBookmark, removeFromHistory, clearHistory } = useQueryHistory()
   const [elements, setElements] = useState<Element[]>([])
   const [isInitialized, setIsInitialized] = useState(false)
   const [hasRestoredFromContext, setHasRestoredFromContext] = useState(false)
@@ -547,6 +551,9 @@ export default function TwoToTwoQuery() {
       setTotalCount(result.totalCount)
       setShowResults(true)
 
+      // Save to query history
+      addToHistory('twotwo', queryFilter, result.totalCount)
+
       // Also fetch unlimited results for heatmap if toggle is enabled
       if (useAllResultsForHeatmap && result.totalCount > result.reactions.length) {
         const unlimitedQuery = { ...queryFilter, limit: undefined }
@@ -653,9 +660,30 @@ export default function TwoToTwoQuery() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('reactions.twoToTwoTitle')}</h1>
-        <p className="text-gray-600 dark:text-gray-400">{t('reactions.twoToTwoDescription')}</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('reactions.twoToTwoTitle')}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{t('reactions.twoToTwoDescription')}</p>
+        </div>
+        <QueryHistoryPanel
+          history={history}
+          currentQueryType="twotwo"
+          onLoadQuery={(loadedFilter, queryType) => {
+            if (queryType !== 'twotwo') {
+              const routeMap = { fusion: '/fusion', fission: '/fission', twotwo: '/twotwo' }
+              navigate(routeMap[queryType])
+              return
+            }
+            setSelectedElement1(loadedFilter.element1List || [])
+            setSelectedElement2(loadedFilter.element2List || [])
+            setSelectedOutputElement3(loadedFilter.outputElement3List || [])
+            setSelectedOutputElement4(loadedFilter.outputElement4List || [])
+            setFilter(loadedFilter)
+          }}
+          onToggleBookmark={toggleBookmark}
+          onRemove={removeFromHistory}
+          onClearHistory={() => clearHistory(true)}
+        />
       </div>
 
       {/* Query Builder */}
