@@ -133,12 +133,12 @@ export default function EnergyHistogram({ reactions }: EnergyHistogramProps) {
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
               <XAxis
                 dataKey="label"
-                tick={{ fill: axisColor, fontSize: 12 }}
-                label={{ value: t('histogram.xAxisLabel'), position: 'insideBottom', offset: -15, fill: axisColor }}
+                tick={{ style: { fill: axisColor }, fontSize: 12 }}
+                label={{ value: t('histogram.xAxisLabel'), position: 'insideBottom', offset: -15, style: { fill: axisColor } }}
               />
               <YAxis
-                tick={{ fill: axisColor, fontSize: 12 }}
-                label={{ value: t('histogram.yAxisLabel'), angle: -90, position: 'insideLeft', offset: 5, fill: axisColor }}
+                tick={{ style: { fill: axisColor }, fontSize: 12 }}
+                label={{ value: t('histogram.yAxisLabel'), angle: -90, position: 'insideLeft', offset: 5, style: { fill: axisColor } }}
               />
               <Tooltip
                 contentStyle={{
