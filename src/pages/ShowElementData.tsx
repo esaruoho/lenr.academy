@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Radiation, ChevronDown } from 'lucide-react'
 import { useDatabase } from '../contexts/DatabaseContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { useLayout } from '../contexts/LayoutContext'
 import { useTheme } from '../contexts/ThemeContext'
 import type { Element, Nuclide, AtomicRadiiData, RadioactiveNuclideData, DisplayNuclide, RadioNuclideListItem } from '../types'
@@ -140,6 +141,7 @@ function getDaughterNuclide(Z: number, A: number, E: string, decayMode: string):
 export default function ShowElementData() {
   const { t } = useTranslation()
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
+  const { theme } = useTheme()
   const { openSidebar, setMobileHeaderHidden } = useLayout()
   const { theme } = useTheme()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -2089,8 +2091,8 @@ export default function ShowElementData() {
                 <div
                   className="w-4 h-4 rounded border"
                   style={{
-                    backgroundColor: RUSSELL_COLORS.generation.bg.light,
-                    borderColor: RUSSELL_COLORS.generation.light,
+                    backgroundColor: theme === 'dark' ? RUSSELL_COLORS.generation.bg.dark : RUSSELL_COLORS.generation.bg.light,
+                    borderColor: theme === 'dark' ? RUSSELL_COLORS.generation.dark : RUSSELL_COLORS.generation.light,
                   }}
                 />
                 <span className="text-gray-600 dark:text-gray-400">
@@ -2101,8 +2103,8 @@ export default function ShowElementData() {
                 <div
                   className="w-4 h-4 rounded border"
                   style={{
-                    backgroundColor: RUSSELL_COLORS.radiation.bg.light,
-                    borderColor: RUSSELL_COLORS.radiation.light,
+                    backgroundColor: theme === 'dark' ? RUSSELL_COLORS.radiation.bg.dark : RUSSELL_COLORS.radiation.bg.light,
+                    borderColor: theme === 'dark' ? RUSSELL_COLORS.radiation.dark : RUSSELL_COLORS.radiation.light,
                   }}
                 />
                 <span className="text-gray-600 dark:text-gray-400">
@@ -2113,8 +2115,8 @@ export default function ShowElementData() {
                 <div
                   className="w-4 h-4 rounded border"
                   style={{
-                    backgroundColor: RUSSELL_COLORS.inertGas.bg.light,
-                    borderColor: RUSSELL_COLORS.inertGas.light,
+                    backgroundColor: theme === 'dark' ? RUSSELL_COLORS.inertGas.bg.dark : RUSSELL_COLORS.inertGas.bg.light,
+                    borderColor: theme === 'dark' ? RUSSELL_COLORS.inertGas.dark : RUSSELL_COLORS.inertGas.light,
                   }}
                 />
                 <span className="text-gray-600 dark:text-gray-400">
@@ -2125,8 +2127,8 @@ export default function ShowElementData() {
                 <div
                   className="w-4 h-4 rounded border-2"
                   style={{
-                    backgroundColor: RUSSELL_COLORS.carbon.bg.light,
-                    borderColor: RUSSELL_COLORS.carbon.light,
+                    backgroundColor: theme === 'dark' ? RUSSELL_COLORS.carbon.bg.dark : RUSSELL_COLORS.carbon.bg.light,
+                    borderColor: theme === 'dark' ? RUSSELL_COLORS.carbon.dark : RUSSELL_COLORS.carbon.light,
                   }}
                 />
                 <span className="text-gray-600 dark:text-gray-400">
@@ -2138,11 +2140,11 @@ export default function ShowElementData() {
                   <div
                     className="w-4 h-4 rounded border"
                     style={{
-                      backgroundColor: RUSSELL_COLORS.predicted.bg.light,
-                      borderColor: RUSSELL_COLORS.predicted.light,
+                      backgroundColor: theme === 'dark' ? RUSSELL_COLORS.predicted.bg.dark : RUSSELL_COLORS.predicted.bg.light,
+                      borderColor: theme === 'dark' ? RUSSELL_COLORS.predicted.dark : RUSSELL_COLORS.predicted.light,
                     }}
                   />
-                  <span className="absolute -top-0.5 -right-0.5 text-[8px]" style={{ color: RUSSELL_COLORS.predicted.light }}>
+                  <span className="absolute -top-0.5 -right-0.5 text-[8px]" style={{ color: theme === 'dark' ? RUSSELL_COLORS.predicted.dark : RUSSELL_COLORS.predicted.light }}>
                     ★
                   </span>
                 </div>
@@ -2154,8 +2156,8 @@ export default function ShowElementData() {
                 <div
                   className="w-4 h-4 rounded"
                   style={{
-                    backgroundColor: RUSSELL_COLORS.hypothetical.bg.light,
-                    border: `1.5px dashed ${RUSSELL_COLORS.hypothetical.light}`,
+                    backgroundColor: theme === 'dark' ? RUSSELL_COLORS.hypothetical.bg.dark : RUSSELL_COLORS.hypothetical.bg.light,
+                    border: `1.5px dashed ${theme === 'dark' ? RUSSELL_COLORS.hypothetical.dark : RUSSELL_COLORS.hypothetical.light}`,
                   }}
                 />
                 <span className="text-gray-600 dark:text-gray-400">
