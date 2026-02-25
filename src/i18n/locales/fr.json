@@ -480,6 +480,8 @@
     "aboutParagraph1": "Walter Russell (1871–1963) a publié sa Table Périodique des Neuf Octaves dans « The Universal One » (1926), arrangeant tous les éléments dans un système d'octaves basé sur les ondes. Chaque octave a un côté de génération (charge) et un côté de radiation (décharge), avec un gaz inerte au point d'équilibre — le pivot de l'onde.",
     "aboutParagraph2": "Dans la cosmologie de Russell, la matière est créée par des vortex spiralants opposés de compression (génération) et d'expansion (radiation). Le carbone se situe à l'amplitude — le point de compression maximale — ce qui en fait l'élément le plus équilibré et stable.",
     "aboutParagraph3": "Russell a notamment prédit l'existence du Deutérium (qu'il appelait « Ethlogen »), du Tritium (« Bebegen »), du Neptunium et du Plutonium des années avant leur découverte officielle en laboratoire.",
+    "view3D": "Vue 3D",
+    "view3DControls": "Glisser pour tourner, défiler pour zoomer",
     "experimentalNote": "Cette visualisation est basée sur le tableau original de Russell de 1926. Le système de Russell diffère significativement de la table périodique moderne — il représente son modèle philosophique et cosmologique de la matière."
   },
   "segreChart": {

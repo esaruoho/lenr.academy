@@ -502,6 +502,8 @@
     "aboutParagraph1": "Walter Russell (1871–1963) published his Nine-Octave Periodic Table in \"The Universal One\" (1926), arranging all elements into a wave-based system of octaves. Each octave has a generation (charging) side and a radiation (discharging) side, with an inert gas at the balance point — the fulcrum of the wave.",
     "aboutParagraph2": "In Russell's cosmology, matter is created by opposing spiraling vortices of compression (generation) and expansion (radiation). Carbon sits at the amplitude — the point of maximum compression — making it the most balanced and stable element. The serpentine S-curve pattern shows how each octave reverses direction, creating a continuous wave from the lightest hypothetical substances to the heaviest known elements.",
     "aboutParagraph3": "Russell notably predicted the existence of Deuterium (which he called \"Ethlogen\"), Tritium (\"Bebegen\"), Neptunium, and Plutonium years before their official laboratory discovery — validating his wave-based model's predictive capacity.",
+    "view3D": "3D View",
+    "view3DControls": "Drag to rotate, scroll to zoom",
     "experimentalNote": "This visualization is based on Russell's original 1926 chart. Russell's system differs significantly from the modern periodic table — it represents his philosophical and cosmological model of matter rather than the quantum mechanical model used in contemporary chemistry."
   },
   "segreChart": {
