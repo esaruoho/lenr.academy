@@ -491,7 +491,12 @@
     "hideNetwork": "Masquer le réseau",
     "tooManyReactions": "Affichage des {{count}} principales réactions par énergie",
     "showAll": "Tout afficher",
-    "nodeTooltip": "{{element}}: {{count}} réactions"
+    "nodeTooltip": "{{element}}: {{count}} réactions",
+    "nodeTooltipFull": "{{element}} (Z={{Z}}) : {{count}} réactions",
+    "exothermic": "Exothermique (+MeV)",
+    "endothermic": "Endothermique (-MeV)",
+    "instructions": "Glissez les noeuds pour repositionner. Faites defiler pour zoomer.",
+    "graphStats": "{{nodes}} elements, {{links}} connexions"
   },
   "segreChart": {
     "title": "Segre Chart (N-Z Diagram)",

@@ -494,7 +494,12 @@
     "hideNetwork": "ネットワーク非表示",
     "tooManyReactions": "エネルギー上位{{count}}反応を表示",
     "showAll": "すべて表示",
-    "nodeTooltip": "{{element}}: {{count}}反応"
+    "nodeTooltip": "{{element}}: {{count}}反応",
+    "nodeTooltipFull": "{{element}} (Z={{Z}}): {{count}}反応",
+    "exothermic": "発熱反応 (+MeV)",
+    "endothermic": "吸熱反応 (-MeV)",
+    "instructions": "ノードをドラッグして移動。スクロールでズーム。",
+    "graphStats": "{{nodes}}元素、{{links}}接続"
   },
   "segreChart": {
     "title": "Segre Chart (N-Z Diagram)",

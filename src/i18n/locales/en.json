@@ -505,7 +505,12 @@
     "hideNetwork": "Hide Network",
     "tooManyReactions": "Showing top {{count}} reactions by energy",
     "showAll": "Show all",
-    "nodeTooltip": "{{element}}: {{count}} reactions"
+    "nodeTooltip": "{{element}}: {{count}} reactions",
+    "nodeTooltipFull": "{{element}} (Z={{Z}}): {{count}} reactions",
+    "exothermic": "Exothermic (+MeV)",
+    "endothermic": "Endothermic (-MeV)",
+    "instructions": "Drag nodes to reposition. Scroll to zoom.",
+    "graphStats": "{{nodes}} elements, {{links}} connections"
   },
   "segreChart": {
     "title": "Segre Chart (N-Z Diagram)",

@@ -271,7 +271,7 @@ export default function ReactionNetworkGraph({ reactions, reactionType }: Reacti
           })
 
         // Show tooltip
-        const text = `${d.label} (Z=${d.Z}): ${d.reactionCount} reactions`
+        const text = t('networkGraph.nodeTooltipFull', { element: d.label, Z: d.Z, count: d.reactionCount })
         tooltipText.text(text)
         const textBBox = (tooltipText.node() as SVGTextElement).getBBox()
         tooltipRect
@@ -375,7 +375,7 @@ export default function ReactionNetworkGraph({ reactions, reactionType }: Reacti
     return () => {
       simulation.stop()
     }
-  }, [graphData, isDark])
+  }, [graphData, isDark, t])
 
   useEffect(() => {
     if (expanded) {
@@ -394,7 +394,7 @@ export default function ReactionNetworkGraph({ reactions, reactionType }: Reacti
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {t('networkGraph.reactionNetworkDesc')}
-            {graphData.nodes.length > 0 && ` — ${graphData.nodes.length} elements, ${graphData.links.length} connections`}
+            {graphData.nodes.length > 0 && ` — ${t('networkGraph.graphStats', { nodes: graphData.nodes.length, links: graphData.links.length })}`}
           </p>
         </div>
         <button
@@ -430,13 +430,13 @@ export default function ReactionNetworkGraph({ reactions, reactionType }: Reacti
           <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
             <span className="flex items-center gap-1">
               <span className="inline-block w-3 h-0.5 rounded" style={{ backgroundColor: isDark ? '#34d399' : '#059669' }} />
-              Exothermic (+MeV)
+              {t('networkGraph.exothermic')}
             </span>
             <span className="flex items-center gap-1">
               <span className="inline-block w-3 h-0.5 rounded" style={{ backgroundColor: isDark ? '#f87171' : '#dc2626' }} />
-              Endothermic (-MeV)
+              {t('networkGraph.endothermic')}
             </span>
-            <span className="ml-auto">Drag nodes to reposition. Scroll to zoom.</span>
+            <span className="ml-auto">{t('networkGraph.instructions')}</span>
           </div>
         </div>
       </div>

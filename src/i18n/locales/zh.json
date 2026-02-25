@@ -494,7 +494,12 @@
     "hideNetwork": "隐藏网络",
     "tooManyReactions": "按能量显示前{{count}}个反应",
     "showAll": "显示全部",
-    "nodeTooltip": "{{element}}：{{count}}个反应"
+    "nodeTooltip": "{{element}}：{{count}}个反应",
+    "nodeTooltipFull": "{{element}} (Z={{Z}})：{{count}}个反应",
+    "exothermic": "放热反应 (+MeV)",
+    "endothermic": "吸热反应 (-MeV)",
+    "instructions": "拖动节点重新定位。滚动缩放。",
+    "graphStats": "{{nodes}}个元素，{{links}}个连接"
   },
   "segreChart": {
     "title": "Segre Chart (N-Z Diagram)",
