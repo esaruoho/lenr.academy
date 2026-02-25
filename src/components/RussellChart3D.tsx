@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo, useCallback } from 'react'
+import { useRef, useState, useMemo, useCallback, useEffect } from 'react'
 import { Canvas, useFrame, ThreeEvent } from '@react-three/fiber'
 import { OrbitControls, Text, Html } from '@react-three/drei'
 import * as THREE from 'three'
@@ -90,6 +90,7 @@ interface ElementSphereProps {
 
 function ElementSphere({ node, isDark, isHovered, onHover, onClick }: ElementSphereProps) {
   const meshRef = useRef<THREE.Mesh>(null)
+  const targetVec = useRef(new THREE.Vector3(1, 1, 1))
   const color = useMemo(() => getElementColor3D(node.el, isDark), [node.el, isDark])
   const isClickable = !!node.el.Z
   const isHypothetical = node.el.status === 'hypothetical'
@@ -97,14 +98,12 @@ function ElementSphere({ node, isDark, isHovered, onHover, onClick }: ElementSph
   // Size: real elements larger, predicted medium, hypothetical smaller
   const baseSize = isHypothetical ? 0.25 : node.el.status === 'predicted' ? 0.35 : 0.4
 
-  // Gentle hover pulse
+  // Gentle hover pulse — cached Vector3 avoids per-frame allocation
   useFrame(() => {
     if (meshRef.current) {
       const targetScale = isHovered ? 1.3 : 1.0
-      meshRef.current.scale.lerp(
-        new THREE.Vector3(targetScale, targetScale, targetScale),
-        0.1
-      )
+      targetVec.current.set(targetScale, targetScale, targetScale)
+      meshRef.current.scale.lerp(targetVec.current, 0.1)
     }
   })
 
@@ -243,14 +242,23 @@ function SpiralConnections({ nodes, isDark }: { nodes: ElementNode[]; isDark: bo
         transparent: true,
         opacity: 0.35,
       })
-      return new THREE.Line(geometry, material)
+      return { line: new THREE.Line(geometry, material), geometry, material }
     })
   }, [lines])
 
+  useEffect(() => {
+    return () => {
+      lineObjects.forEach(({ geometry, material }) => {
+        geometry.dispose()
+        material.dispose()
+      })
+    }
+  }, [lineObjects])
+
   return (
     <group>
-      {lineObjects.map((lineObj, i) => (
-        <primitive key={i} object={lineObj} />
+      {lineObjects.map((obj, i) => (
+        <primitive key={i} object={obj.line} />
       ))}
     </group>
   )
@@ -264,6 +272,7 @@ interface SceneProps {
 }
 
 function Scene({ isDark, onElementClick }: SceneProps) {
+  const { t } = useTranslation()
   const [hoveredNode, setHoveredNode] = useState<ElementNode | null>(null)
   const nodes = useMemo(() => buildElementNodes(), [])
 
@@ -317,11 +326,11 @@ function Scene({ isDark, onElementClick }: SceneProps) {
               {hoveredNode.el.modernSymbol && ` (${hoveredNode.el.modernSymbol})`}
             </div>
             <div className="text-xs opacity-75">
-              Octave {hoveredNode.octave.number} — {hoveredNode.el.side === 'generation'
-                ? 'Generation'
+              {t('russellChart.octave')} {hoveredNode.octave.number} — {hoveredNode.el.side === 'generation'
+                ? t('russellChart.generationSide')
                 : hoveredNode.el.side === 'radiation'
-                ? 'Radiation'
-                : 'Inert Gas'}
+                ? t('russellChart.radiationSide')
+                : t('russellChart.inertGasLabel')}
             </div>
             {hoveredNode.el.Z && (
               <div className="text-xs opacity-75">Z = {hoveredNode.el.Z}</div>
