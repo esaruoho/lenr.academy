@@ -18,6 +18,7 @@ import { exportToJSON, exportToPDF } from '../utils/exportUtils'
 import { useQueryHistory } from '../hooks/useQueryHistory'
 import QueryHistoryPanel from '../components/QueryHistoryPanel'
 import EnergyHistogram from '../components/EnergyHistogram'
+import ReactionNetworkGraph from '../components/ReactionNetworkGraph'
 
 // Default values
 const DEFAULT_ELEMENT: string[] = []
@@ -1128,6 +1129,9 @@ export default function FissionQuery() {
 
           {/* Energy Distribution Histogram */}
           <EnergyHistogram reactions={filteredResults} />
+
+          {/* Reaction Network Graph */}
+          <ReactionNetworkGraph reactions={filteredResults} reactionType="fission" />
 
           <div className="card p-6 pb-0 sm:pb-6">
             <div className="flex justify-between items-center mb-4">

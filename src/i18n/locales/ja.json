@@ -487,11 +487,20 @@
     "view3DControls": "ドラッグで回転、スクロールでズーム",
     "experimentalNote": "この視覚化はラッセルの1926年の原図に基づいています。ラッセルのシステムは現代の周期表とは大きく異なり、現代化学で使用される量子力学モデルではなく、彼の哲学的・宇宙論的な物質モデルを表しています。"
   },
+  "networkGraph": {
+    "reactionNetwork": "反応ネットワーク",
+    "reactionNetworkDesc": "元素関係を示す力指向グラフ",
+    "showNetwork": "ネットワーク表示",
+    "hideNetwork": "ネットワーク非表示",
+    "tooManyReactions": "エネルギー上位{{count}}反応を表示",
+    "showAll": "すべて表示",
+    "nodeTooltip": "{{element}}: {{count}}反応"
+  },
   "segreChart": {
     "title": "Segre Chart (N-Z Diagram)",
     "description": "Interactive chart of nuclides plotted by proton number (Z) vs neutron number (N), color-coded by stability",
     "sectionTitle": "核種図（セグレ図）",
-    "stable": "Stable (>10\u2079 years)",
+    "stable": "Stable (>10⁹ years)",
     "longHalfLife": "Long half-life (>100 years)",
     "shortHalfLife": "Short half-life (<100 years)",
     "unknown": "Unknown half-life",
@@ -510,7 +519,7 @@
   },
   "cascades": {
     "title": "カスケード",
-    "description": "反応カスケードと経路を探索",
+    "description": "説明",
     "simulationEngine": "カスケードシミュレーションエンジン",
     "startSimulation": "シミュレーション開始",
     "stopSimulation": "シミュレーション停止",
@@ -592,7 +601,6 @@
     "noMaterialsInCategory": "このカテゴリには材料がありません",
     "saveCustomMaterial": "カスタム材料を保存",
     "name": "名前",
-    "description": "説明",
     "saveCurrentFuelMixture": "現在の燃料混合物（{{count}}核種）をカスタム材料として保存します。",
     "saveMaterial": "材料を保存",
     "deleteCustomMaterial": "このカスタム材料を削除しますか？",

@@ -18,6 +18,7 @@ import { exportToJSON, exportToPDF } from '../utils/exportUtils'
 import { useQueryHistory } from '../hooks/useQueryHistory'
 import QueryHistoryPanel from '../components/QueryHistoryPanel'
 import EnergyHistogram from '../components/EnergyHistogram'
+import ReactionNetworkGraph from '../components/ReactionNetworkGraph'
 
 // Default values
 const DEFAULT_ELEMENT1 = ['D']
@@ -1033,6 +1034,9 @@ export default function TwoToTwoQuery() {
 
           {/* Energy Distribution Histogram */}
           <EnergyHistogram reactions={filteredResults} />
+
+          {/* Reaction Network Graph */}
+          <ReactionNetworkGraph reactions={filteredResults} reactionType="twotwo" />
 
           <div className="card p-6 pb-0 sm:pb-6">
             <div className="flex justify-between items-center mb-4">
