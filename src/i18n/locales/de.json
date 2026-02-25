@@ -468,11 +468,12 @@
     "legendSerpentine": "Serpentinenfluss",
     "clickToView": "Klicken Sie auf ein bekanntes Element, um seine Eigenschaften und Isotope in der Datenbank anzuzeigen",
     "clickToViewDetails": "Klicken für Elementdetails",
-    "gridView": "Grid View",
-    "waveView": "Wave View",
-    "waveDescription": "Elements as points on Russell's octave wave — amplitude rises through generation (compression) to Carbon at the peak, then descends through radiation (expansion)",
+    "gridView": "Gitteransicht",
+    "waveView": "Wellenansicht",
+    "waveDescription": "Elemente als Punkte auf Russells Oktavwelle — die Amplitude steigt durch Erzeugung (Verdichtung) bis zum Kohlenstoff am Scheitel und fällt dann durch Strahlung (Ausdehnung)",
     "amplitude": "Amplitude",
-    "octaveAxis": "Octave",
+    "octaveAxis": "Oktave",
+    "carbonPeak": "Kohlenstoff (Scheitel)",
     "zoomControls": "Scrollen zum Zoomen, Ziehen zum Schwenken, Doppelklick zum Vergrößern",
     "predictionsTitle": "Russells Vorhersagen",
     "predictionsDescription": "Walter Russell sagte mehrere Elemente vor ihrer offiziellen Entdeckung voraus und demonstrierte damit die Vorhersagekraft seines wellenbasierten periodischen Systems.",
@@ -481,6 +482,45 @@
     "aboutParagraph2": "In Russells Kosmologie wird Materie durch gegenläufig spiralige Wirbel von Kompression (Erzeugung) und Expansion (Strahlung) erzeugt. Kohlenstoff sitzt an der Amplitude — dem Punkt maximaler Verdichtung — und ist damit das ausgeglichenste und stabilste Element.",
     "aboutParagraph3": "Russell sagte bemerkenswert die Existenz von Deuterium (das er \"Ethlogen\" nannte), Tritium (\"Bebegen\"), Neptunium und Plutonium Jahre vor ihrer offiziellen Laborentdeckung voraus.",
     "experimentalNote": "Diese Visualisierung basiert auf Russells Originaldiagramm von 1926. Russells System unterscheidet sich erheblich vom modernen Periodensystem — es repräsentiert sein philosophisches und kosmologisches Modell der Materie."
+  },
+  "russellHistory": {
+    "title": "Historischer Hintergrund",
+    "subtitle": "Die Geschichte hinter dem Periodensystem der neun Oktaven — von einem Universalgelehrten und Maler zur verifizierten Transmutation.",
+    "expandAll": "Alle aufklappen",
+    "collapseAll": "Alle zuklappen",
+    "whoWasRussell": {
+      "title": "Wer war Walter Russell (1871–1963)?",
+      "p1": "Walter Russell war Porträtmaler, Bildhauer, Architekt, Komponist, Eiskunstläufer und Pferdezüchter, der in jedem Bereich internationale Anerkennung erlangte. Er entwarf das Mark Twain Hotel und schuf Büsten von Edison, Roosevelt, Mark Twain und Gershwin. Er war Präsident der Society of Arts and Sciences und hielt Vorträge bei IBM über Geschäftsethik.",
+      "p2": "Ohne nennenswerte formale naturwissenschaftliche Ausbildung veröffentlichte Russell 1926 ein völlig neues Periodensystem der Elemente, geordnet in neun Oktaven wie eine Tonleiter. Auf diesen Diagrammen platzierte er vier Elemente, die noch in keinem Labor entdeckt worden waren.",
+      "p3": "Sir Oliver Lodge hatte gesagt: 'Kein Wissenschaftler könnte die höchste Entdeckung machen. Es müsste die höchste Inspiration eines Dichters, Malers, Philosophen oder Heiligen sein.' Russell war Maler, Philosoph und mehr.",
+      "highlight": "Russell erhielt einen Ehrendoktortitel der American Academy of Sciences für seine Elementvorhersagen."
+    },
+    "nineOctaveStructure": {
+      "title": "Die Neun-Oktaven-Struktur",
+      "p1": "Russell ordnete alle Elemente in neun Oktaven an, wie Noten auf einer Tonleiter. Jede Oktave hat eine Erzeugungs- (Ladungs-/Verdichtungs-) Seite und eine Strahlungsseite (Entladungs-/Ausdehnungs-), mit einem Edelgas am Drehpunkt — dem Gleichgewichtspunkt jeder Oktave.",
+      "p2": "Kohlenstoff sitzt an der Amplitude der vierten Oktave — dem Punkt maximaler Verdichtung und perfekter Stabilität. Von Wasserstoffs steilem Wirbelkegel bis zu Kohlenstoffs flacher Spirale bilden die Elementpositionen eine durchgehende Welle zunehmender Dichte ab.",
+      "p3": "Das Standard-Periodensystem beschreibt, WAS Elemente sind (Ordnungszahl, Elektronenkonfiguration). Russells Neun-Oktaven-Tabelle beschreibt, WARUM sie existieren — als Verdichtungszustände entlang eines kontinuierlichen Spektrums."
+    },
+    "westinghouse": {
+      "title": "Das Westinghouse-Transmutationsexperiment (1927)",
+      "p1": "1927 demonstrierte Russell die Transmutation im Westinghouse-Lampblack-Laboratorium in Bloomfield, New Jersey. Die Apparatur verwendete zwei asymmetrische Solenoidspulen, die in einstellbaren Winkeln in einem evakuierten Quarzrohr mit Stickstoff montiert waren.",
+      "p2": "Durch Anpassung des Winkelversatzes der Spulen (Kontrolle dreier gebrochener Symmetrien: Winkel, Polarität und zeitlich) wandelte Russell Wasserdampf in Stickstoff und Wasserstoff um und verschob Stickstoff in Richtung anderer Elemente. Die Ergebnisse wurden vom chemischen Labor von Westinghouse verifiziert.",
+      "p3": "Die zentrale Erkenntnis: Die Geometrie wählt das Element aus. Durch Ändern des Magnetfeldwinkels (Nachbildung des Wirbelkegelwinkels für jede Elementposition auf dem Oktavendiagramm) konnte Russell auswählen, welcher elementare Zustand sich manifestieren würde.",
+      "highlight": "Westinghouse-Chemiker M. Hoyt verifizierte die Ergebnisse: 69,1% des ursprünglichen Stickstoffs wurden umgewandelt. Das Experiment wurde von mehreren Westinghouse-Mitarbeitern bezeugt."
+    },
+    "modernReplication": {
+      "title": "Moderne Replikation und LENR-Verbindung (1992–1994)",
+      "p1": "1992 replizierte Toby Grotz (Tesla Engineering Laboratories) die Russell-Transmutation mit moderner Ausrüstung zusammen mit Tim Binder von der University of Science and Philosophy. Sie detektierten Fluor (Spektrallinien bei 7311/7398 Angström) bei einem 44°-Solenoidwinkel — genau dort, wo Russells Diagramm es platziert.",
+      "p2": "1994 erzielte Ron Kovac ein dramatischeres Ergebnis: Ausgehend von Stickstoff zeigte seine Massenspektrometrie Helium-4 bei 3,75% und Lithium-5 bei 2,50%. Dies ist direkt relevant für die LENR-Forschung — Julian Schwinger (Nobelpreisträger) sagte unabhängig voraus, dass Li-5 ein Produkt des Kalten-Fusionsprozesses sein sollte.",
+      "p3": "Die Grotz-Kovac-Ergebnisse wurden bei SAE International (Paper 929470) vorgestellt. Sie bieten eine unabhängige Verifizierung von Russells Kernaussage: Elemente sind Verdichtungszustände, die durch Änderung der Feldgeometrie verschoben werden können.",
+      "highlight": "Kovacs Nachweis von Li-5 — vorhergesagt durch Schwingers Kalte-Fusionstheorie und erzeugt durch Russells Transmutationsmethode — verbindet die Kosmogonie der 1920er Jahre mit moderner LENR-Forschung."
+    },
+    "vortexCone": {
+      "title": "Das Wirbelkegelmodell",
+      "p1": "In Russells Modell entspricht jedes Element einem bestimmten Winkel auf einem spiralförmigen Wirbelkegel. Wasserstoff sitzt am steilen Ende des Kegels (fast vertikal). Mit zunehmender Verdichtung flacht die Spirale ab. Russell schrieb: 'Verkürzen Sie den Kegel allmählich, bis diese Linien so flach wie eine Uhrfeder sind, und Sie haben dann das Kohlenstoffatom.'",
+      "p2": "Deshalb ist der Solenoidwinkel im Transmutator wichtig: Das Einstellen der Spulen auf einen bestimmten Winkel repliziert die Wirbelkegelgeometrie für die Position dieses Elements. Der 44°-Winkel, der in Grotz' Experiment von 1992 Fluor produzierte, entspricht der Position von Fluor auf dem abgewickelten Oktavenkegel.",
+      "p3": "Das Wirbelkegelmodell vereint das Periodensystem mit der Feldgeometrie. Es sagt voraus, dass jedes Element aus jedem anderen erzeugt werden kann, indem das Verdichtungsverhältnis geändert wird — genau das, was die Transmutationsexperimente demonstrierten."
+    }
   },
   "segreChart": {
     "title": "Segre Chart (N-Z Diagram)",

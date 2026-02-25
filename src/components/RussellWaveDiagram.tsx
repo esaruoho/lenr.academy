@@ -379,7 +379,7 @@ export default function RussellWaveDiagram({ onElementClick }: RussellWaveDiagra
                 fontSize={10}
                 fontWeight="600"
               >
-                Carbon (Peak)
+                {t('russellChart.carbonPeak')}
               </text>
             )
           })}

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Radiation, ChevronDown } from 'lucide-react'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useLayout } from '../contexts/LayoutContext'
+import { useTheme } from '../contexts/ThemeContext'
 import type { Element, Nuclide, AtomicRadiiData, RadioactiveNuclideData, DisplayNuclide, RadioNuclideListItem } from '../types'
 import PeriodicTable from '../components/PeriodicTable'
 import NuclideDetailsCard from '../components/NuclideDetailsCard'
@@ -142,6 +143,8 @@ export default function ShowElementData() {
   const { t } = useTranslation()
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const { openSidebar, setMobileHeaderHidden } = useLayout()
+  const { theme } = useTheme()
+  const russellColorMode = theme === 'dark' ? 'dark' : 'light'
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Tab state
@@ -2121,8 +2124,8 @@ export default function ShowElementData() {
                 <div
                   className="w-4 h-4 rounded border"
                   style={{
-                    backgroundColor: RUSSELL_COLORS.generation.bg.light,
-                    borderColor: RUSSELL_COLORS.generation.light,
+                    backgroundColor: RUSSELL_COLORS.generation.bg[russellColorMode],
+                    borderColor: RUSSELL_COLORS.generation[russellColorMode],
                   }}
                 />
                 <span className="text-gray-600 dark:text-gray-400">
@@ -2133,8 +2136,8 @@ export default function ShowElementData() {
                 <div
                   className="w-4 h-4 rounded border"
                   style={{
-                    backgroundColor: RUSSELL_COLORS.radiation.bg.light,
-                    borderColor: RUSSELL_COLORS.radiation.light,
+                    backgroundColor: RUSSELL_COLORS.radiation.bg[russellColorMode],
+                    borderColor: RUSSELL_COLORS.radiation[russellColorMode],
                   }}
                 />
                 <span className="text-gray-600 dark:text-gray-400">
@@ -2145,8 +2148,8 @@ export default function ShowElementData() {
                 <div
                   className="w-4 h-4 rounded border"
                   style={{
-                    backgroundColor: RUSSELL_COLORS.inertGas.bg.light,
-                    borderColor: RUSSELL_COLORS.inertGas.light,
+                    backgroundColor: RUSSELL_COLORS.inertGas.bg[russellColorMode],
+                    borderColor: RUSSELL_COLORS.inertGas[russellColorMode],
                   }}
                 />
                 <span className="text-gray-600 dark:text-gray-400">
@@ -2157,8 +2160,8 @@ export default function ShowElementData() {
                 <div
                   className="w-4 h-4 rounded border-2"
                   style={{
-                    backgroundColor: RUSSELL_COLORS.carbon.bg.light,
-                    borderColor: RUSSELL_COLORS.carbon.light,
+                    backgroundColor: RUSSELL_COLORS.carbon.bg[russellColorMode],
+                    borderColor: RUSSELL_COLORS.carbon[russellColorMode],
                   }}
                 />
                 <span className="text-gray-600 dark:text-gray-400">
@@ -2170,11 +2173,11 @@ export default function ShowElementData() {
                   <div
                     className="w-4 h-4 rounded border"
                     style={{
-                      backgroundColor: RUSSELL_COLORS.predicted.bg.light,
-                      borderColor: RUSSELL_COLORS.predicted.light,
+                      backgroundColor: RUSSELL_COLORS.predicted.bg[russellColorMode],
+                      borderColor: RUSSELL_COLORS.predicted[russellColorMode],
                     }}
                   />
-                  <span className="absolute -top-0.5 -right-0.5 text-[8px]" style={{ color: RUSSELL_COLORS.predicted.light }}>
+                  <span className="absolute -top-0.5 -right-0.5 text-[8px]" style={{ color: RUSSELL_COLORS.predicted[russellColorMode] }}>
                     ★
                   </span>
                 </div>
@@ -2186,8 +2189,8 @@ export default function ShowElementData() {
                 <div
                   className="w-4 h-4 rounded"
                   style={{
-                    backgroundColor: RUSSELL_COLORS.hypothetical.bg.light,
-                    border: `1.5px dashed ${RUSSELL_COLORS.hypothetical.light}`,
+                    backgroundColor: RUSSELL_COLORS.hypothetical.bg[russellColorMode],
+                    border: `1.5px dashed ${RUSSELL_COLORS.hypothetical[russellColorMode]}`,
                   }}
                 />
                 <span className="text-gray-600 dark:text-gray-400">
@@ -2220,11 +2223,11 @@ export default function ShowElementData() {
                   key={el.russellName}
                   className="flex items-start gap-3 p-3 rounded-lg"
                   style={{
-                    backgroundColor: 'rgba(5, 150, 105, 0.05)',
-                    border: '1px solid rgba(5, 150, 105, 0.15)',
+                    backgroundColor: russellColorMode === 'dark' ? 'rgba(5, 150, 105, 0.1)' : 'rgba(5, 150, 105, 0.05)',
+                    border: `1px solid ${russellColorMode === 'dark' ? 'rgba(52, 211, 153, 0.25)' : 'rgba(5, 150, 105, 0.15)'}`,
                   }}
                 >
-                  <span className="text-lg" style={{ color: RUSSELL_COLORS.predicted.light }}>
+                  <span className="text-lg" style={{ color: RUSSELL_COLORS.predicted[russellColorMode] }}>
                     ★
                   </span>
                   <div>
