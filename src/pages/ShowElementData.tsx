@@ -2190,11 +2190,11 @@ export default function ShowElementData() {
                   key={el.russellName}
                   className="flex items-start gap-3 p-3 rounded-lg"
                   style={{
-                    backgroundColor: 'rgba(5, 150, 105, 0.05)',
-                    border: '1px solid rgba(5, 150, 105, 0.15)',
+                    backgroundColor: theme === 'dark' ? 'rgba(52, 211, 153, 0.08)' : 'rgba(5, 150, 105, 0.05)',
+                    border: `1px solid ${theme === 'dark' ? 'rgba(52, 211, 153, 0.2)' : 'rgba(5, 150, 105, 0.15)'}`,
                   }}
                 >
-                  <span className="text-lg" style={{ color: RUSSELL_COLORS.predicted.light }}>
+                  <span className="text-lg" style={{ color: theme === 'dark' ? RUSSELL_COLORS.predicted.dark : RUSSELL_COLORS.predicted.light }}>
                     ★
                   </span>
                   <div>
