@@ -5,7 +5,6 @@ import { Radiation, ChevronDown } from 'lucide-react'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useLayout } from '../contexts/LayoutContext'
-import { useTheme } from '../contexts/ThemeContext'
 import type { Element, Nuclide, AtomicRadiiData, RadioactiveNuclideData, DisplayNuclide, RadioNuclideListItem } from '../types'
 import PeriodicTable from '../components/PeriodicTable'
 import NuclideDetailsCard from '../components/NuclideDetailsCard'
@@ -143,7 +142,6 @@ export default function ShowElementData() {
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const { theme } = useTheme()
   const { openSidebar, setMobileHeaderHidden } = useLayout()
-  const { theme } = useTheme()
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Tab state
@@ -2165,7 +2163,7 @@ export default function ShowElementData() {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-0.5" style={{ borderTop: '2px dashed rgba(156, 163, 175, 0.4)' }} />
+                <div className="w-8 h-0.5" style={{ borderTop: `2px dashed ${theme === 'dark' ? 'rgba(107, 114, 128, 0.3)' : 'rgba(156, 163, 175, 0.4)'}` }} />
                 <span className="text-gray-600 dark:text-gray-400">
                   {t('russellChart.legendSerpentine')}
                 </span>
