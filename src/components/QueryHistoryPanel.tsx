@@ -57,7 +57,8 @@ const TYPE_BADGE_LABELS: Record<'fusion' | 'fission' | 'twotwo', string> = {
 
 export default function QueryHistoryPanel({
   history,
-  currentQueryType: _,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  currentQueryType,
   onLoadQuery,
   onToggleBookmark,
   onRemove,

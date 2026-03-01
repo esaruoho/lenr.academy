@@ -37,10 +37,12 @@ function SentryTest() {
 
         // Simulate some work
         const start = Date.now()
+        /* eslint-disable @typescript-eslint/no-unused-vars */
         let sum = 0
         for (let i = 0; i < 1000000; i++) {
           sum += i
         }
+        /* eslint-enable @typescript-eslint/no-unused-vars */
         const duration = Date.now() - start
 
         span.setAttribute('computation_duration_ms', duration)

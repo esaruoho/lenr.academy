@@ -79,6 +79,7 @@ export default function ChangelogModal({
   }
 
   const markdownComponents: Components = {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     a: ({ node, ...props }) => (
       <a
         {...props}
@@ -87,9 +88,11 @@ export default function ChangelogModal({
         className="font-medium text-yellow-700 dark:text-yellow-300 hover:underline"
       />
     ),
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ul: ({ node, ...props }) => (
       <ul {...props} className="list-disc pl-5 space-y-1" />
     ),
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ol: ({ node, ...props }) => (
       <ol {...props} className="list-decimal pl-5 space-y-1" />
     ),
