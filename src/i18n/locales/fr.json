@@ -468,12 +468,6 @@
     "legendSerpentine": "Chemin en Serpentin",
     "clickToView": "Cliquez sur un élément connu pour afficher ses propriétés et isotopes dans la base de données",
     "clickToViewDetails": "Cliquez pour voir les détails de l'élément",
-    "gridView": "Vue grille",
-    "waveView": "Vue onde",
-    "waveDescription": "Les elements comme points sur l'onde d'octave de Russell — l'amplitude monte a travers la generation (compression) jusqu'au Carbone au sommet, puis descend a travers la radiation (expansion)",
-    "amplitude": "Amplitude",
-    "octaveAxis": "Octave",
-    "carbonPeak": "Carbone (Sommet)",
     "zoomControls": "Défiler pour zoomer, glisser pour déplacer, double-cliquer pour agrandir",
     "predictionsTitle": "Les Prédictions de Russell",
     "predictionsDescription": "Walter Russell a prédit plusieurs éléments avant leur découverte officielle, démontrant la capacité prédictive de son système périodique basé sur les ondes.",
@@ -482,45 +476,6 @@
     "aboutParagraph2": "Dans la cosmologie de Russell, la matière est créée par des vortex spiralants opposés de compression (génération) et d'expansion (radiation). Le carbone se situe à l'amplitude — le point de compression maximale — ce qui en fait l'élément le plus équilibré et stable.",
     "aboutParagraph3": "Russell a notamment prédit l'existence du Deutérium (qu'il appelait « Ethlogen »), du Tritium (« Bebegen »), du Neptunium et du Plutonium des années avant leur découverte officielle en laboratoire.",
     "experimentalNote": "Cette visualisation est basée sur le tableau original de Russell de 1926. Le système de Russell diffère significativement de la table périodique moderne — il représente son modèle philosophique et cosmologique de la matière."
-  },
-  "russellHistory": {
-    "title": "Contexte historique",
-    "subtitle": "L'histoire derriere la table periodique des neuf octaves — d'un peintre polymathe a la transmutation verifiee.",
-    "expandAll": "Tout deplier",
-    "collapseAll": "Tout replier",
-    "whoWasRussell": {
-      "title": "Qui etait Walter Russell (1871–1963) ?",
-      "p1": "Walter Russell etait portraitiste, sculpteur, architecte, compositeur, patineur artistique et eleveur de chevaux, ayant obtenu une reconnaissance internationale dans chaque domaine. Il a concu le Mark Twain Hotel et sculpte les bustes d'Edison, Roosevelt, Mark Twain et Gershwin. Il etait president de la Society of Arts and Sciences et donnait des conferences chez IBM sur l'ethique des affaires.",
-      "p2": "Avec presque aucune formation scientifique formelle, Russell a publie une table periodique des elements entierement nouvelle en 1926, organisee en neuf octaves comme une gamme musicale. Sur ces diagrammes, il a place quatre elements qui n'avaient encore ete decouverts dans aucun laboratoire.",
-      "p3": "Sir Oliver Lodge avait dit : « Aucun scientifique ne pourrait faire la decouverte supreme. Ce devrait etre l'inspiration supreme d'un poete, peintre, philosophe ou saint. » Russell etait peintre, philosophe et bien plus.",
-      "highlight": "Russell a recu un doctorat honorifique de l'American Academy of Sciences pour ses predictions d'elements."
-    },
-    "nineOctaveStructure": {
-      "title": "La structure des neuf octaves",
-      "p1": "Russell a organise tous les elements en neuf octaves, comme les notes d'une gamme musicale. Chaque octave a un cote de generation (charge/compression) et un cote de radiation (decharge/expansion), avec un gaz inerte au point d'appui — le point d'equilibre de chaque octave.",
-      "p2": "Le carbone se situe a l'amplitude de la quatrieme octave — le point de compression maximale et de stabilite parfaite. Du cone de vortex abrupt de l'hydrogene a la spirale plate du carbone, les positions des elements dessinent une onde continue de densite croissante.",
-      "p3": "La table periodique standard decrit CE QUE sont les elements (numero atomique, configuration electronique). La table des neuf octaves de Russell decrit POURQUOI ils existent — comme des conditions de compression le long d'un spectre continu."
-    },
-    "westinghouse": {
-      "title": "L'experience de transmutation Westinghouse (1927)",
-      "p1": "En 1927, Russell a demontre la transmutation au laboratoire Lampblack de Westinghouse a Bloomfield, New Jersey. L'appareil utilisait deux bobines solenoides asymetriques montees a des angles ajustables a l'interieur d'un tube de quartz evacue rempli d'azote.",
-      "p2": "En ajustant le decalage angulaire des bobines (controlant trois symetries brisees : angulaire, de polarite et temporelle), Russell a converti la vapeur d'eau en azote et hydrogene, et deplace l'azote vers d'autres elements. Les resultats ont ete verifies par le laboratoire chimique de Westinghouse.",
-      "p3": "L'idee cle : la geometrie selectionne l'element. En changeant l'angle du champ magnetique (reproduisant l'angle du cone de vortex pour la position de chaque element sur le diagramme des octaves), Russell pouvait selectionner quelle condition elementaire se manifesterait.",
-      "highlight": "Le chimiste de Westinghouse M. Hoyt a verifie les resultats : 69,1% de l'azote original a ete converti. L'experience a ete observee par plusieurs employes de Westinghouse."
-    },
-    "modernReplication": {
-      "title": "Replication moderne et connexion LENR (1992–1994)",
-      "p1": "En 1992, Toby Grotz (Tesla Engineering Laboratories) a replique la transmutation de Russell avec un equipement moderne, avec Tim Binder de l'University of Science and Philosophy. Ils ont detecte du fluor (raies spectrales a 7311/7398 Angströms) a un angle de solenoide de 44° — exactement la ou le diagramme de Russell le place.",
-      "p2": "En 1994, Ron Kovac a obtenu un resultat plus spectaculaire : partant de l'azote, sa spectrometrie de masse a montre de l'Helium-4 a 3,75% et du Lithium-5 a 2,50%. Ceci est directement pertinent pour la recherche LENR — Julian Schwinger (laureat Nobel) avait independamment predit que le Li-5 devrait etre un produit du processus de fusion froide.",
-      "p3": "Les resultats Grotz-Kovac ont ete presentes a SAE International (article 929470). Ils fournissent une verification independante de l'affirmation centrale de Russell : les elements sont des conditions de compression qui peuvent etre deplacees en changeant la geometrie du champ.",
-      "highlight": "La detection de Li-5 par Kovac — predite par la theorie de fusion froide de Schwinger et produite par la methode de transmutation de Russell — relie la cosmogonie des annees 1920 a la recherche LENR moderne."
-    },
-    "vortexCone": {
-      "title": "Le modele de cone de vortex",
-      "p1": "Dans le modele de Russell, chaque element correspond a un angle specifique sur un cone de vortex en spirale. L'hydrogene se situe a l'extremite abrupte du cone (presque vertical). A mesure que la compression augmente, la spirale s'aplatit. Russell ecrivait : « Raccourcissez le cone progressivement jusqu'a ce que ces lignes soient aussi plates qu'un ressort de montre et vous aurez alors l'atome de carbone. »",
-      "p2": "C'est pourquoi l'angle du solenoide compte dans le transmutateur : regler les bobines a un angle specifique reproduit la geometrie du cone de vortex pour la position de cet element. L'angle de 44° qui a produit du fluor dans l'experience de Grotz en 1992 correspond a la position du fluor sur le cone d'octave deroule.",
-      "p3": "Le modele de cone de vortex unifie la table periodique avec la geometrie du champ. Il predit que tout element peut etre produit a partir de tout autre en changeant le rapport de compression — exactement ce que les experiences de transmutation ont demontre."
-    }
   },
   "segreChart": {
     "title": "Segre Chart (N-Z Diagram)",
