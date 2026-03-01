@@ -468,6 +468,11 @@
     "legendSerpentine": "Flujo Serpentino",
     "clickToView": "Haga clic en cualquier elemento conocido para ver sus propiedades e isótopos en la base de datos",
     "clickToViewDetails": "Haga clic para ver detalles del elemento",
+    "gridView": "Vista de cuadr\u00edcula",
+    "waveView": "Vista de onda",
+    "waveDescription": "Elementos como puntos en la onda de octava de Russell \u2014 la amplitud sube a trav\u00e9s de la generaci\u00f3n (compresi\u00f3n) hasta el Carbono en el pico, luego desciende a trav\u00e9s de la radiaci\u00f3n (expansi\u00f3n)",
+    "amplitude": "Amplitud",
+    "octaveAxis": "Octava",
     "zoomControls": "Desplazar para ampliar, arrastrar para mover, doble clic para acercar",
     "predictionsTitle": "Predicciones de Russell",
     "predictionsDescription": "Walter Russell predijo varios elementos antes de su descubrimiento oficial, demostrando el poder predictivo de su sistema periódico basado en ondas.",
@@ -475,6 +480,8 @@
     "aboutParagraph1": "Walter Russell (1871–1963) publicó su Tabla Periódica de Nueve Octavas en \"The Universal One\" (1926), organizando todos los elementos en un sistema de octavas basado en ondas. Cada octava tiene un lado de generación (carga) y un lado de radiación (descarga), con un gas inerte en el punto de equilibrio — el fulcro de la onda.",
     "aboutParagraph2": "En la cosmología de Russell, la materia se crea por vórtices espirales opuestos de compresión (generación) y expansión (radiación). El carbono se sitúa en la amplitud — el punto de compresión máxima — convirtiéndolo en el elemento más equilibrado y estable.",
     "aboutParagraph3": "Russell predijo notablemente la existencia del Deuterio (que llamó \"Ethlogen\"), Tritio (\"Bebegen\"), Neptunio y Plutonio años antes de su descubrimiento oficial en laboratorio.",
+    "view3D": "Vista 3D",
+    "view3DControls": "Arrastrar para rotar, scroll para zoom",
     "experimentalNote": "Esta visualización está basada en el gráfico original de Russell de 1926. El sistema de Russell difiere significativamente de la tabla periódica moderna — representa su modelo filosófico y cosmológico de la materia."
   },
   "segreChart": {
