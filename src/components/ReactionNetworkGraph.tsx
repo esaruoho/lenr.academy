@@ -8,6 +8,8 @@ import {
   forceManyBody,
   forceCenter,
   forceCollide,
+  type Simulation,
+  type ForceLink,
   type SimulationNodeDatum,
   type SimulationLinkDatum,
 } from 'd3-force'
@@ -139,6 +141,8 @@ export default function ReactionNetworkGraph({ reactions, reactionType }: Reacti
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const svgRef = useRef<SVGSVGElement>(null)
+  const simulationRef = useRef<Simulation<GraphNode, GraphLink> | null>(null)
+  const prevNodeIdsRef = useRef<string>('')
   const [expanded, setExpanded] = useState(false)
   const [limitResults, setLimitResults] = useState(true)
 
@@ -165,21 +169,15 @@ export default function ReactionNetworkGraph({ reactions, reactionType }: Reacti
     if (!svgRef.current || graphData.nodes.length === 0) return
 
     const svg = d3.select(svgRef.current)
-    svg.selectAll('*').remove()
-
     const width = SVG_WIDTH
     const height = SVG_HEIGHT
     const textColor = isDark ? '#d1d5db' : '#374151'
     const bgColor = isDark ? '#1f2937' : '#ffffff'
 
-    // Background
-    svg.append('rect')
-      .attr('width', width)
-      .attr('height', height)
-      .attr('fill', bgColor)
-      .attr('rx', 8)
-
-    const container = svg.append('g').attr('class', 'graph-container')
+    // Check if the node set changed
+    const currentNodeIds = graphData.nodes.map(n => n.id).sort().join(',')
+    const nodesChanged = currentNodeIds !== prevNodeIdsRef.current
+    prevNodeIdsRef.current = currentNodeIds
 
     // Deep clone nodes/links for simulation
     const simNodes: GraphNode[] = graphData.nodes.map(n => ({ ...n }))
@@ -192,19 +190,86 @@ export default function ReactionNetworkGraph({ reactions, reactionType }: Reacti
     // Find max weight for link scaling
     const maxWeight = Math.max(...simLinks.map(l => l.weight), 1)
 
-    // Force simulation
-    const chargeStrength = simNodes.length > 30 ? -300 : simNodes.length > 15 ? -200 : -150
-    const simulation = forceSimulation(simNodes)
-      .force('link', forceLink<GraphNode, GraphLink>(simLinks)
-        .id(d => d.id)
-        .distance(80)
-        .strength(0.4)
-      )
-      .force('charge', forceManyBody().strength(chargeStrength))
-      .force('center', forceCenter(width / 2, height / 2).strength(0.05))
-      .force('collision', forceCollide<GraphNode>().radius(d => d.size + 5))
-      .alphaDecay(0.02)
-      .velocityDecay(0.5)
+    let simulation: Simulation<GraphNode, GraphLink>
+
+    if (simulationRef.current && !nodesChanged) {
+      // Node set hasn't changed — skip full rebuild, just update visuals for theme changes
+      simulation = simulationRef.current
+    } else if (simulationRef.current && nodesChanged) {
+      // Node set changed — preserve positions of existing nodes, initialize new ones at center
+      const oldSim = simulationRef.current
+      const oldNodes: GraphNode[] = oldSim.nodes()
+      const positionMap = new Map(oldNodes.map(n => [n.id, { x: n.x, y: n.y, vx: n.vx, vy: n.vy }]))
+
+      simNodes.forEach(node => {
+        const oldPos = positionMap.get(node.id)
+        if (oldPos) {
+          node.x = oldPos.x
+          node.y = oldPos.y
+          node.vx = oldPos.vx
+          node.vy = oldPos.vy
+        } else {
+          node.x = width / 2 + (Math.random() - 0.5) * 200
+          node.y = height / 2 + (Math.random() - 0.5) * 200
+          node.vx = 0
+          node.vy = 0
+        }
+      })
+
+      oldSim.stop()
+
+      const chargeStrength = simNodes.length > 30 ? -300 : simNodes.length > 15 ? -200 : -150
+      simulation = forceSimulation(simNodes)
+        .force('link', forceLink<GraphNode, GraphLink>(simLinks)
+          .id(d => d.id)
+          .distance(80)
+          .strength(0.4)
+        )
+        .force('charge', forceManyBody().strength(chargeStrength))
+        .force('center', forceCenter(width / 2, height / 2).strength(0.05))
+        .force('collision', forceCollide<GraphNode>().radius(d => d.size + 5))
+        .alphaDecay(0.02)
+        .velocityDecay(0.5)
+
+      // Gentle restart instead of full alpha=1
+      simulation.alpha(0.3).restart()
+      simulationRef.current = simulation
+    } else {
+      // First render — initialize all nodes at center with random offset
+      simNodes.forEach(node => {
+        node.x = width / 2 + (Math.random() - 0.5) * 200
+        node.y = height / 2 + (Math.random() - 0.5) * 200
+        node.vx = 0
+        node.vy = 0
+      })
+
+      const chargeStrength = simNodes.length > 30 ? -300 : simNodes.length > 15 ? -200 : -150
+      simulation = forceSimulation(simNodes)
+        .force('link', forceLink<GraphNode, GraphLink>(simLinks)
+          .id(d => d.id)
+          .distance(80)
+          .strength(0.4)
+        )
+        .force('charge', forceManyBody().strength(chargeStrength))
+        .force('center', forceCenter(width / 2, height / 2).strength(0.05))
+        .force('collision', forceCollide<GraphNode>().radius(d => d.size + 5))
+        .alphaDecay(0.02)
+        .velocityDecay(0.5)
+
+      simulationRef.current = simulation
+    }
+
+    // Rebuild SVG elements (needed for theme changes and data updates)
+    svg.selectAll('*').remove()
+
+    // Background
+    svg.append('rect')
+      .attr('width', width)
+      .attr('height', height)
+      .attr('fill', bgColor)
+      .attr('rx', 8)
+
+    const container = svg.append('g').attr('class', 'graph-container')
 
     // Edges
     const linkGroup = container.append('g').attr('class', 'edges')
@@ -218,7 +283,7 @@ export default function ReactionNetworkGraph({ reactions, reactionType }: Reacti
     // Nodes
     const nodeGroup = container.append('g').attr('class', 'nodes')
     const nodeElements = nodeGroup.selectAll<SVGGElement, GraphNode>('g')
-      .data(simNodes)
+      .data(simulation.nodes())
       .join('g')
       .attr('cursor', 'grab')
 
@@ -360,7 +425,17 @@ export default function ReactionNetworkGraph({ reactions, reactionType }: Reacti
     svg.call(zoomBehavior)
     svg.call(zoomBehavior.transform, zoomIdentity)
 
-    // Simulation tick
+    // Re-bind the tick handler to update the new SVG elements
+    // Use the simulation's actual nodes (which have live x/y positions)
+    const simNodesLive = simulation.nodes()
+    // Re-bind link data to match simulation's link objects
+    const simForceLink = simulation.force('link') as ForceLink<GraphNode, GraphLink> | undefined
+    const simLinksLive = simForceLink ? simForceLink.links() : simLinks
+
+    // Update link data binding to use live simulation links
+    linkElements.data(simLinksLive)
+    nodeElements.data(simNodesLive)
+
     simulation.on('tick', () => {
       linkElements
         .attr('x1', d => (d.source as GraphNode).x || 0)
@@ -371,15 +446,18 @@ export default function ReactionNetworkGraph({ reactions, reactionType }: Reacti
       nodeElements
         .attr('transform', d => `translate(${d.x || 0}, ${d.y || 0})`)
     })
-
-    return () => {
-      simulation.stop()
-    }
   }, [graphData, isDark, t])
 
   useEffect(() => {
     if (expanded) {
-      return renderGraph()
+      renderGraph()
+    }
+    return () => {
+      if (!expanded) {
+        simulationRef.current?.stop()
+        simulationRef.current = null
+        prevNodeIdsRef.current = ''
+      }
     }
   }, [expanded, renderGraph])
 
