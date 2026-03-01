@@ -14,6 +14,31 @@ import { render, screen, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PathwayBrowserTable from './PathwayBrowserTable';
 import type { PathwayAnalysis } from '../services/pathwayAnalyzer';
+import en from '../i18n/locales/en.json';
+
+// Mock react-i18next to return English translations
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, params?: Record<string, unknown>) => {
+      // Navigate nested keys like 'cascades.pathwayBrowser.type'
+      const parts = key.split('.');
+      let value: unknown = en;
+      for (const part of parts) {
+        if (value && typeof value === 'object' && part in value) {
+          value = (value as Record<string, unknown>)[part];
+        } else {
+          return key; // fallback to key
+        }
+      }
+      // Interpolate {{param}} placeholders
+      if (typeof value === 'string' && params) {
+        return value.replace(/\{\{(\w+)\}\}/g, (_, k) => String(params[k] ?? `{{${k}}}`));
+      }
+      return value as string;
+    },
+    i18n: { language: 'en' },
+  }),
+}));
 
 // Mock VirtualizedList to simplify testing
 vi.mock('./VirtualizedList', () => ({
