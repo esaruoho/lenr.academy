@@ -487,11 +487,25 @@
     "view3DControls": "拖动旋转，滚动缩放",
     "experimentalNote": "此可视化基于拉塞尔1926年的原始图表。拉塞尔的系统与现代周期表有显著不同——它代表了他对物质的哲学和宇宙学模型，而非当代化学使用的量子力学模型。"
   },
+  "networkGraph": {
+    "reactionNetwork": "反应网络",
+    "reactionNetworkDesc": "显示元素关系的力导向图",
+    "showNetwork": "显示网络",
+    "hideNetwork": "隐藏网络",
+    "tooManyReactions": "按能量显示前{{count}}个反应",
+    "showAll": "显示全部",
+    "nodeTooltip": "{{element}}：{{count}}个反应",
+    "nodeTooltipFull": "{{element}} (Z={{Z}})：{{count}}个反应",
+    "exothermic": "放热反应 (+MeV)",
+    "endothermic": "吸热反应 (-MeV)",
+    "instructions": "拖动节点重新定位。滚动缩放。",
+    "graphStats": "{{nodes}}个元素，{{links}}个连接"
+  },
   "segreChart": {
     "title": "Segre Chart (N-Z Diagram)",
     "description": "Interactive chart of nuclides plotted by proton number (Z) vs neutron number (N), color-coded by stability",
     "sectionTitle": "核素图（塞格雷图）",
-    "stable": "Stable (>10\u2079 years)",
+    "stable": "Stable (>10⁹ years)",
     "longHalfLife": "Long half-life (>100 years)",
     "shortHalfLife": "Short half-life (<100 years)",
     "unknown": "Unknown half-life",
@@ -510,7 +524,7 @@
   },
   "cascades": {
     "title": "级联",
-    "description": "探索反应级联和途径",
+    "description": "描述",
     "simulationEngine": "级联模拟引擎",
     "startSimulation": "开始模拟",
     "stopSimulation": "停止模拟",
@@ -592,7 +606,6 @@
     "noMaterialsInCategory": "此类别中没有材料",
     "saveCustomMaterial": "保存自定义材料",
     "name": "名称",
-    "description": "描述",
     "saveCurrentFuelMixture": "这将把您当前的燃料混合物（{{count}}种核素）保存为自定义材料。",
     "saveMaterial": "保存材料",
     "deleteCustomMaterial": "删除此自定义材料？",

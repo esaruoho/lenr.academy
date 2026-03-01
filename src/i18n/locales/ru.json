@@ -485,11 +485,25 @@
     "view3DControls": "Перетащите для вращения, прокрутите для масштабирования",
     "experimentalNote": "Эта визуализация основана на оригинальной таблице Рассела 1926 года. Система Рассела существенно отличается от современной периодической таблицы — она представляет его философскую и космологическую модель материи."
   },
+  "networkGraph": {
+    "reactionNetwork": "Сеть реакций",
+    "reactionNetworkDesc": "Силовой граф связей между элементами",
+    "showNetwork": "Показать сеть",
+    "hideNetwork": "Скрыть сеть",
+    "tooManyReactions": "Показаны топ {{count}} реакций по энергии",
+    "showAll": "Показать все",
+    "nodeTooltip": "{{element}}: {{count}} реакций",
+    "nodeTooltipFull": "{{element}} (Z={{Z}}): {{count}} реакций",
+    "exothermic": "Экзотермическая (+МэВ)",
+    "endothermic": "Эндотермическая (-МэВ)",
+    "instructions": "Перетаскивайте узлы для перемещения. Прокрутка для масштабирования.",
+    "graphStats": "{{nodes}} элементов, {{links}} связей"
+  },
   "segreChart": {
     "title": "Segre Chart (N-Z Diagram)",
     "description": "Interactive chart of nuclides plotted by proton number (Z) vs neutron number (N), color-coded by stability",
     "sectionTitle": "Карта нуклидов (диаграмма Сегре)",
-    "stable": "Stable (>10\u2079 years)",
+    "stable": "Stable (>10⁹ years)",
     "longHalfLife": "Long half-life (>100 years)",
     "shortHalfLife": "Short half-life (<100 years)",
     "unknown": "Unknown half-life",
@@ -508,7 +522,7 @@
   },
   "cascades": {
     "title": "Каскады",
-    "description": "Исследуйте каскады реакций и пути",
+    "description": "Описание",
     "simulationEngine": "Движок моделирования каскадов",
     "startSimulation": "Начать моделирование",
     "stopSimulation": "Остановить моделирование",
@@ -590,7 +604,6 @@
     "noMaterialsInCategory": "Нет материалов в этой категории",
     "saveCustomMaterial": "Сохранить пользовательский материал",
     "name": "Название",
-    "description": "Описание",
     "saveCurrentFuelMixture": "Это сохранит вашу текущую топливную смесь ({{count}} нуклидов) как пользовательский материал.",
     "saveMaterial": "Сохранить материал",
     "deleteCustomMaterial": "Удалить этот пользовательский материал?",
