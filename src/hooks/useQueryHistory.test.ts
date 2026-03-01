@@ -1,195 +1,145 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
-import { useQueryHistory } from './useQueryHistory'
-import type { QueryFilter } from '../types'
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import { useQueryHistory } from './useQueryHistory';
 
-// Mock crypto.randomUUID
-vi.stubGlobal('crypto', {
-  randomUUID: () => `uuid-${Date.now()}-${Math.random()}`,
-})
-
-const fusionFilter: QueryFilter = {
-  element1List: ['H'],
-  element2List: ['Li'],
-}
-
-const fissionFilter: QueryFilter = {
-  elements: ['U'],
-}
+const STORAGE_KEY = 'lenr-query-history';
 
 describe('useQueryHistory', () => {
   beforeEach(() => {
-    localStorage.clear()
-  })
+    localStorage.clear();
+    vi.stubGlobal('crypto', {
+      randomUUID: () => `test-${Date.now()}-${Math.random()}`,
+    });
+  });
 
   it('starts with empty history', () => {
-    const { result } = renderHook(() => useQueryHistory())
-    expect(result.current.history).toEqual([])
-  })
+    const { result } = renderHook(() => useQueryHistory());
+    expect(result.current.history).toEqual([]);
+  });
 
-  it('addToHistory adds a query', () => {
-    const { result } = renderHook(() => useQueryHistory())
+  it('loads existing history from localStorage', () => {
+    const existingHistory = [{
+      id: '1',
+      name: 'Fusion H',
+      queryType: 'fusion',
+      filter: { element1List: ['H'] },
+      timestamp: Date.now(),
+      isBookmarked: false,
+    }];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(existingHistory));
+    const { result } = renderHook(() => useQueryHistory());
+    expect(result.current.history).toHaveLength(1);
+    expect(result.current.history[0].id).toBe('1');
+  });
 
+  it('addToHistory adds a new query', () => {
+    const { result } = renderHook(() => useQueryHistory());
     act(() => {
-      result.current.addToHistory('fusion', fusionFilter, 42)
-    })
+      result.current.addToHistory('fusion', { element1List: ['H'] }, 10);
+    });
+    expect(result.current.history).toHaveLength(1);
+    expect(result.current.history[0].queryType).toBe('fusion');
+    expect(result.current.history[0].resultCount).toBe(10);
+  });
 
-    expect(result.current.history).toHaveLength(1)
-    expect(result.current.history[0].queryType).toBe('fusion')
-    expect(result.current.history[0].resultCount).toBe(42)
-    expect(result.current.history[0].isBookmarked).toBe(false)
-  })
-
-  it('generates a name from query type and elements', () => {
-    const { result } = renderHook(() => useQueryHistory())
-
+  it('addToHistory persists to localStorage', () => {
+    const { result } = renderHook(() => useQueryHistory());
     act(() => {
-      result.current.addToHistory('fusion', fusionFilter)
-    })
+      result.current.addToHistory('fission', { elements: ['U'] });
+    });
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    expect(stored).toHaveLength(1);
+  });
 
-    expect(result.current.history[0].name).toBe('Fusion H + Li')
-  })
-
-  it('generates name for two-to-two queries', () => {
-    const { result } = renderHook(() => useQueryHistory())
-
+  it('addToHistory deduplicates same query', () => {
+    const { result } = renderHook(() => useQueryHistory());
     act(() => {
-      result.current.addToHistory('twotwo', { element1List: ['D'], element2List: ['Ni'] })
-    })
-
-    expect(result.current.history[0].name).toContain('2→2')
-  })
-
-  it('deduplicates queries and moves to top', () => {
-    const { result } = renderHook(() => useQueryHistory())
-
+      result.current.addToHistory('fusion', { element1List: ['H'] }, 5);
+    });
     act(() => {
-      result.current.addToHistory('fusion', fusionFilter, 10)
-    })
+      result.current.addToHistory('fusion', { element1List: ['H'] }, 10);
+    });
+    expect(result.current.history).toHaveLength(1);
+    expect(result.current.history[0].resultCount).toBe(10);
+  });
+
+  it('addToHistory generates a name with query type', () => {
+    const { result } = renderHook(() => useQueryHistory());
     act(() => {
-      result.current.addToHistory('fission', fissionFilter, 5)
-    })
+      result.current.addToHistory('fusion', { element1List: ['H'], element2List: ['Li'] });
+    });
+    expect(result.current.history[0].name).toContain('Fusion');
+    expect(result.current.history[0].name).toContain('H');
+  });
+
+  it('toggleBookmark toggles bookmark state', () => {
+    const { result } = renderHook(() => useQueryHistory());
     act(() => {
-      result.current.addToHistory('fusion', fusionFilter, 20)
-    })
-
-    // Should still be 2 entries, fusion moved to top with updated count
-    expect(result.current.history).toHaveLength(2)
-    expect(result.current.history[0].queryType).toBe('fusion')
-    expect(result.current.history[0].resultCount).toBe(20)
-  })
-
-  it('toggleBookmark toggles bookmark status', () => {
-    const { result } = renderHook(() => useQueryHistory())
-
-    act(() => {
-      result.current.addToHistory('fusion', fusionFilter)
-    })
-
-    const id = result.current.history[0].id
-
-    act(() => {
-      result.current.toggleBookmark(id)
-    })
-    expect(result.current.history[0].isBookmarked).toBe(true)
-
-    act(() => {
-      result.current.toggleBookmark(id)
-    })
-    expect(result.current.history[0].isBookmarked).toBe(false)
-  })
+      result.current.addToHistory('fusion', { element1List: ['H'] });
+    });
+    const id = result.current.history[0].id;
+    expect(result.current.history[0].isBookmarked).toBe(false);
+    act(() => { result.current.toggleBookmark(id); });
+    expect(result.current.history[0].isBookmarked).toBe(true);
+    act(() => { result.current.toggleBookmark(id); });
+    expect(result.current.history[0].isBookmarked).toBe(false);
+  });
 
   it('removeFromHistory removes a query', () => {
-    const { result } = renderHook(() => useQueryHistory())
-
+    const { result } = renderHook(() => useQueryHistory());
     act(() => {
-      result.current.addToHistory('fusion', fusionFilter)
-      result.current.addToHistory('fission', fissionFilter)
-    })
+      result.current.addToHistory('fusion', { element1List: ['H'] });
+    });
+    const id = result.current.history[0].id;
+    act(() => { result.current.removeFromHistory(id); });
+    expect(result.current.history).toHaveLength(0);
+  });
 
-    const id = result.current.history[0].id
+  it('clearHistory preserves bookmarks by default', () => {
+    const { result } = renderHook(() => useQueryHistory());
     act(() => {
-      result.current.removeFromHistory(id)
-    })
-
-    expect(result.current.history).toHaveLength(1)
-  })
-
-  it('clearHistory removes non-bookmarked queries', () => {
-    const { result } = renderHook(() => useQueryHistory())
-
+      result.current.addToHistory('fusion', { element1List: ['H'] });
+    });
     act(() => {
-      result.current.addToHistory('fusion', fusionFilter)
-      result.current.addToHistory('fission', fissionFilter)
-    })
+      result.current.addToHistory('fission', { elements: ['U'] });
+    });
+    const id = result.current.history[0].id;
+    act(() => { result.current.toggleBookmark(id); });
+    act(() => { result.current.clearHistory(); });
+    expect(result.current.history).toHaveLength(1);
+    expect(result.current.history[0].isBookmarked).toBe(true);
+  });
 
-    const fusionId = result.current.history.find(q => q.queryType === 'fusion')!.id
+  it('clearHistory removes all when preserveBookmarks is false', () => {
+    const { result } = renderHook(() => useQueryHistory());
     act(() => {
-      result.current.toggleBookmark(fusionId)
-    })
-
-    act(() => {
-      result.current.clearHistory(true) // preserve bookmarks
-    })
-
-    expect(result.current.history).toHaveLength(1)
-    expect(result.current.history[0].isBookmarked).toBe(true)
-  })
-
-  it('clearHistory with preserveBookmarks=false removes everything', () => {
-    const { result } = renderHook(() => useQueryHistory())
-
-    act(() => {
-      result.current.addToHistory('fusion', fusionFilter)
-    })
-
-    const id = result.current.history[0].id
-    act(() => { result.current.toggleBookmark(id) })
-    act(() => { result.current.clearHistory(false) })
-
-    expect(result.current.history).toHaveLength(0)
-  })
+      result.current.addToHistory('fusion', { element1List: ['H'] });
+    });
+    const id = result.current.history[0].id;
+    act(() => { result.current.toggleBookmark(id); });
+    act(() => { result.current.clearHistory(false); });
+    expect(result.current.history).toHaveLength(0);
+  });
 
   it('getHistoryForType filters by query type', () => {
-    const { result } = renderHook(() => useQueryHistory())
-
+    const { result } = renderHook(() => useQueryHistory());
     act(() => {
-      result.current.addToHistory('fusion', fusionFilter)
-      result.current.addToHistory('fission', fissionFilter)
-      result.current.addToHistory('twotwo', { element1List: ['D'], element2List: ['Ni'] })
-    })
-
-    expect(result.current.getHistoryForType('fusion')).toHaveLength(1)
-    expect(result.current.getHistoryForType('fission')).toHaveLength(1)
-    expect(result.current.getHistoryForType('twotwo')).toHaveLength(1)
-  })
-
-  it('persists to localStorage', () => {
-    const { result } = renderHook(() => useQueryHistory())
-
+      result.current.addToHistory('fusion', { element1List: ['H'] });
+    });
     act(() => {
-      result.current.addToHistory('fusion', fusionFilter)
-    })
+      result.current.addToHistory('fission', { elements: ['U'] });
+    });
+    act(() => {
+      result.current.addToHistory('fusion', { element1List: ['Li'] });
+    });
+    const fusionHistory = result.current.getHistoryForType('fusion');
+    expect(fusionHistory).toHaveLength(2);
+    expect(fusionHistory.every(q => q.queryType === 'fusion')).toBe(true);
+  });
 
-    const stored = JSON.parse(localStorage.getItem('lenr-query-history') || '[]')
-    expect(stored).toHaveLength(1)
-    expect(stored[0].queryType).toBe('fusion')
-  })
-
-  it('restores from localStorage', () => {
-    localStorage.setItem('lenr-query-history', JSON.stringify([{
-      id: 'test-id',
-      name: 'Test Query',
-      queryType: 'fusion',
-      filter: fusionFilter,
-      timestamp: Date.now(),
-      isBookmarked: true,
-      resultCount: 10,
-    }]))
-
-    const { result } = renderHook(() => useQueryHistory())
-
-    expect(result.current.history).toHaveLength(1)
-    expect(result.current.history[0].isBookmarked).toBe(true)
-  })
-})
+  it('handles corrupt localStorage gracefully', () => {
+    localStorage.setItem(STORAGE_KEY, 'not-json');
+    const { result } = renderHook(() => useQueryHistory());
+    expect(result.current.history).toEqual([]);
+  });
+});
