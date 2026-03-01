@@ -880,7 +880,10 @@ test.describe('Element Data - Half-life Unit Display', () => {
     await expect(page.getByRole('heading', { name: /C-14/i })).toBeVisible();
 
     // Check for any decay data on the page
-    const decayTable = page.locator('table').filter({ hasText: 'Half-life' });
+    // Use .first() because NuclideDetailsCard renders both desktop and mobile
+    // table variants (hidden xs:block / block xs:hidden), so multiple <table>
+    // elements with 'Half-life' text exist in the DOM simultaneously
+    const decayTable = page.locator('table').filter({ hasText: 'Half-life' }).first();
     const hasDecayTable = await decayTable.isVisible({ timeout: 10000 }).catch(() => false);
 
     if (hasDecayTable) {
@@ -908,7 +911,9 @@ test.describe('Element Data - Half-life Unit Display', () => {
       await decayHeading.scrollIntoViewIfNeeded();
 
       // Wait for decay table
-      const decayTable = page.locator('table').filter({ hasText: 'Half-life' });
+      // Use .first() because NuclideDetailsCard renders both desktop and mobile
+      // table variants, so multiple <table> elements with 'Half-life' exist in DOM
+      const decayTable = page.locator('table').filter({ hasText: 'Half-life' }).first();
       await expect(decayTable).toBeVisible();
 
       // Get all table cell text
@@ -930,7 +935,9 @@ test.describe('Element Data - Half-life Unit Display', () => {
     await page.waitForTimeout(2000);
 
     // Look for decay table with half-life column
-    const decayTable = page.locator('table').filter({ hasText: 'Half-life' });
+    // Use .first() because NuclideDetailsCard renders both desktop and mobile
+    // table variants, so multiple <table> elements with 'Half-life' exist in DOM
+    const decayTable = page.locator('table').filter({ hasText: 'Half-life' }).first();
     const hasDecayTable = await decayTable.isVisible({ timeout: 10000 }).catch(() => false);
 
     if (hasDecayTable) {
