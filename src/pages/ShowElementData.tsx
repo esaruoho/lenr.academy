@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Radiation, ChevronDown } from 'lucide-react'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useLayout } from '../contexts/LayoutContext'
+import { useTheme } from '../contexts/ThemeContext'
 import type { Element, Nuclide, AtomicRadiiData, RadioactiveNuclideData, DisplayNuclide, RadioNuclideListItem } from '../types'
 import PeriodicTable from '../components/PeriodicTable'
 import NuclideDetailsCard from '../components/NuclideDetailsCard'
@@ -32,6 +33,10 @@ import {
   type RadioactiveDecay
 } from '../services/queryService'
 import { traceDecayChain } from '../services/decayChainService'
+import RussellChartDiagram from '../components/RussellChartDiagram'
+import RussellWaveDiagram from '../components/RussellWaveDiagram'
+import RussellHistoricalContext from '../components/RussellHistoricalContext'
+import { RUSSELL_COLORS, getPredictedElements } from '../constants/russellElements'
 import { expandHalfLifeUnit, normalizeElementSymbol } from '../utils/formatUtils'
 import { filterDataBySearch, SearchMetadata } from '../utils/searchUtils'
 import { RADIATION_TYPE_INFO } from '../constants/radiationTypes'
@@ -138,6 +143,8 @@ export default function ShowElementData() {
   const { t } = useTranslation()
   const { db, isLoading: dbLoading, error: dbError, downloadProgress } = useDatabase()
   const { openSidebar, setMobileHeaderHidden } = useLayout()
+  const { theme } = useTheme()
+  const russellColorMode = theme === 'dark' ? 'dark' : 'light'
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Tab state
@@ -190,6 +197,9 @@ export default function ShowElementData() {
   const [customElementsPresets, setCustomElementsPresets] = useState<FilterPreset[]>([])
   const [customNuclidesPresets, setCustomNuclidesPresets] = useState<FilterPreset[]>([])
   const [customDecaysPresets, setCustomDecaysPresets] = useState<FilterPreset[]>([])
+
+  // Russell tab: grid vs wave view toggle
+  const [russellView, setRussellView] = useState<'grid' | 'wave'>('grid')
 
   // Expanded row state (per tab, session-only - NOT in URL)
   const [elementsExpandedRows, setElementsExpandedRows] = useState<Set<string | number>>(new Set())
@@ -723,6 +733,7 @@ export default function ShowElementData() {
   // Define tabs with counts (showing filtered counts)
   const tabs: Tab[] = [
     { id: 'integrated', label: t('elements.integrated') },
+    { id: 'russell', label: t('elements.russellChart') },
     { id: 'elements', label: t('elements.element'), count: filteredElements.length },
     { id: 'nuclides', label: t('elements.nuclides'), count: filteredNuclides.length },
     { id: 'decays', label: t('elements.decays'), count: filteredDecays.length }
@@ -2054,6 +2065,205 @@ export default function ShowElementData() {
               ) : null}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Russell Tab */}
+      {activeTab === 'russell' && (
+        <div className="space-y-4">
+          {/* View toggle */}
+          <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg w-fit">
+            <button
+              onClick={() => setRussellView('grid')}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                russellView === 'grid'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              {t('russellChart.gridView')}
+            </button>
+            <button
+              onClick={() => setRussellView('wave')}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                russellView === 'wave'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              {t('russellChart.waveView')}
+            </button>
+          </div>
+
+          {/* Diagram card */}
+          <div className="card p-6">
+            {russellView === 'grid' ? (
+              <RussellChartDiagram onElementClick={(Z) => {
+                const newParams = new URLSearchParams(searchParams)
+                newParams.set('Z', String(Z))
+                newParams.set('tab', 'integrated')
+                setSearchParams(newParams)
+              }} />
+            ) : (
+              <RussellWaveDiagram onElementClick={(Z) => {
+                const newParams = new URLSearchParams(searchParams)
+                newParams.set('Z', String(Z))
+                newParams.set('tab', 'integrated')
+                setSearchParams(newParams)
+              }} />
+            )}
+          </div>
+
+          {/* Legend card */}
+          <div className="card p-6">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              {t('russellChart.legend')}
+            </h3>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-4 h-4 rounded border"
+                  style={{
+                    backgroundColor: RUSSELL_COLORS.generation.bg[russellColorMode],
+                    borderColor: RUSSELL_COLORS.generation[russellColorMode],
+                  }}
+                />
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('russellChart.legendGeneration')}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-4 h-4 rounded border"
+                  style={{
+                    backgroundColor: RUSSELL_COLORS.radiation.bg[russellColorMode],
+                    borderColor: RUSSELL_COLORS.radiation[russellColorMode],
+                  }}
+                />
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('russellChart.legendRadiation')}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-4 h-4 rounded border"
+                  style={{
+                    backgroundColor: RUSSELL_COLORS.inertGas.bg[russellColorMode],
+                    borderColor: RUSSELL_COLORS.inertGas[russellColorMode],
+                  }}
+                />
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('russellChart.legendInertGas')}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-4 h-4 rounded border-2"
+                  style={{
+                    backgroundColor: RUSSELL_COLORS.carbon.bg[russellColorMode],
+                    borderColor: RUSSELL_COLORS.carbon[russellColorMode],
+                  }}
+                />
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('russellChart.legendCarbon')}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <div
+                    className="w-4 h-4 rounded border"
+                    style={{
+                      backgroundColor: RUSSELL_COLORS.predicted.bg[russellColorMode],
+                      borderColor: RUSSELL_COLORS.predicted[russellColorMode],
+                    }}
+                  />
+                  <span className="absolute -top-0.5 -right-0.5 text-[8px]" style={{ color: RUSSELL_COLORS.predicted[russellColorMode] }}>
+                    ★
+                  </span>
+                </div>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('russellChart.legendPredicted')}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-4 h-4 rounded"
+                  style={{
+                    backgroundColor: RUSSELL_COLORS.hypothetical.bg[russellColorMode],
+                    border: `1.5px dashed ${RUSSELL_COLORS.hypothetical[russellColorMode]}`,
+                  }}
+                />
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('russellChart.legendHypothetical')}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-0.5" style={{ borderTop: '2px dashed rgba(156, 163, 175, 0.4)' }} />
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('russellChart.legendSerpentine')}
+                </span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+              {t('russellChart.clickToView')}
+            </p>
+          </div>
+
+          {/* Predictions card */}
+          <div className="card p-6">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              {t('russellChart.predictionsTitle')}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              {t('russellChart.predictionsDescription')}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {getPredictedElements().map((el) => (
+                <div
+                  key={el.russellName}
+                  className="flex items-start gap-3 p-3 rounded-lg"
+                  style={{
+                    backgroundColor: russellColorMode === 'dark' ? 'rgba(5, 150, 105, 0.1)' : 'rgba(5, 150, 105, 0.05)',
+                    border: `1px solid ${russellColorMode === 'dark' ? 'rgba(52, 211, 153, 0.25)' : 'rgba(5, 150, 105, 0.15)'}`,
+                  }}
+                >
+                  <span className="text-lg" style={{ color: RUSSELL_COLORS.predicted[russellColorMode] }}>
+                    ★
+                  </span>
+                  <div>
+                    <div className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                      {el.russellName} → {el.modernName} ({el.modernSymbol})
+                    </div>
+                    {el.note && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {el.note}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Historical context - collapsible deep dive */}
+          <RussellHistoricalContext />
+
+          {/* About card */}
+          <div className="card p-6">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              {t('russellChart.aboutTitle')}
+            </h3>
+            <div className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
+              <p>{t('russellChart.aboutParagraph1')}</p>
+              <p>{t('russellChart.aboutParagraph2')}</p>
+              <p>{t('russellChart.aboutParagraph3')}</p>
+            </div>
+            <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800/50">
+              <p className="text-xs text-amber-700 dark:text-amber-400">
+                {t('russellChart.experimentalNote')}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 

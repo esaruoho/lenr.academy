@@ -230,6 +230,7 @@
     "selected": "{{count}} seleccionado(s)",
     "applySelection": "Aplicar selección",
     "integrated": "Integrado",
+    "russellChart": "Russell",
     "decays": "Desintegraciones",
     "period": "Período",
     "group": "Grupo",
@@ -449,6 +450,77 @@
     "count": "Total",
     "collapse": "Contraer histograma",
     "expand": "Expandir histograma"
+  },
+  "russellChart": {
+    "title": "Tabla de Russell — Tabla Periódica de Nueve Octavas",
+    "description": "La disposición basada en ondas de Walter Russell de los elementos en 9 octavas con un patrón serpentino, mostrando los lados de generación (carga) y radiación (descarga) con gases inertes en los puntos de equilibrio.",
+    "generationSide": "Generación (Carga)",
+    "radiationSide": "Radiación (Descarga)",
+    "inertGasLabel": "Gas Inerte (Punto de Equilibrio)",
+    "octave": "Octava",
+    "legend": "Leyenda",
+    "legendGeneration": "Generación (Lado de Carga)",
+    "legendRadiation": "Radiación (Lado de Descarga)",
+    "legendInertGas": "Gas Inerte (Punto de Equilibrio)",
+    "legendCarbon": "Carbono (Compresión Máxima)",
+    "legendPredicted": "Predicho por Russell",
+    "legendHypothetical": "Elementos Hipotéticos",
+    "legendSerpentine": "Flujo Serpentino",
+    "clickToView": "Haga clic en cualquier elemento conocido para ver sus propiedades e isótopos en la base de datos",
+    "clickToViewDetails": "Haga clic para ver detalles del elemento",
+    "gridView": "Vista de cuadricula",
+    "waveView": "Vista de onda",
+    "waveDescription": "Elementos como puntos en la onda de octavas de Russell — la amplitud sube a traves de la generacion (compresion) hasta el Carbono en el pico, luego desciende a traves de la radiacion (expansion)",
+    "amplitude": "Amplitud",
+    "octaveAxis": "Octava",
+    "carbonPeak": "Carbono (Pico)",
+    "zoomControls": "Desplazar para ampliar, arrastrar para mover, doble clic para acercar",
+    "predictionsTitle": "Predicciones de Russell",
+    "predictionsDescription": "Walter Russell predijo varios elementos antes de su descubrimiento oficial, demostrando el poder predictivo de su sistema periódico basado en ondas.",
+    "aboutTitle": "Sobre la Tabla Periódica de Russell",
+    "aboutParagraph1": "Walter Russell (1871–1963) publicó su Tabla Periódica de Nueve Octavas en \"The Universal One\" (1926), organizando todos los elementos en un sistema de octavas basado en ondas. Cada octava tiene un lado de generación (carga) y un lado de radiación (descarga), con un gas inerte en el punto de equilibrio — el fulcro de la onda.",
+    "aboutParagraph2": "En la cosmología de Russell, la materia se crea por vórtices espirales opuestos de compresión (generación) y expansión (radiación). El carbono se sitúa en la amplitud — el punto de compresión máxima — convirtiéndolo en el elemento más equilibrado y estable.",
+    "aboutParagraph3": "Russell predijo notablemente la existencia del Deuterio (que llamó \"Ethlogen\"), Tritio (\"Bebegen\"), Neptunio y Plutonio años antes de su descubrimiento oficial en laboratorio.",
+    "experimentalNote": "Esta visualización está basada en el gráfico original de Russell de 1926. El sistema de Russell difiere significativamente de la tabla periódica moderna — representa su modelo filosófico y cosmológico de la materia."
+  },
+  "russellHistory": {
+    "title": "Contexto historico",
+    "subtitle": "La historia detras de la tabla periodica de nueve octavas — de un pintor polimata a la transmutacion verificada.",
+    "expandAll": "Expandir todo",
+    "collapseAll": "Contraer todo",
+    "whoWasRussell": {
+      "title": "Quien fue Walter Russell (1871–1963)?",
+      "p1": "Walter Russell fue retratista, escultor, arquitecto, compositor, patinador artistico y criador de caballos que logro reconocimiento internacional en cada campo. Diseno el Mark Twain Hotel y esculpio bustos de Edison, Roosevelt, Mark Twain y Gershwin. Fue presidente de la Society of Arts and Sciences y dio conferencias en IBM sobre etica empresarial.",
+      "p2": "Sin casi ninguna educacion cientifica formal, Russell publico una tabla periodica de elementos completamente nueva en 1926, organizada en nueve octavas como una escala musical. En esos diagramas coloco cuatro elementos que aun no habian sido descubiertos en ningun laboratorio.",
+      "p3": "Sir Oliver Lodge habia dicho: \"Ningun cientifico podria hacer el descubrimiento supremo. Tendria que ser la inspiracion suprema de algun poeta, pintor, filosofo o santo.\" Russell era pintor, filosofo y mas.",
+      "highlight": "Russell recibio un doctorado honorario de la American Academy of Sciences por sus predicciones de elementos."
+    },
+    "nineOctaveStructure": {
+      "title": "La estructura de nueve octavas",
+      "p1": "Russell organizo todos los elementos en nueve octavas, como notas en una escala musical. Cada octava tiene un lado de generacion (carga/compresion) y un lado de radiacion (descarga/expansion), con un gas inerte en el punto de apoyo — el punto de equilibrio de cada octava.",
+      "p2": "El carbono se situa en la amplitud de la cuarta octava — el punto de maxima compresion y estabilidad perfecta. Desde el cono de vortice empinado del hidrogeno hasta la espiral plana del carbono, las posiciones de los elementos se mapean en una onda continua de densidad creciente.",
+      "p3": "La tabla periodica estandar describe QUE son los elementos (numero atomico, configuracion electronica). La tabla de nueve octavas de Russell describe POR QUE existen — como condiciones de compresion a lo largo de un espectro continuo."
+    },
+    "westinghouse": {
+      "title": "El experimento de transmutacion de Westinghouse (1927)",
+      "p1": "En 1927, Russell demostro la transmutacion en el Laboratorio de Lampblack de Westinghouse en Bloomfield, Nueva Jersey. El aparato utilizaba dos bobinas solenoides asimetricas montadas en angulos ajustables dentro de un tubo de cuarzo evacuado lleno de nitrogeno.",
+      "p2": "Ajustando el desplazamiento angular de las bobinas (controlando tres simetrias rotas: angular, de polaridad y temporal), Russell convirtio vapor de agua en nitrogeno e hidrogeno, y desplazo nitrogeno hacia otros elementos. Los resultados fueron verificados por el laboratorio quimico de Westinghouse.",
+      "p3": "La idea clave: la geometria selecciona el elemento. Al cambiar el angulo del campo magnetico (replicando el angulo del cono de vortice para la posicion de cada elemento en el diagrama de octavas), Russell podia seleccionar que condicion elemental se manifestaria.",
+      "highlight": "El quimico de Westinghouse M. Hoyt verifico los resultados: el 69,1% del nitrogeno original fue convertido. El experimento fue presenciado por multiples empleados de Westinghouse."
+    },
+    "modernReplication": {
+      "title": "Replicacion moderna y conexion con LENR (1992–1994)",
+      "p1": "En 1992, Toby Grotz (Tesla Engineering Laboratories) replico la transmutacion de Russell usando equipo moderno con Tim Binder de la University of Science and Philosophy. Detectaron fluor (lineas espectrales en 7311/7398 Angstroms) a un angulo de solenoide de 44° — exactamente donde el diagrama de Russell lo situa.",
+      "p2": "En 1994, Ron Kovac logro un resultado mas dramatico: partiendo de nitrogeno, su espectrometria de masas mostro Helio-4 al 3,75% y Litio-5 al 2,50%. Esto es directamente relevante para la investigacion LENR — Julian Schwinger (premio Nobel) predijo independientemente que Li-5 deberia ser un producto del proceso de fusion fria.",
+      "p3": "Los resultados de Grotz-Kovac fueron presentados en SAE International (articulo 929470). Proporcionan verificacion independiente de la afirmacion central de Russell: los elementos son condiciones de compresion que pueden desplazarse cambiando la geometria del campo.",
+      "highlight": "La deteccion de Li-5 por Kovac — predicha por la teoria de fusion fria de Schwinger y producida por el metodo de transmutacion de Russell — conecta la cosmogonia de los anos 1920 con la investigacion LENR moderna."
+    },
+    "vortexCone": {
+      "title": "El modelo de cono de vortice",
+      "p1": "En el modelo de Russell, cada elemento corresponde a un angulo especifico en un cono de vortice espiral. El hidrogeno se situa en el extremo empinado del cono (casi vertical). A medida que aumenta la compresion, la espiral se aplana. Russell escribio: \"Acorte el cono gradualmente hasta que estas lineas sean tan planas como un muelle de reloj y entonces tendra el atomo de carbono.\"",
+      "p2": "Por eso el angulo del solenoide importa en el transmutador: ajustar las bobinas a un angulo especifico replica la geometria del cono de vortice para la posicion de ese elemento. El angulo de 44° que produjo fluor en el experimento de Grotz de 1992 corresponde a la posicion del fluor en el cono de octavas desenrollado.",
+      "p3": "El modelo de cono de vortice unifica la tabla periodica con la geometria del campo. Predice que cualquier elemento puede producirse a partir de cualquier otro cambiando la relacion de compresion — exactamente lo que demostraron los experimentos de transmutacion."
+    }
   },
   "segreChart": {
     "title": "Segre Chart (N-Z Diagram)",
