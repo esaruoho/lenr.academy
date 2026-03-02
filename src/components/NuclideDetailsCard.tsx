@@ -7,6 +7,7 @@ import { getRadioactiveDecayData, getElementSymbolByZ, getNuclideBySymbol } from
 import { traceDecayChain } from '../services/decayChainService'
 import { useNavigate, Link } from 'react-router-dom'
 import { expandHalfLifeUnit } from '../utils/formatUtils'
+import { getIAEAAbundance } from '../constants/iaeaAbundances'
 import DecayChainDiagram from './DecayChainDiagram'
 
 interface NuclideDetailsCardProps {
@@ -301,7 +302,19 @@ export default function NuclideDetailsCard({ nuclide, onClose }: NuclideDetailsC
                 <div className="flex justify-between gap-2">
                   <dt className="text-gray-600 dark:text-gray-400 flex-shrink-0">{t('elements.isotopicPercent')}:</dt>
                   <dd className="font-medium text-gray-900 dark:text-gray-100 text-right truncate">
-                    {nuclide.pcaNCrust.toFixed(2)}%
+                    {nuclide.pcaNCrust.toFixed(4)}%
+                    {(() => {
+                      const iaea = getIAEAAbundance(nuclide.E, nuclide.A)
+                      if (iaea !== null) {
+                        const delta = iaea - nuclide.pcaNCrust
+                        return (
+                          <span className="ml-1 text-xs text-gray-400 dark:text-gray-500" title={`IAEA: ${iaea.toFixed(4)}% (Δ${delta >= 0 ? '+' : ''}${delta.toFixed(4)})`}>
+                            (IAEA: {iaea.toFixed(4)}%)
+                          </span>
+                        )
+                      }
+                      return null
+                    })()}
                   </dd>
                 </div>
               )}
