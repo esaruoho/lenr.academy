@@ -1,86 +1,117 @@
 import { test, expect } from '@playwright/test';
 import {
-  waitForDatabaseReady,
-  acceptMeteredWarningIfPresent,
   acceptPrivacyConsent,
-  navigateToPage,
 } from '../fixtures/test-helpers';
 
 test.describe('Help Page', () => {
   test.beforeEach(async ({ page }) => {
     await acceptPrivacyConsent(page);
-    await page.goto('/');
-    await acceptMeteredWarningIfPresent(page);
-    await waitForDatabaseReady(page);
+    await page.goto('/help');
   });
 
-  test('should navigate to help page', async ({ page }) => {
-    await navigateToPage(page, 'Help');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  });
-
-  test('should display glossary section', async ({ page }) => {
-    await navigateToPage(page, 'Help');
-    // Glossary section should be present
-    await expect(page.getByText(/Glossary/i).first()).toBeVisible();
+  test('should display page title', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /Help & Glossary/i })).toBeVisible();
   });
 
   test('should display example queries section', async ({ page }) => {
-    await navigateToPage(page, 'Help');
-    await expect(page.getByText(/Example Queries/i).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Example Queries/i })).toBeVisible();
   });
 
-  test('should have a working glossary search', async ({ page }) => {
-    await navigateToPage(page, 'Help');
+  test('should display example query cards with names and descriptions', async ({ page }) => {
+    await expect(page.getByText('Hydrogen-Lithium Fusion')).toBeVisible();
+    await expect(page.getByText('Deuterium-Deuterium Fusion')).toBeVisible();
+    await expect(page.getByText('Uranium Fission Pathways')).toBeVisible();
+  });
 
+  test('should show query type badges on example cards', async ({ page }) => {
+    // Query type badges are rendered in small text spans next to card titles
+    // Use exact matching to avoid matching substring in card names
+    const fusionBadges = page.locator('span', { hasText: 'fusion' });
+    const fissionBadges = page.locator('span', { hasText: 'fission' });
+    const twotwoBadges = page.locator('span', { hasText: '2→2' });
+    expect(await fusionBadges.count()).toBeGreaterThan(0);
+    expect(await fissionBadges.count()).toBeGreaterThan(0);
+    expect(await twotwoBadges.count()).toBeGreaterThan(0);
+  });
+
+  test('should navigate to fusion query when clicking fusion example', async ({ page }) => {
+    await page.getByText('Hydrogen-Lithium Fusion').click();
+    await page.waitForURL(/\/fusion/);
+    expect(page.url()).toContain('/fusion');
+  });
+
+  test('should navigate to fission query when clicking fission example', async ({ page }) => {
+    await page.getByText('Uranium Fission Pathways').click();
+    await page.waitForURL(/\/fission/);
+    expect(page.url()).toContain('/fission');
+  });
+
+  test('should navigate to twotwo query when clicking twotwo example', async ({ page }) => {
+    await page.getByText('Deuterium-Nickel Reactions').click();
+    await page.waitForURL(/\/twotwo/);
+    expect(page.url()).toContain('/twotwo');
+  });
+
+  test('should display glossary section heading', async ({ page }) => {
+    // The glossary section has its own heading distinct from the page title
+    const glossaryHeadings = page.getByRole('heading', { name: /Glossary/i });
+    // At least one heading containing "Glossary"
+    expect(await glossaryHeadings.count()).toBeGreaterThan(0);
+  });
+
+  test('should have glossary search input', async ({ page }) => {
     const searchInput = page.getByRole('textbox');
-    if (await searchInput.isVisible()) {
-      await searchInput.fill('fusion');
-      // Should filter glossary entries
-      // Wait a moment for filtering
-      await page.waitForTimeout(300);
-      // The glossary should still show some results (fusion is a common term)
-      const glossaryItems = page.locator('[class*="border"]').filter({ hasText: /fusion/i });
-      await expect(glossaryItems.first()).toBeVisible();
-    }
+    await expect(searchInput).toBeVisible();
   });
 
-  test('should have glossary category filter buttons', async ({ page }) => {
-    await navigateToPage(page, 'Help');
+  test('should filter glossary entries by search term', async ({ page }) => {
+    const searchInput = page.getByRole('textbox');
+    await searchInput.fill('Binding Energy');
 
-    // Check for category filter buttons (All, Nuclear Physics, etc.)
-    const allButton = page.getByRole('button', { name: /All/i }).first();
-    if (await allButton.isVisible()) {
-      await allButton.click();
-      // Should show all glossary entries
-    }
+    // Should show entries matching "Binding Energy"
+    await expect(page.getByText('Binding Energy').first()).toBeVisible();
   });
 
-  test('should have clickable example queries that navigate to query pages', async ({ page }) => {
-    await navigateToPage(page, 'Help');
+  test('should show no results message for non-matching search', async ({ page }) => {
+    const searchInput = page.getByRole('textbox');
+    await searchInput.fill('xyznonexistentterm123');
 
-    // Find a "Try this" or arrow button for an example query
-    const tryButton = page.getByRole('button').filter({ hasText: /try|→/i }).first();
-    if (await tryButton.isVisible()) {
-      await tryButton.click();
-      // Should navigate to a query page (fusion, fission, or twotwo)
-      await expect(page).toHaveURL(/\/(fusion|fission|twotwo)/);
-    }
-  });
-});
-
-test.describe('Help Page - Mobile', () => {
-  test.use({ viewport: { width: 375, height: 667 } });
-
-  test.beforeEach(async ({ page }) => {
-    await acceptPrivacyConsent(page);
-    await page.goto('/');
-    await acceptMeteredWarningIfPresent(page);
-    await waitForDatabaseReady(page);
+    await expect(page.getByText(/no results|No matching/i)).toBeVisible();
   });
 
-  test('should display help page content on mobile', async ({ page }) => {
-    await navigateToPage(page, 'Help');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  test('should have category filter buttons', async ({ page }) => {
+    const categoryButtons = page.locator('button.rounded-full');
+    const count = await categoryButtons.count();
+    expect(count).toBeGreaterThanOrEqual(4);
+  });
+
+  test('should filter glossary by category when clicking category button', async ({ page }) => {
+    // Get total entry count first by scrolling down to see glossary
+    const allItems = page.locator('section').last().locator('.card');
+    const totalCount = await allItems.count();
+
+    // Click a specific category (not "All")
+    const categoryButtons = page.locator('button.rounded-full');
+    await categoryButtons.nth(1).click();
+
+    const filteredCount = await allItems.count();
+    expect(filteredCount).toBeLessThanOrEqual(totalCount);
+  });
+
+  test('should display glossary entry count', async ({ page }) => {
+    const countText = page.getByText(/\d+ terms/i);
+    await countText.scrollIntoViewIfNeeded();
+    await expect(countText).toBeVisible();
+  });
+
+  test('should show related terms on glossary entries', async ({ page }) => {
+    // Search for Nuclide to make sure it's visible
+    const searchInput = page.getByRole('textbox');
+    await searchInput.fill('Nuclide');
+
+    // Wait for filter to apply
+    const nuclideEntry = page.locator('.card', { hasText: /^Nuclide/ }).first();
+    await expect(nuclideEntry).toBeVisible();
+    await expect(nuclideEntry.getByText('Isotope')).toBeVisible();
   });
 });

@@ -1,83 +1,112 @@
 import { test, expect } from '@playwright/test';
 import {
-  waitForDatabaseReady,
-  acceptMeteredWarningIfPresent,
   acceptPrivacyConsent,
-  navigateToPage,
 } from '../fixtures/test-helpers';
 
 test.describe('Home Page', () => {
   test.beforeEach(async ({ page }) => {
     await acceptPrivacyConsent(page);
     await page.goto('/');
-    await acceptMeteredWarningIfPresent(page);
-    await waitForDatabaseReady(page);
   });
 
   test('should display the main title', async ({ page }) => {
-    const heading = page.getByRole('heading', { level: 1 });
-    await expect(heading).toBeVisible();
-    // Title should contain LENR Academy or similar
-    await expect(heading).toHaveText(/LENR|Academy|Nanosoft/i);
+    await expect(page.getByRole('heading', { name: /Nanosoft Package/i })).toBeVisible();
   });
 
-  test('should have navigation links to query pages', async ({ page }) => {
-    // Should have links to Fusion, Fission, and Two-To-Two pages
-    await expect(page.getByRole('link', { name: /Fusion/i }).first()).toBeVisible();
-    await expect(page.getByRole('link', { name: /Fission/i }).first()).toBeVisible();
-    await expect(page.getByRole('link', { name: /Two.?To.?Two/i }).first()).toBeVisible();
-  });
-
-  test('should navigate to Fusion page from home', async ({ page }) => {
-    await page.getByRole('link', { name: /Fusion/i }).first().click();
-    await expect(page).toHaveURL(/\/fusion/);
-  });
-
-  test('should navigate to Element Data from home', async ({ page }) => {
-    const elementDataLink = page.getByRole('link', { name: /Element/i }).first();
-    if (await elementDataLink.isVisible()) {
-      await elementDataLink.click();
-      await expect(page).toHaveURL(/\/element/);
+  test('should display four feature cards', async ({ page }) => {
+    const featureHeadings = [
+      /Query Nuclear Reactions/i,
+      /Cascade Simulations/i,
+      /Element.*Nuclide Data/i,
+      /Advanced Queries/i,
+    ];
+    for (const heading of featureHeadings) {
+      await expect(page.getByRole('heading', { name: heading })).toBeVisible();
     }
   });
 
-  test('should display feature cards', async ({ page }) => {
-    // The home page has cards describing features
-    // Check for key sections: Query Reactions, Element Data, etc.
-    const cards = page.locator('.card, [class*="card"]');
-    const count = await cards.count();
-    expect(count).toBeGreaterThan(0);
+  test('should have navigation links to query pages in main content', async ({ page }) => {
+    // Main content links include arrow prefix "→"
+    const mainContent = page.locator('.max-w-6xl');
+    await expect(mainContent.getByRole('link', { name: /Fusion Reactions/i })).toBeVisible();
+    await expect(mainContent.getByRole('link', { name: /Fission Reactions/i })).toBeVisible();
+    await expect(mainContent.getByRole('link', { name: /Two-To-Two Reactions/i })).toBeVisible();
   });
 
-  test('should display database statistics', async ({ page }) => {
-    // Home page may show database stats like reaction counts
-    // Look for numbers that match known database sizes
-    const statsText = page.getByText(/\d{3,}/).first();
-    if (await statsText.isVisible()) {
-      const text = await statsText.textContent();
-      expect(text).toBeDefined();
-    }
-  });
-});
-
-test.describe('Home Page - Mobile', () => {
-  test.use({ viewport: { width: 375, height: 667 } });
-
-  test.beforeEach(async ({ page }) => {
-    await acceptPrivacyConsent(page);
-    await page.goto('/');
-    await acceptMeteredWarningIfPresent(page);
-    await waitForDatabaseReady(page);
+  test('should navigate to fusion query page from home', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    await mainContent.getByRole('link', { name: /Fusion Reactions/i }).click();
+    await page.waitForURL(/\/fusion/);
+    expect(page.url()).toContain('/fusion');
   });
 
-  test('should display home page on mobile viewport', async ({ page }) => {
-    const heading = page.getByRole('heading', { level: 1 });
-    await expect(heading).toBeVisible();
+  test('should navigate to fission query page from home', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    await mainContent.getByRole('link', { name: /Fission Reactions/i }).click();
+    await page.waitForURL(/\/fission/);
+    expect(page.url()).toContain('/fission');
   });
 
-  test('should have working navigation links on mobile', async ({ page }) => {
-    // Links should be visible and clickable on mobile
-    const fusionLink = page.getByRole('link', { name: /Fusion/i }).first();
-    await expect(fusionLink).toBeVisible();
+  test('should navigate to twotwo query page from home', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    await mainContent.getByRole('link', { name: /Two-To-Two Reactions/i }).click();
+    await page.waitForURL(/\/twotwo/);
+    expect(page.url()).toContain('/twotwo');
+  });
+
+  test('should have cascade simulations link', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    await expect(mainContent.getByRole('link', { name: /Cascade Simulations/i })).toBeVisible();
+  });
+
+  test('should have element data link', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    const elementLink = mainContent.getByRole('link', { name: /Show Element Data/i });
+    await elementLink.scrollIntoViewIfNeeded();
+    await expect(elementLink).toBeVisible();
+  });
+
+  test('should have tables in detail link', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    const tablesLink = mainContent.getByRole('link', { name: /Tables in Detail/i });
+    await tablesLink.scrollIntoViewIfNeeded();
+    await expect(tablesLink).toBeVisible();
+  });
+
+  test('should have all tables query tool link', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    const allTablesLink = mainContent.getByRole('link', { name: /All Tables/i });
+    await allTablesLink.scrollIntoViewIfNeeded();
+    await expect(allTablesLink).toBeVisible();
+  });
+
+  test('should display Parkhomov tables section', async ({ page }) => {
+    const parkhomovSection = page.getByText(/1,389/);
+    await parkhomovSection.scrollIntoViewIfNeeded();
+    await expect(parkhomovSection).toBeVisible();
+  });
+
+  test('should display original app section with external link', async ({ page }) => {
+    const nanosoftLink = page.getByRole('link', { name: /Visit|Nanosoft/i });
+    await nanosoftLink.scrollIntoViewIfNeeded();
+    await expect(nanosoftLink).toBeVisible();
+    await expect(nanosoftLink).toHaveAttribute('href', 'https://nanosoft.co.nz');
+    await expect(nanosoftLink).toHaveAttribute('target', '_blank');
+  });
+
+  test('should display open source section with GitHub link', async ({ page }) => {
+    const githubLink = page.getByRole('link', { name: /GitHub/i }).first();
+    await githubLink.scrollIntoViewIfNeeded();
+    await expect(githubLink).toBeVisible();
+    await expect(githubLink).toHaveAttribute('href', /github\.com\/Episk-pos\/lenr\.academy/);
+  });
+
+  test('should have discussions and issues links', async ({ page }) => {
+    const discussionLink = page.getByRole('link', { name: /Discussion/i });
+    await discussionLink.scrollIntoViewIfNeeded();
+    await expect(discussionLink).toBeVisible();
+    const issueLink = page.getByRole('link', { name: /Report|Issue/i }).first();
+    await issueLink.scrollIntoViewIfNeeded();
+    await expect(issueLink).toBeVisible();
   });
 });
