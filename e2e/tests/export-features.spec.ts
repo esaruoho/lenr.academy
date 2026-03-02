@@ -4,25 +4,45 @@ import {
   acceptMeteredWarningIfPresent,
   acceptPrivacyConsent,
   navigateToPage,
-  selectElements,
   waitForReactionResults,
 } from '../fixtures/test-helpers';
+
+/**
+ * Helper to open periodic table dropdown and select an element.
+ * The periodic table on query pages is inside a dropdown that must be opened first.
+ */
+async function openDropdownAndSelectElement(
+  page: import('@playwright/test').Page,
+  dropdownIndex: number,
+  elementButtonPattern: RegExp
+) {
+  // Open the dropdown by clicking the "Any" button (or the current selection button)
+  const dropdownButton = page.getByRole('button', { name: /Any|All/i }).nth(dropdownIndex);
+  if (await dropdownButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await dropdownButton.click({ force: true });
+    // Wait for periodic table to appear
+    const elementButton = page.getByRole('button', { name: elementButtonPattern }).first();
+    await elementButton.waitFor({ state: 'visible', timeout: 5000 });
+    await elementButton.click();
+    // Close dropdown
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
+  }
+}
 
 test.describe('Export Features', () => {
   test.beforeEach(async ({ page }) => {
     await acceptPrivacyConsent(page);
-    await page.goto('/');
+    await page.goto('/fusion');
     await acceptMeteredWarningIfPresent(page);
     await waitForDatabaseReady(page);
   });
 
   test('should show export buttons after running fusion query', async ({ page }) => {
-    await navigateToPage(page, 'Fusion');
+    // Open Element 1 dropdown and select Hydrogen
+    await openDropdownAndSelectElement(page, 0, /^1\s+H$/i);
 
-    // Select H in element 1 and Li in element 2
-    await selectElements(page, ['H']);
-
-    // Look for and click the run/search button
+    // Click Run Query
     const runButton = page.getByRole('button', { name: /Run Query|Search/i }).first();
     if (await runButton.isVisible({ timeout: 3000 }).catch(() => false)) {
       await runButton.click();
@@ -32,7 +52,6 @@ test.describe('Export Features', () => {
       const jsonButton = page.getByRole('button', { name: /JSON/i }).first();
       const pdfButton = page.getByRole('button', { name: /PDF/i }).first();
 
-      // At least one export option should exist
       const jsonVisible = await jsonButton.isVisible({ timeout: 3000 }).catch(() => false);
       const pdfVisible = await pdfButton.isVisible({ timeout: 3000 }).catch(() => false);
 
@@ -41,10 +60,12 @@ test.describe('Export Features', () => {
   });
 
   test('should show export buttons after running fission query', async ({ page }) => {
-    await navigateToPage(page, 'Fission');
+    await page.goto('/fission');
+    await acceptMeteredWarningIfPresent(page);
+    await waitForDatabaseReady(page);
 
-    // Select U (Uranium) for fission
-    await selectElements(page, ['U']);
+    // Open Element dropdown and select Uranium
+    await openDropdownAndSelectElement(page, 0, /^92\s+U$/i);
 
     const runButton = page.getByRole('button', { name: /Run Query|Search/i }).first();
     if (await runButton.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -54,14 +75,12 @@ test.describe('Export Features', () => {
       // Check for export options
       const exportButton = page.getByRole('button').filter({ hasText: /export|JSON|PDF|download/i }).first();
       const visible = await exportButton.isVisible({ timeout: 3000 }).catch(() => false);
-      // Export should be available when there are results
       expect(visible).toBeDefined();
     }
   });
 
   test('should show share query button on query pages', async ({ page }) => {
-    await navigateToPage(page, 'Fusion');
-    // The share/copy link button should be visible
+    // The share/copy link button should be visible on the fusion page
     const shareButton = page.getByText(/Copy Link|Share/i).first();
     await expect(shareButton).toBeVisible({ timeout: 5000 });
   });
@@ -70,16 +89,14 @@ test.describe('Export Features', () => {
 test.describe('Energy Histogram', () => {
   test.beforeEach(async ({ page }) => {
     await acceptPrivacyConsent(page);
-    await page.goto('/');
+    await page.goto('/fusion');
     await acceptMeteredWarningIfPresent(page);
     await waitForDatabaseReady(page);
   });
 
   test('should show energy histogram after fusion query with results', async ({ page }) => {
-    await navigateToPage(page, 'Fusion');
-
-    // Select H in element 1
-    await selectElements(page, ['H']);
+    // Open Element 1 dropdown and select Hydrogen
+    await openDropdownAndSelectElement(page, 0, /^1\s+H$/i);
 
     const runButton = page.getByRole('button', { name: /Run Query|Search/i }).first();
     if (await runButton.isVisible({ timeout: 3000 }).catch(() => false)) {
