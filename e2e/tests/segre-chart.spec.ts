@@ -38,20 +38,16 @@ test.describe('Segre Chart on Element Data Page', () => {
     const segreSection = page.getByText(/Nuclide Chart.*Segre Chart/i);
     await segreSection.scrollIntoViewIfNeeded();
 
-    // There should be zoom in/out buttons
-    const zoomButtons = page.locator('button').filter({ has: page.locator('svg') });
-    const count = await zoomButtons.count();
-    expect(count).toBeGreaterThan(0);
+    // The chart includes zoom control hint text
+    await expect(page.getByText(/zoom/i).first()).toBeVisible();
   });
 
   test('should redirect /segre-chart to /element-data', async ({ page }) => {
     await page.goto('/segre-chart');
     await page.waitForURL(/\/element-data/);
-    expect(page.url()).toContain('/element-data');
   });
 
-  test('should show Nuclides tab with count', async ({ page }) => {
-    // The Nuclides tab shows the count like "Nuclides 324"
+  test('should show Nuclides tab', async ({ page }) => {
     await expect(page.getByText(/Nuclides/).first()).toBeVisible();
   });
 });

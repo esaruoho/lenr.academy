@@ -25,31 +25,25 @@ test.describe('Help Page', () => {
 
   test('should show query type badges on example cards', async ({ page }) => {
     // Query type badges are rendered in small text spans next to card titles
-    // Use exact matching to avoid matching substring in card names
-    const fusionBadges = page.locator('span', { hasText: 'fusion' });
-    const fissionBadges = page.locator('span', { hasText: 'fission' });
-    const twotwoBadges = page.locator('span', { hasText: '2→2' });
-    expect(await fusionBadges.count()).toBeGreaterThan(0);
-    expect(await fissionBadges.count()).toBeGreaterThan(0);
-    expect(await twotwoBadges.count()).toBeGreaterThan(0);
+    // hasText performs substring matching; using .first() to wait for at least one
+    await expect(page.locator('span', { hasText: 'fusion' }).first()).toBeVisible();
+    await expect(page.locator('span', { hasText: 'fission' }).first()).toBeVisible();
+    await expect(page.locator('span', { hasText: '2→2' }).first()).toBeVisible();
   });
 
   test('should navigate to fusion query when clicking fusion example', async ({ page }) => {
     await page.getByText('Hydrogen-Lithium Fusion').click();
     await page.waitForURL(/\/fusion/);
-    expect(page.url()).toContain('/fusion');
   });
 
   test('should navigate to fission query when clicking fission example', async ({ page }) => {
     await page.getByText('Uranium Fission Pathways').click();
     await page.waitForURL(/\/fission/);
-    expect(page.url()).toContain('/fission');
   });
 
   test('should navigate to twotwo query when clicking twotwo example', async ({ page }) => {
     await page.getByText('Deuterium-Nickel Reactions').click();
     await page.waitForURL(/\/twotwo/);
-    expect(page.url()).toContain('/twotwo');
   });
 
   test('should display glossary section heading', async ({ page }) => {
@@ -80,22 +74,29 @@ test.describe('Help Page', () => {
   });
 
   test('should have category filter buttons', async ({ page }) => {
-    const categoryButtons = page.locator('button.rounded-full');
-    const count = await categoryButtons.count();
-    expect(count).toBeGreaterThanOrEqual(4);
+    // Category filters include "All" and specific categories
+    await expect(page.getByRole('button', { name: 'All' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Nuclear Physics/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Reaction Types/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Database Fields/i })).toBeVisible();
   });
 
   test('should filter glossary by category when clicking category button', async ({ page }) => {
-    // Get total entry count first by scrolling down to see glossary
-    const allItems = page.locator('section').last().locator('.card');
-    const totalCount = await allItems.count();
+    // Get the displayed terms count text
+    const countText = page.getByText(/\d+ terms/i);
+    await countText.scrollIntoViewIfNeeded();
+    const initialText = await countText.textContent();
+    const initialCount = parseInt(initialText?.match(/(\d+)/)?.[1] ?? '0', 10);
 
-    // Click a specific category (not "All")
-    const categoryButtons = page.locator('button.rounded-full');
-    await categoryButtons.nth(1).click();
+    // Click "Database Fields" to filter to a specific category
+    await page.getByRole('button', { name: /Database Fields/i }).click();
 
-    const filteredCount = await allItems.count();
-    expect(filteredCount).toBeLessThanOrEqual(totalCount);
+    // After filtering, the count should be less than the total
+    await expect(countText).not.toHaveText(new RegExp(`${initialCount} terms`, 'i'));
+    const filteredText = await countText.textContent();
+    const filteredCount = parseInt(filteredText?.match(/(\d+)/)?.[1] ?? '0', 10);
+    expect(filteredCount).toBeGreaterThan(0);
+    expect(filteredCount).toBeLessThan(initialCount);
   });
 
   test('should display glossary entry count', async ({ page }) => {
