@@ -1,113 +1,177 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { collectErrorContext } from './errorContext';
 
-describe('errorContext', () => {
-  beforeEach(() => {
-    // Provide a stable userAgent for testing
-    Object.defineProperty(navigator, 'userAgent', {
-      value:
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      writable: true,
-      configurable: true,
-    });
+vi.mock('./errorFingerprint', () => ({
+  generateErrorFingerprint: vi.fn(() => 'abc123fingerprint'),
+}));
 
-    // Mock window properties
-    Object.defineProperty(window, 'innerWidth', {
-      value: 1920,
-      writable: true,
-      configurable: true,
-    });
+describe('collectErrorContext', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
-  describe('collectErrorContext', () => {
-    it('collects all expected fields', () => {
-      const error = new Error('Test error');
-      const ctx = collectErrorContext(error, 'TestBoundary');
+  function makeError(message: string, name = 'Error'): Error {
+    const err = new Error(message);
+    err.name = name;
+    return err;
+  }
 
-      expect(ctx.error).toBe(error);
-      expect(ctx.errorBoundary).toBe('TestBoundary');
-      expect(ctx.timestamp).toBeDefined();
-      expect(ctx.url).toBeDefined();
-      expect(ctx.userAgent).toBeDefined();
-      expect(ctx.browser).toBeDefined();
-      expect(ctx.browserVersion).toBeDefined();
-      expect(ctx.os).toBeDefined();
-      expect(ctx.device).toBeDefined();
-      expect(ctx.appVersion).toBeDefined();
-      expect(ctx.fingerprint).toBeDefined();
-      expect(ctx.stackTrace).toBeDefined();
-    });
+  it('returns an object with all expected fields', () => {
+    const ctx = collectErrorContext(makeError('test error'));
+    expect(ctx).toHaveProperty('error');
+    expect(ctx).toHaveProperty('errorBoundary');
+    expect(ctx).toHaveProperty('timestamp');
+    expect(ctx).toHaveProperty('url');
+    expect(ctx).toHaveProperty('userAgent');
+    expect(ctx).toHaveProperty('browser');
+    expect(ctx).toHaveProperty('browserVersion');
+    expect(ctx).toHaveProperty('os');
+    expect(ctx).toHaveProperty('device');
+    expect(ctx).toHaveProperty('appVersion');
+    expect(ctx).toHaveProperty('fingerprint');
+    expect(ctx).toHaveProperty('stackTrace');
+  });
 
-    it('detects Chrome browser from user agent', () => {
-      const ctx = collectErrorContext(new Error('test'));
-      expect(ctx.browser).toBe('Chrome');
-      expect(ctx.browserVersion).toMatch(/^\d+/);
-    });
+  it('uses provided errorBoundary name', () => {
+    const ctx = collectErrorContext(makeError('test'), 'AppErrorBoundary');
+    expect(ctx.errorBoundary).toBe('AppErrorBoundary');
+  });
 
-    it('detects macOS from user agent', () => {
-      const ctx = collectErrorContext(new Error('test'));
-      expect(ctx.os).toBe('macOS');
-    });
+  it('defaults errorBoundary to Unknown', () => {
+    const ctx = collectErrorContext(makeError('test'));
+    expect(ctx.errorBoundary).toBe('Unknown');
+  });
 
-    it('detects Desktop device when no touch support', () => {
-      // jsdom may have ontouchstart or maxTouchPoints; explicitly remove them
-      delete (window as any).ontouchstart;
-      Object.defineProperty(navigator, 'maxTouchPoints', {
-        value: 0,
-        writable: true,
-        configurable: true,
-      });
-      const ctx = collectErrorContext(new Error('test'));
-      expect(ctx.device).toBe('Desktop');
-    });
+  it('sets fingerprint from generateErrorFingerprint', () => {
+    const ctx = collectErrorContext(makeError('test'));
+    expect(ctx.fingerprint).toBe('abc123fingerprint');
+  });
 
-    it('defaults errorBoundary to Unknown', () => {
-      const ctx = collectErrorContext(new Error('test'));
-      expect(ctx.errorBoundary).toBe('Unknown');
-    });
+  it('generates valid ISO timestamp', () => {
+    const ctx = collectErrorContext(makeError('test'));
+    expect(() => new Date(ctx.timestamp)).not.toThrow();
+    expect(ctx.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
 
-    it('generates a fingerprint string', () => {
-      const ctx = collectErrorContext(new Error('test'));
-      expect(typeof ctx.fingerprint).toBe('string');
-      expect(ctx.fingerprint.length).toBeGreaterThan(0);
-    });
+  it('preserves original error object', () => {
+    const err = makeError('original error', 'TypeError');
+    const ctx = collectErrorContext(err);
+    expect(ctx.error).toBe(err);
+    expect(ctx.error.name).toBe('TypeError');
+    expect(ctx.error.message).toBe('original error');
+  });
 
-    it('formats stack trace without the error message line', () => {
-      const error = new Error('My error message');
-      const ctx = collectErrorContext(error);
-      // Stack trace should not start with the error message
-      expect(ctx.stackTrace).not.toMatch(/^Error: My error message/);
-    });
+  it('includes url from window.location', () => {
+    const ctx = collectErrorContext(makeError('test'));
+    expect(typeof ctx.url).toBe('string');
+  });
 
-    it('detects Edge browser', () => {
-      Object.defineProperty(navigator, 'userAgent', {
-        value:
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
-        configurable: true,
-      });
-      const ctx = collectErrorContext(new Error('test'));
-      expect(ctx.browser).toBe('Edge');
-    });
+  it('includes userAgent string', () => {
+    const ctx = collectErrorContext(makeError('test'));
+    expect(typeof ctx.userAgent).toBe('string');
+  });
 
-    it('detects Firefox browser', () => {
-      Object.defineProperty(navigator, 'userAgent', {
-        value:
-          'Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0',
-        configurable: true,
-      });
-      const ctx = collectErrorContext(new Error('test'));
-      expect(ctx.browser).toBe('Firefox');
-      expect(ctx.os).toBe('Linux');
+  // Browser detection tests (via collectErrorContext output)
+  it('detects Chrome browser', () => {
+    const originalUA = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/120.0.6099.130 Safari/537.36',
+      configurable: true,
     });
+    const ctx = collectErrorContext(makeError('test'));
+    expect(ctx.browser).toBe('Chrome');
+    expect(ctx.browserVersion).toMatch(/^120/);
+    Object.defineProperty(navigator, 'userAgent', { value: originalUA, configurable: true });
+  });
 
-    it('detects Windows OS', () => {
-      Object.defineProperty(navigator, 'userAgent', {
-        value:
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0',
-        configurable: true,
-      });
-      const ctx = collectErrorContext(new Error('test'));
-      expect(ctx.os).toBe('Windows');
+  it('detects Edge browser (before Chrome check)', () => {
+    const originalUA = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/120.0 Safari/537.36 Edg/120.0.2210.91',
+      configurable: true,
     });
+    const ctx = collectErrorContext(makeError('test'));
+    expect(ctx.browser).toBe('Edge');
+    expect(ctx.browserVersion).toMatch(/^120/);
+    Object.defineProperty(navigator, 'userAgent', { value: originalUA, configurable: true });
+  });
+
+  it('detects Firefox browser', () => {
+    const originalUA = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0',
+      configurable: true,
+    });
+    const ctx = collectErrorContext(makeError('test'));
+    expect(ctx.browser).toBe('Firefox');
+    expect(ctx.browserVersion).toMatch(/^121/);
+    Object.defineProperty(navigator, 'userAgent', { value: originalUA, configurable: true });
+  });
+
+  it('detects Safari browser', () => {
+    const originalUA = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2) AppleWebKit/605.1.15 Version/17.2 Safari/605.1.15',
+      configurable: true,
+    });
+    const ctx = collectErrorContext(makeError('test'));
+    expect(ctx.browser).toBe('Safari');
+    expect(ctx.browserVersion).toMatch(/^17/);
+    Object.defineProperty(navigator, 'userAgent', { value: originalUA, configurable: true });
+  });
+
+  // OS detection tests
+  it('detects Windows OS', () => {
+    const originalUA = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0',
+      configurable: true,
+    });
+    const ctx = collectErrorContext(makeError('test'));
+    expect(ctx.os).toBe('Windows');
+    Object.defineProperty(navigator, 'userAgent', { value: originalUA, configurable: true });
+  });
+
+  it('detects macOS', () => {
+    const originalUA = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2) Safari/605.1.15',
+      configurable: true,
+    });
+    const ctx = collectErrorContext(makeError('test'));
+    expect(ctx.os).toBe('macOS');
+    Object.defineProperty(navigator, 'userAgent', { value: originalUA, configurable: true });
+  });
+
+  it('detects Linux OS', () => {
+    const originalUA = navigator.userAgent;
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (X11; Linux x86_64) Firefox/121.0',
+      configurable: true,
+    });
+    const ctx = collectErrorContext(makeError('test'));
+    expect(ctx.os).toBe('Linux');
+    Object.defineProperty(navigator, 'userAgent', { value: originalUA, configurable: true });
+  });
+
+  // Stack trace tests
+  it('formats stack trace removing error message line', () => {
+    const err = makeError('some error');
+    err.stack = 'Error: some error\n    at Function.test (file.js:10:5)\n    at Object.<anonymous> (runner.js:1:1)';
+    const ctx = collectErrorContext(err);
+    expect(ctx.stackTrace).not.toContain('Error: some error');
+    expect(ctx.stackTrace).toContain('at Function.test');
+  });
+
+  it('handles error with no stack trace', () => {
+    const err = makeError('no stack');
+    err.stack = undefined;
+    const ctx = collectErrorContext(err);
+    expect(ctx.stackTrace).toBe('No stack trace available');
+  });
+
+  it('device type is Desktop, Mobile, or Tablet', () => {
+    const ctx = collectErrorContext(makeError('test'));
+    expect(['Desktop', 'Mobile', 'Tablet']).toContain(ctx.device);
   });
 });

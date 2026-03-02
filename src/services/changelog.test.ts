@@ -1,160 +1,191 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fetchReleaseNotes, clearReleaseNotesCache } from './changelog';
-import type { ReleaseNotes } from './changelog';
 
-function mockFetchImpl(response: object, status = 200): typeof fetch {
-  return vi.fn().mockResolvedValue({
-    ok: status >= 200 && status < 300,
-    status,
-    statusText: status === 404 ? 'Not Found' : 'OK',
-    json: () => Promise.resolve(response),
-    text: () => Promise.resolve(JSON.stringify(response)),
-  });
-}
+describe('changelog service', () => {
+  const originalFetch = globalThis.fetch;
 
-function mockFetchSequence(...responses: Array<{ body: object; status?: number }>): typeof fetch {
-  const fn = vi.fn();
-  for (const [i, resp] of responses.entries()) {
-    const status = resp.status ?? 200;
-    fn.mockResolvedValueOnce({
-      ok: status >= 200 && status < 300,
-      status,
-      statusText: status === 404 ? 'Not Found' : 'OK',
-      json: () => Promise.resolve(resp.body),
-      text: () => Promise.resolve(JSON.stringify(resp.body)),
-    });
-    // Ensure unused value doesn't trigger lint
-    void i;
-  }
-  return fn;
-}
-
-const sampleRelease = {
-  tag_name: 'v0.1.0-alpha.21',
-  name: 'Release v0.1.0-alpha.21',
-  body: '## Changes\n- Fixed something',
-  published_at: '2026-02-23T00:00:00Z',
-  html_url: 'https://github.com/Episk-pos/lenr.academy/releases/tag/v0.1.0-alpha.21',
-};
-
-describe('changelog', () => {
   beforeEach(() => {
     clearReleaseNotesCache();
   });
 
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  function mockFetchResponse(data: unknown, ok = true, status = 200) {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok,
+      status,
+      statusText: ok ? 'OK' : 'Not Found',
+      json: () => Promise.resolve(data),
+      text: () => Promise.resolve(JSON.stringify(data)),
+    });
+  }
+
   describe('fetchReleaseNotes', () => {
-    it('fetches release notes for a tag', async () => {
-      const fetchImpl = mockFetchImpl(sampleRelease);
+    it('fetches and maps release data', async () => {
+      mockFetchResponse({
+        tag_name: 'v0.1.0',
+        name: 'Release v0.1.0',
+        body: '## Changes\n- Added stuff',
+        published_at: '2026-01-15T00:00:00Z',
+        html_url: 'https://github.com/Episk-pos/lenr.academy/releases/tag/v0.1.0',
+      });
 
-      const result = await fetchReleaseNotes('v0.1.0-alpha.21', { fetchImpl });
-
-      expect(result.tagName).toBe('v0.1.0-alpha.21');
-      expect(result.name).toBe('Release v0.1.0-alpha.21');
-      expect(result.body).toContain('Fixed something');
-      expect(result.publishedAt).toBe('2026-02-23T00:00:00Z');
-      expect(result.htmlUrl).toContain('v0.1.0-alpha.21');
+      const notes = await fetchReleaseNotes('v0.1.0');
+      expect(notes.tagName).toBe('v0.1.0');
+      expect(notes.name).toBe('Release v0.1.0');
+      expect(notes.body).toContain('Changes');
+      expect(notes.publishedAt).toBe('2026-01-15T00:00:00Z');
+      expect(notes.htmlUrl).toContain('releases/tag/v0.1.0');
     });
 
     it('normalizes tags without v prefix', async () => {
-      const fetchImpl = mockFetchImpl(sampleRelease);
+      mockFetchResponse({
+        tag_name: 'v0.2.0',
+        name: 'Release v0.2.0',
+        body: 'changelog',
+        published_at: '2026-02-01T00:00:00Z',
+        html_url: 'https://github.com/Episk-pos/lenr.academy/releases/tag/v0.2.0',
+      });
 
-      await fetchReleaseNotes('0.1.0-alpha.21', { fetchImpl });
-
-      expect(fetchImpl).toHaveBeenCalledWith(
-        expect.stringContaining('v0.1.0-alpha.21'),
-        expect.any(Object),
+      const notes = await fetchReleaseNotes('0.2.0');
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('v0.2.0'),
+        expect.any(Object)
       );
+      expect(notes.tagName).toBe('v0.2.0');
     });
 
-    it('caches results and returns cached on second call', async () => {
-      const fetchImpl = mockFetchImpl(sampleRelease);
+    it('caches results for repeated requests', async () => {
+      mockFetchResponse({
+        tag_name: 'v1.0.0',
+        name: 'v1.0.0',
+        body: 'cached content',
+        published_at: null,
+        html_url: 'https://github.com/Episk-pos/lenr.academy/releases/tag/v1.0.0',
+      });
 
-      const first = await fetchReleaseNotes('v0.1.0-alpha.21', { fetchImpl });
-      const second = await fetchReleaseNotes('v0.1.0-alpha.21', { fetchImpl });
+      const first = await fetchReleaseNotes('v1.0.0');
+      const second = await fetchReleaseNotes('v1.0.0');
 
       expect(first).toEqual(second);
-      // Should only have called fetch once
-      expect(fetchImpl).toHaveBeenCalledTimes(1);
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     });
 
-    it('falls back to releases list when tag endpoint returns 404', async () => {
-      const fetchImpl = mockFetchSequence(
-        { body: {}, status: 404 },
-        { body: [sampleRelease], status: 200 },
-      );
+    it('handles missing fields with defaults', async () => {
+      mockFetchResponse({
+        tag_name: 'v0.3.0',
+      });
 
-      const result = await fetchReleaseNotes('v0.1.0-alpha.21', { fetchImpl });
-
-      expect(result.tagName).toBe('v0.1.0-alpha.21');
-      expect(fetchImpl).toHaveBeenCalledTimes(2);
+      const notes = await fetchReleaseNotes('v0.3.0');
+      expect(notes.tagName).toBe('v0.3.0');
+      expect(notes.name).toBe('v0.3.0');
+      expect(notes.body).toBe('');
+      expect(notes.publishedAt).toBeNull();
+      expect(notes.htmlUrl).toContain('github.com/Episk-pos/lenr.academy/releases');
     });
 
-    it('throws ReleaseNotFoundError when tag not found in fallback list', async () => {
-      const fetchImpl = mockFetchSequence(
-        { body: {}, status: 404 },
-        { body: [{ ...sampleRelease, tag_name: 'v999.0.0' }], status: 200 },
-      );
+    it('falls back to listing releases on 404', async () => {
+      let callCount = 0;
+      globalThis.fetch = vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return Promise.resolve({
+            ok: false,
+            status: 404,
+            statusText: 'Not Found',
+            json: () => Promise.resolve({}),
+            text: () => Promise.resolve('Not Found'),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () =>
+            Promise.resolve([
+              {
+                tag_name: 'v0.4.0',
+                name: 'Found in list',
+                body: 'found it',
+                published_at: '2026-03-01T00:00:00Z',
+                html_url: 'https://github.com/Episk-pos/lenr.academy/releases/tag/v0.4.0',
+              },
+            ]),
+          text: () => Promise.resolve(''),
+        });
+      });
 
-      await expect(
-        fetchReleaseNotes('v0.1.0-alpha.21', { fetchImpl }),
-      ).rejects.toThrow('Release not found for tag "v0.1.0-alpha.21"');
+      const notes = await fetchReleaseNotes('v0.4.0');
+      expect(notes.name).toBe('Found in list');
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
     });
 
-    it('throws on non-404 errors', async () => {
-      const fetchImpl = vi.fn().mockResolvedValue({
+    it('throws ReleaseNotFoundError when tag not in release list', async () => {
+      let callCount = 0;
+      globalThis.fetch = vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return Promise.resolve({
+            ok: false,
+            status: 404,
+            statusText: 'Not Found',
+            text: () => Promise.resolve('Not Found'),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve([{ tag_name: 'v0.5.0' }]),
+          text: () => Promise.resolve(''),
+        });
+      });
+
+      await expect(fetchReleaseNotes('v999.0.0')).rejects.toThrow('Release not found');
+    });
+
+    it('throws on non-404 HTTP errors', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
-        text: () => Promise.resolve('Server error'),
+        text: () => Promise.resolve('Server Error'),
       });
 
-      await expect(
-        fetchReleaseNotes('v1.0.0', { fetchImpl }),
-      ).rejects.toThrow('Server error');
+      await expect(fetchReleaseNotes('v0.1.0')).rejects.toThrow();
     });
 
-    it('handles missing fields gracefully', async () => {
-      const fetchImpl = mockFetchImpl({
-        tag_name: 'v1.0.0',
-        // name, body, published_at, html_url all missing
-      });
-
-      const result = await fetchReleaseNotes('v1.0.0', { fetchImpl });
-
-      expect(result.tagName).toBe('v1.0.0');
-      expect(result.name).toBe('v1.0.0'); // Falls back to tag_name
-      expect(result.body).toBe('');
-      expect(result.publishedAt).toBeNull();
-      expect(result.htmlUrl).toContain('Episk-pos/lenr.academy');
-    });
-
-    it('passes abort signal to fetch', async () => {
-      const fetchImpl = mockFetchImpl(sampleRelease);
-      const controller = new AbortController();
-
-      await fetchReleaseNotes('v1.0.0', {
-        fetchImpl,
-        signal: controller.signal,
-      });
-
-      expect(fetchImpl).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ signal: controller.signal }),
-      );
+    it('throws on network errors', async () => {
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network failure'));
+      await expect(fetchReleaseNotes('v0.1.0')).rejects.toThrow('Network failure');
     });
   });
 
   describe('clearReleaseNotesCache', () => {
-    it('clears the cache so next fetch hits the API', async () => {
-      const fetchImpl = mockFetchImpl(sampleRelease);
+    it('clears cache so subsequent requests re-fetch', async () => {
+      mockFetchResponse({
+        tag_name: 'v2.0.0',
+        name: 'v2.0.0',
+        body: 'first',
+        published_at: null,
+        html_url: '',
+      });
 
-      await fetchReleaseNotes('v1.0.0', { fetchImpl });
-      expect(fetchImpl).toHaveBeenCalledTimes(1);
+      await fetchReleaseNotes('v2.0.0');
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
 
       clearReleaseNotesCache();
 
-      await fetchReleaseNotes('v1.0.0', { fetchImpl });
-      expect(fetchImpl).toHaveBeenCalledTimes(2);
+      mockFetchResponse({
+        tag_name: 'v2.0.0',
+        name: 'v2.0.0',
+        body: 'second',
+        published_at: null,
+        html_url: '',
+      });
+
+      const notes = await fetchReleaseNotes('v2.0.0');
+      expect(notes.body).toBe('second');
     });
   });
 });

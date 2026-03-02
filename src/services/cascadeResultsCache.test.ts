@@ -10,21 +10,16 @@ import type { CascadeResults } from '../types';
 
 function makeMockResults(overrides?: Partial<CascadeResults>): CascadeResults {
   return {
-    reactions: [],
-    productDistribution: new Map(),
-    nuclides: [],
-    elements: [],
-    totalEnergy: 42.5,
-    loopsExecuted: 3,
-    executionTime: 150,
-    terminationReason: 'max_loops',
+    generations: [],
+    totalReactions: 5,
+    totalUniqueNuclides: 10,
+    executionTimeMs: 42,
     ...overrides,
-  };
+  } as CascadeResults;
 }
 
 describe('cascadeResultsCache', () => {
   beforeEach(async () => {
-    // Clear the object store between tests
     const req = indexedDB.open('CascadeResultsCache', 1);
     const db = await new Promise<IDBDatabase>((resolve) => {
       req.onupgradeneeded = (event) => {
@@ -44,100 +39,106 @@ describe('cascadeResultsCache', () => {
   });
 
   describe('saveCascadeResults', () => {
-    it('saves results with a tabId key', async () => {
-      const results = makeMockResults();
-      await saveCascadeResults('tab-1', results);
-
-      const retrieved = await getCascadeResults('tab-1');
-      expect(retrieved).not.toBeNull();
-      expect(retrieved!.totalEnergy).toBe(42.5);
-      expect(retrieved!.loopsExecuted).toBe(3);
-      expect(retrieved!.terminationReason).toBe('max_loops');
+    it('stores results for a tab', async () => {
+      await saveCascadeResults('tab-1', makeMockResults());
+      const result = await getCascadeResults('tab-1');
+      expect(result).not.toBeNull();
+      expect(result!.totalReactions).toBe(5);
     });
 
-    it('overwrites existing results for the same tabId', async () => {
-      await saveCascadeResults('tab-1', makeMockResults({ totalEnergy: 10 }));
-      await saveCascadeResults('tab-1', makeMockResults({ totalEnergy: 99 }));
-
-      const retrieved = await getCascadeResults('tab-1');
-      expect(retrieved!.totalEnergy).toBe(99);
+    it('overwrites results for same tab', async () => {
+      await saveCascadeResults('tab-1', makeMockResults({ totalReactions: 5 }));
+      await saveCascadeResults('tab-1', makeMockResults({ totalReactions: 99 }));
+      const result = await getCascadeResults('tab-1');
+      expect(result!.totalReactions).toBe(99);
     });
 
-    it('stores results independently per tabId', async () => {
-      await saveCascadeResults('tab-a', makeMockResults({ totalEnergy: 1 }));
-      await saveCascadeResults('tab-b', makeMockResults({ totalEnergy: 2 }));
-
-      const a = await getCascadeResults('tab-a');
-      const b = await getCascadeResults('tab-b');
-      expect(a!.totalEnergy).toBe(1);
-      expect(b!.totalEnergy).toBe(2);
+    it('stores results for multiple tabs', async () => {
+      await saveCascadeResults('tab-1', makeMockResults({ totalReactions: 1 }));
+      await saveCascadeResults('tab-2', makeMockResults({ totalReactions: 2 }));
+      const r1 = await getCascadeResults('tab-1');
+      const r2 = await getCascadeResults('tab-2');
+      expect(r1!.totalReactions).toBe(1);
+      expect(r2!.totalReactions).toBe(2);
     });
   });
 
   describe('getCascadeResults', () => {
-    it('returns null for non-existent tabId', async () => {
+    it('returns null for non-existent tab', async () => {
       const result = await getCascadeResults('nonexistent');
       expect(result).toBeNull();
     });
 
-    it('returns the saved results', async () => {
-      const results = makeMockResults({
-        loopsExecuted: 7,
-        executionTime: 500,
-        terminationReason: 'no_new_products',
-      });
-      await saveCascadeResults('tab-x', results);
-
-      const retrieved = await getCascadeResults('tab-x');
-      expect(retrieved!.loopsExecuted).toBe(7);
-      expect(retrieved!.executionTime).toBe(500);
-      expect(retrieved!.terminationReason).toBe('no_new_products');
+    it('returns stored results for existing tab', async () => {
+      await saveCascadeResults('tab-1', makeMockResults({ totalUniqueNuclides: 42 }));
+      const result = await getCascadeResults('tab-1');
+      expect(result!.totalUniqueNuclides).toBe(42);
     });
   });
 
   describe('deleteCascadeResults', () => {
-    it('removes results for a specific tabId', async () => {
+    it('deletes results for a specific tab', async () => {
       await saveCascadeResults('tab-1', makeMockResults());
-      await saveCascadeResults('tab-2', makeMockResults());
-
       await deleteCascadeResults('tab-1');
-
-      const deleted = await getCascadeResults('tab-1');
-      const kept = await getCascadeResults('tab-2');
-      expect(deleted).toBeNull();
-      expect(kept).not.toBeNull();
+      const result = await getCascadeResults('tab-1');
+      expect(result).toBeNull();
     });
 
-    it('does not throw when deleting non-existent tabId', async () => {
-      await expect(deleteCascadeResults('nonexistent')).resolves.toBeUndefined();
+    it('does not affect other tabs', async () => {
+      await saveCascadeResults('tab-1', makeMockResults());
+      await saveCascadeResults('tab-2', makeMockResults());
+      await deleteCascadeResults('tab-1');
+      const r2 = await getCascadeResults('tab-2');
+      expect(r2).not.toBeNull();
+    });
+
+    it('handles deleting non-existent tab gracefully', async () => {
+      await expect(deleteCascadeResults('nonexistent')).resolves.not.toThrow();
     });
   });
 
   describe('cleanupOldResults', () => {
-    it('removes entries older than 7 days', async () => {
-      // Save a result directly with an old savedAt timestamp
+    it('does not delete recent results', async () => {
+      await saveCascadeResults('recent-tab', makeMockResults());
+      await cleanupOldResults();
+      const result = await getCascadeResults('recent-tab');
+      expect(result).not.toBeNull();
+    });
+
+    it('deletes results older than 7 days', async () => {
+      const req = indexedDB.open('CascadeResultsCache', 1);
       const db = await new Promise<IDBDatabase>((resolve) => {
-        const req = indexedDB.open('CascadeResultsCache', 1);
         req.onsuccess = () => resolve(req.result);
       });
-
       const tx = db.transaction('results', 'readwrite');
-      const store = tx.objectStore('results');
-
-      // Old entry: 8 days ago
-      store.put({
+      tx.objectStore('results').put({
         tabId: 'old-tab',
-        results: makeMockResults({ totalEnergy: 1 }),
-        savedAt: Date.now() - 8 * 24 * 60 * 60 * 1000,
+        results: makeMockResults(),
+        savedAt: Date.now() - (8 * 24 * 60 * 60 * 1000),
       });
-
-      // Recent entry: 1 day ago
-      store.put({
-        tabId: 'recent-tab',
-        results: makeMockResults({ totalEnergy: 2 }),
-        savedAt: Date.now() - 1 * 24 * 60 * 60 * 1000,
+      await new Promise<void>((resolve) => {
+        tx.oncomplete = () => resolve();
       });
+      db.close();
 
+      await cleanupOldResults();
+      const result = await getCascadeResults('old-tab');
+      expect(result).toBeNull();
+    });
+
+    it('keeps recent while deleting old results', async () => {
+      await saveCascadeResults('recent', makeMockResults({ totalReactions: 1 }));
+
+      const req = indexedDB.open('CascadeResultsCache', 1);
+      const db = await new Promise<IDBDatabase>((resolve) => {
+        req.onsuccess = () => resolve(req.result);
+      });
+      const tx = db.transaction('results', 'readwrite');
+      tx.objectStore('results').put({
+        tabId: 'old',
+        results: makeMockResults({ totalReactions: 99 }),
+        savedAt: Date.now() - (10 * 24 * 60 * 60 * 1000),
+      });
       await new Promise<void>((resolve) => {
         tx.oncomplete = () => resolve();
       });
@@ -145,20 +146,14 @@ describe('cascadeResultsCache', () => {
 
       await cleanupOldResults();
 
-      const oldResult = await getCascadeResults('old-tab');
-      const recentResult = await getCascadeResults('recent-tab');
-      expect(oldResult).toBeNull();
-      expect(recentResult).not.toBeNull();
-      expect(recentResult!.totalEnergy).toBe(2);
+      const recent = await getCascadeResults('recent');
+      const old = await getCascadeResults('old');
+      expect(recent).not.toBeNull();
+      expect(old).toBeNull();
     });
 
-    it('keeps entries within 7 days', async () => {
-      await saveCascadeResults('fresh', makeMockResults({ totalEnergy: 42 }));
-      await cleanupOldResults();
-
-      const result = await getCascadeResults('fresh');
-      expect(result).not.toBeNull();
-      expect(result!.totalEnergy).toBe(42);
+    it('handles empty store gracefully', async () => {
+      await expect(cleanupOldResults()).resolves.not.toThrow();
     });
   });
 });
