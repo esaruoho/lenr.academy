@@ -174,6 +174,12 @@ export default function NuclideDetailsCard({ nuclide, onClose }: NuclideDetailsC
 
   if (!nuclide) return null
 
+  // Pre-compute IAEA abundance comparison for this nuclide
+  const iaeaAbundance = getIAEAAbundance(nuclide.E, nuclide.A)
+  const iaeaDelta = iaeaAbundance !== null && typeof nuclide.pcaNCrust === 'number'
+    ? iaeaAbundance - nuclide.pcaNCrust
+    : null
+
   return (
     <>
     <div className="card p-6 animate-fade-in max-w-full">
@@ -302,19 +308,12 @@ export default function NuclideDetailsCard({ nuclide, onClose }: NuclideDetailsC
                 <div className="flex justify-between gap-2">
                   <dt className="text-gray-600 dark:text-gray-400 flex-shrink-0">{t('elements.isotopicPercent')}:</dt>
                   <dd className="font-medium text-gray-900 dark:text-gray-100 text-right truncate">
-                    {nuclide.pcaNCrust.toFixed(4)}%
-                    {(() => {
-                      const iaea = getIAEAAbundance(nuclide.E, nuclide.A)
-                      if (iaea !== null) {
-                        const delta = iaea - nuclide.pcaNCrust
-                        return (
-                          <span className="ml-1 text-xs text-gray-400 dark:text-gray-500" title={`IAEA: ${iaea.toFixed(4)}% (Δ${delta >= 0 ? '+' : ''}${delta.toFixed(4)})`}>
-                            (IAEA: {iaea.toFixed(4)}%)
-                          </span>
-                        )
-                      }
-                      return null
-                    })()}
+                    {nuclide.pcaNCrust.toFixed(2)}%
+                    {iaeaAbundance !== null && iaeaDelta !== null && (
+                      <span className="ml-1 text-xs text-gray-400 dark:text-gray-500" title={`IAEA: ${iaeaAbundance.toFixed(4)}% (Δ${iaeaDelta >= 0 ? '+' : ''}${iaeaDelta.toFixed(4)})`}>
+                        (IAEA: {iaeaAbundance.toFixed(4)}%)
+                      </span>
+                    )}
                   </dd>
                 </div>
               )}

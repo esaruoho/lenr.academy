@@ -260,8 +260,11 @@ export function getNaturalAbundances(
 }
 
 /**
- * Get natural isotopic abundances from IAEA data
+ * Get natural isotopic abundances from IAEA data.
  * Falls back to Parkhomov data if IAEA has no data for the element.
+ *
+ * Safety note: This function only falls back to 'parkhomov' (never to another source),
+ * so there is no risk of infinite recursion via getNaturalAbundances.
  */
 function getIAEANaturalAbundances(
   db: Database,
@@ -271,6 +274,9 @@ function getIAEANaturalAbundances(
 
   if (iaeaData.length === 0) {
     // IAEA has no abundance data for this element; fall back to Parkhomov
+    console.warn(
+      `IAEA abundance data unavailable for '${elementSymbol}', falling back to Parkhomov source`
+    );
     return getNaturalAbundances(db, elementSymbol, 'parkhomov');
   }
 

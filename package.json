@@ -24,6 +24,7 @@
     "screenshots:pr": "tsx scripts/generate-pr-screenshots.ts",
     "screenshots:helper": "tsx scripts/screenshot-helper.ts",
     "screenshots:helper:ai": "tsx scripts/screenshot-helper-ai.ts",
+    "fetch:iaea": "node scripts/fetch-iaea-abundances.cjs",
     "db:upload": "bash -c 'scripts/upload-db.sh \"${npm_config_version:-${VERSION}}\"'",
     "db:download": "bash scripts/download-db.sh",
     "db:index": "bash scripts/generate-db-index.sh && npm run db:invalidate",
