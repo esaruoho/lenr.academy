@@ -1,0 +1,154 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+
+vi.mock('lucide-react', () => ({
+  Scale: () => <svg data-testid="scale-icon" />,
+  RefreshCw: () => <svg data-testid="refresh-icon" />,
+  Percent: () => <svg data-testid="percent-icon" />,
+  AlertCircle: () => <svg data-testid="alert-icon" />,
+  Info: () => <svg data-testid="info-icon" />,
+}));
+
+const mockValidateProportions = vi.fn(() => ({ isValid: true, errors: [] }));
+const mockNormalizeProportions = vi.fn((inputs: Array<{ nuclideId: string; value: number }>) =>
+  inputs.map((i) => ({ nuclideId: i.nuclideId, proportion: i.value, source: 'manual' as const }))
+);
+const mockGetNaturalAbundances = vi.fn(() => [
+  { nuclideId: 'Li-6', proportion: 7.59, source: 'natural' as const },
+  { nuclideId: 'Li-7', proportion: 92.41, source: 'natural' as const },
+]);
+const mockCreateEqualProportions = vi.fn((ids: string[]) =>
+  ids.map((id) => ({ nuclideId: id, proportion: 100 / ids.length, source: 'manual' as const }))
+);
+const mockFormatProportion = vi.fn((val: number) => `${val.toFixed(1)}%`);
+const mockGetFormatLabel = vi.fn((fmt: string) => fmt === 'percentage' ? 'Percentage' : fmt);
+const mockGetFormatHelpText = vi.fn(() => 'Help text for proportions');
+
+vi.mock('../services/proportionService', () => ({
+  validateProportions: (...args: unknown[]) => mockValidateProportions(...args),
+  normalizeProportions: (...args: unknown[]) => mockNormalizeProportions(...args),
+  getNaturalAbundances: (...args: unknown[]) => mockGetNaturalAbundances(...args),
+  createEqualProportions: (...args: unknown[]) => mockCreateEqualProportions(...args),
+  formatProportion: (...args: unknown[]) => mockFormatProportion(...args),
+  getFormatLabel: (...args: unknown[]) => mockGetFormatLabel(...args),
+  getFormatHelpText: (...args: unknown[]) => mockGetFormatHelpText(...args),
+}));
+
+vi.mock('../services/isotopeService', () => ({
+  parseNuclideNotation: vi.fn((id: string) => {
+    const match = /^([A-Z][a-z]?)-(\d+)$/.exec(id);
+    if (!match) return null;
+    return { element: match[1], massNumber: parseInt(match[2]) };
+  }),
+}));
+
+import ProportionInput from './ProportionInput';
+
+describe('ProportionInput', () => {
+  const defaultProps = {
+    nuclideIds: ['Li-6', 'Li-7'],
+    weightedNuclides: [
+      { nuclideId: 'Li-6', proportion: 30, source: 'manual' as const },
+      { nuclideId: 'Li-7', proportion: 70, source: 'manual' as const },
+    ],
+    onProportionsChange: vi.fn(),
+    format: 'percentage' as const,
+    onFormatChange: vi.fn(),
+    db: null,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders empty state when no nuclides selected', () => {
+    render(<ProportionInput {...defaultProps} nuclideIds={[]} weightedNuclides={[]} />);
+    expect(screen.getByText('Select fuel nuclides to configure proportions')).toBeDefined();
+  });
+
+  it('renders label', () => {
+    render(<ProportionInput {...defaultProps} />);
+    expect(screen.getByText('Fuel Proportions')).toBeDefined();
+  });
+
+  it('renders custom label', () => {
+    render(<ProportionInput {...defaultProps} label="Target Mix" />);
+    expect(screen.getByText('Target Mix')).toBeDefined();
+  });
+
+  it('renders nuclide labels', () => {
+    render(<ProportionInput {...defaultProps} />);
+    expect(screen.getByText('Li-6')).toBeDefined();
+    expect(screen.getByText('Li-7')).toBeDefined();
+  });
+
+  it('renders input fields for each nuclide', () => {
+    render(<ProportionInput {...defaultProps} />);
+    expect(screen.getByTestId('proportion-input-input-Li-6')).toBeDefined();
+    expect(screen.getByTestId('proportion-input-input-Li-7')).toBeDefined();
+  });
+
+  it('shows Equal button', () => {
+    render(<ProportionInput {...defaultProps} />);
+    expect(screen.getByText('Equal')).toBeDefined();
+  });
+
+  it('calls createEqualProportions when Equal clicked', () => {
+    render(<ProportionInput {...defaultProps} />);
+    fireEvent.click(screen.getByText('Equal'));
+    expect(mockCreateEqualProportions).toHaveBeenCalledWith(['Li-6', 'Li-7'], 'manual');
+  });
+
+  it('shows Natural button', () => {
+    render(<ProportionInput {...defaultProps} />);
+    expect(screen.getByText('Natural')).toBeDefined();
+  });
+
+  it('Natural button is disabled when db is null', () => {
+    render(<ProportionInput {...defaultProps} db={null} />);
+    const naturalBtn = screen.getByTestId('proportion-input-natural-abundance');
+    expect(naturalBtn.hasAttribute('disabled')).toBe(true);
+  });
+
+  it('shows Normalize button', () => {
+    render(<ProportionInput {...defaultProps} />);
+    expect(screen.getByText('Normalize')).toBeDefined();
+  });
+
+  it('shows format selector by default', () => {
+    render(<ProportionInput {...defaultProps} />);
+    expect(screen.getByTestId('proportion-input-format-selector')).toBeDefined();
+  });
+
+  it('hides format selector when showFormatSelector=false', () => {
+    render(<ProportionInput {...defaultProps} showFormatSelector={false} />);
+    expect(screen.queryByTestId('proportion-input-format-selector')).toBeNull();
+  });
+
+  it('shows Total line', () => {
+    render(<ProportionInput {...defaultProps} />);
+    expect(screen.getByText('Total:')).toBeDefined();
+  });
+
+  it('handles input change', () => {
+    render(<ProportionInput {...defaultProps} />);
+    const input = screen.getByTestId('proportion-input-input-Li-6');
+    fireEvent.change(input, { target: { value: '50' } });
+    // The input value should be updated
+    expect((input as HTMLInputElement).value).toBe('50');
+  });
+
+  it('shows validation errors when invalid', () => {
+    mockValidateProportions.mockReturnValue({
+      isValid: false,
+      errors: [{ nuclideId: 'Li-6', message: 'Value too high' }],
+    });
+    render(<ProportionInput {...defaultProps} />);
+    expect(screen.getByText('Value too high')).toBeDefined();
+  });
+
+  it('uses custom testId', () => {
+    render(<ProportionInput {...defaultProps} testId="my-proportions" />);
+    expect(screen.getByTestId('my-proportions')).toBeDefined();
+  });
+});
