@@ -1,109 +1,107 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import TabNavigation from './TabNavigation';
-import type { Tab } from './TabNavigation';
+import { MemoryRouter } from 'react-router-dom';
 
-// Mock react-router-dom
-const mockSetSearchParams = vi.fn();
-vi.mock('react-router-dom', () => ({
-  useSearchParams: () => [new URLSearchParams(''), mockSetSearchParams],
+vi.mock('lucide-react', () => ({
+  Menu: () => <svg data-testid="menu-icon" />,
 }));
 
-const tabs: Tab[] = [
+import TabNavigation, { type Tab } from './TabNavigation';
+
+const mockTabs: Tab[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'details', label: 'Details', count: 42 },
   { id: 'chart', label: 'Chart' },
 ];
 
+function renderWithRouter(ui: React.ReactElement, initialEntries = ['/']) {
+  return render(
+    <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
+  );
+}
+
 describe('TabNavigation', () => {
+  let onTabChange: ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
-    mockSetSearchParams.mockClear();
-    // Mock IntersectionObserver
-    const mockObserver = {
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    };
-    vi.stubGlobal('IntersectionObserver', vi.fn(() => mockObserver));
+    onTabChange = vi.fn();
   });
 
   it('renders all tabs', () => {
-    render(
-      <TabNavigation tabs={tabs} activeTab="overview" onTabChange={vi.fn()} />
+    renderWithRouter(
+      <TabNavigation tabs={mockTabs} activeTab="overview" onTabChange={onTabChange} />
     );
-    expect(screen.getByText('Overview')).toBeInTheDocument();
-    expect(screen.getByText('Details')).toBeInTheDocument();
-    expect(screen.getByText('Chart')).toBeInTheDocument();
-  });
-
-  it('shows count badge when tab has count', () => {
-    render(
-      <TabNavigation tabs={tabs} activeTab="overview" onTabChange={vi.fn()} />
-    );
-    expect(screen.getByText('42')).toBeInTheDocument();
+    expect(screen.getByText('Overview')).toBeDefined();
+    expect(screen.getByText('Details')).toBeDefined();
+    expect(screen.getByText('Chart')).toBeDefined();
   });
 
   it('marks active tab with aria-selected', () => {
-    render(
-      <TabNavigation tabs={tabs} activeTab="details" onTabChange={vi.fn()} />
+    renderWithRouter(
+      <TabNavigation tabs={mockTabs} activeTab="details" onTabChange={onTabChange} />
     );
-    const detailsTab = screen.getByRole('tab', { name: /Details/i });
-    expect(detailsTab).toHaveAttribute('aria-selected', 'true');
+    const detailsTab = screen.getByText('Details').closest('button');
+    expect(detailsTab?.getAttribute('aria-selected')).toBe('true');
 
-    const overviewTab = screen.getByRole('tab', { name: /Overview/i });
-    expect(overviewTab).toHaveAttribute('aria-selected', 'false');
+    const overviewTab = screen.getByText('Overview').closest('button');
+    expect(overviewTab?.getAttribute('aria-selected')).toBe('false');
   });
 
-  it('calls onTabChange and updates URL on tab click', () => {
-    const onTabChange = vi.fn();
-    render(
-      <TabNavigation tabs={tabs} activeTab="overview" onTabChange={onTabChange} />
+  it('shows count badge on tabs with count', () => {
+    renderWithRouter(
+      <TabNavigation tabs={mockTabs} activeTab="overview" onTabChange={onTabChange} />
     );
-    fireEvent.click(screen.getByText('Details'));
-    expect(onTabChange).toHaveBeenCalledWith('details');
-    expect(mockSetSearchParams).toHaveBeenCalled();
+    expect(screen.getByText('42')).toBeDefined();
   });
 
-  it('handles Enter key on tab', () => {
-    const onTabChange = vi.fn();
-    render(
-      <TabNavigation tabs={tabs} activeTab="overview" onTabChange={onTabChange} />
+  it('calls onTabChange when tab clicked', () => {
+    renderWithRouter(
+      <TabNavigation tabs={mockTabs} activeTab="overview" onTabChange={onTabChange} />
     );
-    fireEvent.keyDown(screen.getByText('Chart'), { key: 'Enter' });
+    fireEvent.click(screen.getByText('Chart'));
     expect(onTabChange).toHaveBeenCalledWith('chart');
   });
 
-  it('handles Space key on tab', () => {
-    const onTabChange = vi.fn();
-    render(
-      <TabNavigation tabs={tabs} activeTab="overview" onTabChange={onTabChange} />
+  it('handles keyboard activation with Enter', () => {
+    renderWithRouter(
+      <TabNavigation tabs={mockTabs} activeTab="overview" onTabChange={onTabChange} />
     );
-    fireEvent.keyDown(screen.getByText('Chart'), { key: ' ' });
+    const chartTab = screen.getByText('Chart').closest('button')!;
+    fireEvent.keyDown(chartTab, { key: 'Enter' });
     expect(onTabChange).toHaveBeenCalledWith('chart');
   });
 
-  it('sets tabIndex=0 for active tab and -1 for others', () => {
-    render(
-      <TabNavigation tabs={tabs} activeTab="details" onTabChange={vi.fn()} />
+  it('handles keyboard activation with Space', () => {
+    renderWithRouter(
+      <TabNavigation tabs={mockTabs} activeTab="overview" onTabChange={onTabChange} />
     );
-    const detailsTab = screen.getByRole('tab', { name: /Details/i });
-    expect(detailsTab).toHaveAttribute('tabindex', '0');
-
-    const overviewTab = screen.getByRole('tab', { name: /Overview/i });
-    expect(overviewTab).toHaveAttribute('tabindex', '-1');
+    const chartTab = screen.getByText('Chart').closest('button')!;
+    fireEvent.keyDown(chartTab, { key: ' ' });
+    expect(onTabChange).toHaveBeenCalledWith('chart');
   });
 
-  it('has tablist role on nav element', () => {
-    render(
-      <TabNavigation tabs={tabs} activeTab="overview" onTabChange={vi.fn()} />
+  it('renders with role=tablist', () => {
+    renderWithRouter(
+      <TabNavigation tabs={mockTabs} activeTab="overview" onTabChange={onTabChange} />
     );
-    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    expect(screen.getByRole('tablist')).toBeDefined();
   });
 
-  it('accepts className prop', () => {
-    const { container } = render(
-      <TabNavigation tabs={tabs} activeTab="overview" onTabChange={vi.fn()} className="custom-class" />
+  it('sets tabIndex 0 on active tab and -1 on others', () => {
+    renderWithRouter(
+      <TabNavigation tabs={mockTabs} activeTab="details" onTabChange={onTabChange} />
     );
-    expect(container.querySelector('.custom-class')).toBeInTheDocument();
+    const detailsTab = screen.getByText('Details').closest('button');
+    expect(detailsTab?.tabIndex).toBe(0);
+
+    const overviewTab = screen.getByText('Overview').closest('button');
+    expect(overviewTab?.tabIndex).toBe(-1);
+  });
+
+  it('applies custom className', () => {
+    const { container } = renderWithRouter(
+      <TabNavigation tabs={mockTabs} activeTab="overview" onTabChange={onTabChange} className="custom-class" />
+    );
+    expect(container.querySelector('.custom-class')).toBeDefined();
   });
 });

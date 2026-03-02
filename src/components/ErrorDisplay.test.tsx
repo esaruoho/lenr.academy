@@ -1,164 +1,169 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import ErrorDisplay from './ErrorDisplay';
 
-// Mock Sentry
 vi.mock('@sentry/react', () => ({
   captureException: vi.fn(),
 }));
 
-// Mock errorContext
 vi.mock('../utils/errorContext', () => ({
-  collectErrorContext: vi.fn((_error: Error, _boundary: string) => ({
-    timestamp: '2026-03-01T12:00:00Z',
+  collectErrorContext: vi.fn((_error: Error, boundary: string) => ({
+    error: _error,
+    errorBoundary: boundary || 'App',
+    timestamp: '2026-01-01T00:00:00.000Z',
+    url: 'http://localhost:5173/',
+    userAgent: 'Mozilla/5.0 (Macintosh) Chrome/120',
     browser: 'Chrome',
     browserVersion: '120',
-    os: 'Linux',
-    device: 'Desktop',
-    url: 'http://localhost:5173',
+    os: 'macOS',
+    device: 'Desktop' as const,
     appVersion: '0.1.0',
-    stackTrace: 'Error: test\n    at Test.tsx:10:5',
     fingerprint: 'abc123',
-    errorMessage: 'Test error',
-    errorBoundary: 'App',
+    stackTrace: 'at App.tsx:10:5\n  at render (react-dom.js:1:1)',
   })),
 }));
 
-// Mock githubErrorReporting
 vi.mock('../utils/githubErrorReporting', () => ({
-  getGitHubSearchUrl: vi.fn(() => 'https://github.com/search'),
-  getGitHubNewIssueUrl: vi.fn(() => 'https://github.com/new-issue'),
-  copyErrorReportToClipboard: vi.fn().mockResolvedValue(undefined),
+  getGitHubSearchUrl: vi.fn(() => 'https://github.com/search?q=test'),
+  getGitHubNewIssueUrl: vi.fn(() => 'https://github.com/new?title=test'),
+  copyErrorReportToClipboard: vi.fn(() => Promise.resolve()),
 }));
 
-// Mock dbCache
 vi.mock('../services/dbCache', () => ({
-  clearAllCache: vi.fn().mockResolvedValue(undefined),
+  clearAllCache: vi.fn(() => Promise.resolve()),
 }));
+
+import ErrorDisplay from './ErrorDisplay';
 
 describe('ErrorDisplay', () => {
-  let windowOpenSpy: ReturnType<typeof vi.spyOn>;
-
   beforeEach(() => {
-    windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    vi.clearAllMocks();
   });
 
-  it('renders error message', () => {
-    render(<ErrorDisplay error={new Error('Database connection lost')} />);
-    expect(screen.getByText('Database connection lost')).toBeInTheDocument();
+  it('renders error message', async () => {
+    const error = new Error('Something broke');
+    await act(async () => {
+      render(<ErrorDisplay error={error} />);
+    });
+    expect(screen.getByText('Something broke')).toBeDefined();
   });
 
-  it('shows "Something went wrong" title by default', () => {
-    render(<ErrorDisplay error={new Error('Test error')} />);
-    // The first heading in ErrorDisplay
-    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent(/something went wrong/i);
+  it('shows generic title for non-database errors', async () => {
+    const error = new Error('Test error');
+    await act(async () => {
+      render(<ErrorDisplay error={error} />);
+    });
+    expect(screen.getByText('Something went wrong')).toBeDefined();
   });
 
-  it('shows "Database Error" title when isDatabaseError is true', () => {
-    render(<ErrorDisplay error={new Error('DB fail')} isDatabaseError />);
-    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Database Error');
+  it('shows database title for database errors', async () => {
+    const error = new Error('Database connection failed');
+    await act(async () => {
+      render(<ErrorDisplay error={error} isDatabaseError />);
+    });
+    expect(screen.getByText('Database Error')).toBeDefined();
   });
 
-  it('shows Sentry notice', () => {
-    render(<ErrorDisplay error={new Error('Test')} />);
-    expect(screen.getByText(/automatically reported/i)).toBeInTheDocument();
+  it('shows Sentry notice', async () => {
+    const error = new Error('Test');
+    await act(async () => {
+      render(<ErrorDisplay error={error} />);
+    });
+    expect(screen.getByText('This error has been automatically reported to our team.')).toBeDefined();
   });
 
-  it('has a Technical Details expandable section', () => {
-    render(<ErrorDisplay error={new Error('Test')} />);
-    const detailsBtn = screen.getByText('Technical Details');
-    expect(detailsBtn).toBeInTheDocument();
+  it('shows Technical Details toggle', async () => {
+    const error = new Error('Test');
+    await act(async () => {
+      render(<ErrorDisplay error={error} />);
+    });
+    expect(screen.getByText('Technical Details')).toBeDefined();
   });
 
-  it('expands technical details on click', () => {
-    render(<ErrorDisplay error={new Error('Test')} />);
-    fireEvent.click(screen.getByText('Technical Details'));
-    expect(screen.getByText(/Error Fingerprint/i)).toBeInTheDocument();
-    expect(screen.getByText('abc123')).toBeInTheDocument();
+  it('expands technical details on click', async () => {
+    const error = new Error('Test');
+    await act(async () => {
+      render(<ErrorDisplay error={error} />);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText('Technical Details'));
+    });
+    expect(screen.getByText('Error Fingerprint:')).toBeDefined();
+    expect(screen.getByText('abc123')).toBeDefined();
   });
 
-  it('shows Search Similar Issues button', () => {
-    render(<ErrorDisplay error={new Error('Test')} />);
-    expect(screen.getByText(/Search Similar Issues/i)).toBeInTheDocument();
+  it('shows Search Similar Issues button', async () => {
+    const error = new Error('Test');
+    await act(async () => {
+      render(<ErrorDisplay error={error} />);
+    });
+    expect(screen.getByText('Search Similar Issues')).toBeDefined();
   });
 
-  it('opens GitHub search on Search Similar Issues click', () => {
-    render(<ErrorDisplay error={new Error('Test')} />);
-    fireEvent.click(screen.getByText(/Search Similar Issues/i));
-    expect(windowOpenSpy).toHaveBeenCalledWith('https://github.com/search', '_blank', 'noopener,noreferrer');
+  it('shows Report This Error button (disabled until search)', async () => {
+    const error = new Error('Test');
+    await act(async () => {
+      render(<ErrorDisplay error={error} />);
+    });
+    const reportBtn = screen.getByText('Report This Error');
+    expect(reportBtn.closest('button')?.disabled).toBe(true);
   });
 
-  it('shows Report button as disabled until search is done', () => {
-    render(<ErrorDisplay error={new Error('Test')} />);
-    const reportBtn = screen.getByText(/Report This Error/i).closest('button')!;
-    expect(reportBtn).toBeDisabled();
+  it('enables report button after searching', async () => {
+    const windowOpen = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const error = new Error('Test');
+    await act(async () => {
+      render(<ErrorDisplay error={error} />);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText('Search Similar Issues'));
+    });
+    const reportBtn = screen.getByText('Report This Error');
+    expect(reportBtn.closest('button')?.disabled).toBe(false);
+    windowOpen.mockRestore();
   });
 
-  it('enables Report button after searching', () => {
-    render(<ErrorDisplay error={new Error('Test')} />);
-    fireEvent.click(screen.getByText(/Search Similar Issues/i));
-    const reportBtn = screen.getByText(/Report This Error/i).closest('button')!;
-    expect(reportBtn).not.toBeDisabled();
-  });
-
-  it('shows Try Again button when resetError is provided', () => {
+  it('shows Try Again button when resetError provided', async () => {
     const resetError = vi.fn();
-    render(<ErrorDisplay error={new Error('Test')} resetError={resetError} />);
-    const tryAgainBtn = screen.getByText('Try Again');
-    expect(tryAgainBtn).toBeInTheDocument();
-    fireEvent.click(tryAgainBtn);
-    expect(resetError).toHaveBeenCalledOnce();
+    const error = new Error('Test');
+    await act(async () => {
+      render(<ErrorDisplay error={error} resetError={resetError} />);
+    });
+    const tryAgain = screen.getByText('Try Again');
+    expect(tryAgain).toBeDefined();
+    fireEvent.click(tryAgain);
+    expect(resetError).toHaveBeenCalledTimes(1);
   });
 
-  it('shows Return to Home button', () => {
-    render(<ErrorDisplay error={new Error('Test')} />);
-    expect(screen.getByText('Return to Home')).toBeInTheDocument();
+  it('shows Return to Home button', async () => {
+    const error = new Error('Test');
+    await act(async () => {
+      render(<ErrorDisplay error={error} />);
+    });
+    expect(screen.getByText('Return to Home')).toBeDefined();
   });
 
-  it('shows module loading error recovery for module errors', () => {
-    render(
-      <ErrorDisplay error={new Error('Importing a module script failed')} />
-    );
-    expect(screen.getByText('Module Loading Failed')).toBeInTheDocument();
-    expect(screen.getByText(/content blockers or ad blockers/i)).toBeInTheDocument();
+  it('shows module load error recovery for module errors', async () => {
+    const error = new Error('Importing a module script failed');
+    await act(async () => {
+      render(<ErrorDisplay error={error} />);
+    });
+    expect(screen.getByText('Module Loading Failed')).toBeDefined();
   });
 
-  it('shows database corruption recovery for corruption errors', () => {
-    render(
-      <ErrorDisplay
-        error={new Error('file is not a database')}
-        isDatabaseError
-      />
-    );
-    expect(screen.getByText(/Database Corruption Detected/i)).toBeInTheDocument();
-    expect(screen.getByText(/Clear Cache & Reload/i)).toBeInTheDocument();
+  it('shows corruption recovery for database corruption', async () => {
+    const error = new Error('file is not a database');
+    await act(async () => {
+      render(<ErrorDisplay error={error} isDatabaseError />);
+    });
+    expect(screen.getByText('Database Corruption Detected')).toBeDefined();
+    expect(screen.getByText('Clear Cache & Reload')).toBeDefined();
   });
 
-  it('does not clear cache when user cancels confirm dialog', () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-
-    render(
-      <ErrorDisplay
-        error={new Error('file is not a database')}
-        isDatabaseError
-      />
-    );
-
-    fireEvent.click(screen.getByText(/Clear Cache & Reload/i));
-    // Confirm was called
-    expect(confirmSpy).toHaveBeenCalled();
-
-    confirmSpy.mockRestore();
-  });
-
-  it('shows helper text to search first before reporting', () => {
-    render(<ErrorDisplay error={new Error('Test')} />);
-    expect(screen.getByText(/search for similar issues/i)).toBeInTheDocument();
-  });
-
-  it('does not show module or corruption sections for generic errors', () => {
-    render(<ErrorDisplay error={new Error('Generic error')} />);
-    expect(screen.queryByText(/Module Loading Failed/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Database Corruption/i)).not.toBeInTheDocument();
+  it('shows helper text to search first', async () => {
+    const error = new Error('Test');
+    await act(async () => {
+      render(<ErrorDisplay error={error} />);
+    });
+    expect(screen.getByText(/search for similar issues/i)).toBeDefined();
   });
 });

@@ -1,9 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import ShareQueryButton from './ShareQueryButton';
 import en from '../i18n/locales/en.json';
 
-// Mock react-i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
@@ -21,58 +19,88 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+vi.mock('lucide-react', () => ({
+  Share2: () => <svg data-testid="share-icon" />,
+  Check: () => <svg data-testid="check-icon" />,
+}));
+
+import ShareQueryButton from './ShareQueryButton';
+
 describe('ShareQueryButton', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: vi.fn().mockResolvedValue(undefined),
-      },
-    });
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it('renders with copy link text initially', () => {
+  it('renders with share text', () => {
     render(<ShareQueryButton />);
-    const btn = screen.getByRole('button');
-    expect(btn).toHaveTextContent(/Copy Link/i);
+    expect(screen.getByText('Copy Link')).toBeDefined();
   });
 
-  it('copies current URL to clipboard on click', async () => {
+  it('has correct title attribute', () => {
     render(<ShareQueryButton />);
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button'));
-    });
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(window.location.href);
+    expect(screen.getByTitle('Copy a shareable URL for this query to clipboard')).toBeDefined();
   });
 
-  it('shows copied state after click', async () => {
+  it('shows share icon initially', () => {
     render(<ShareQueryButton />);
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button'));
-    });
-    expect(screen.getByRole('button')).toHaveTextContent(/Link Copied/i);
+    expect(screen.getByTestId('share-icon')).toBeDefined();
   });
 
-  it('reverts to initial state after 2 seconds', async () => {
+  it('copies URL to clipboard and shows success', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
     render(<ShareQueryButton />);
     await act(async () => {
-      fireEvent.click(screen.getByRole('button'));
+      fireEvent.click(screen.getByText('Copy Link'));
     });
-    expect(screen.getByRole('button')).toHaveTextContent(/Link Copied/i);
+
+    expect(writeText).toHaveBeenCalledWith(window.location.href);
+    expect(screen.getByText('Link Copied!')).toBeDefined();
+    expect(screen.getByTestId('check-icon')).toBeDefined();
+  });
+
+  it('reverts to share text after 2 seconds', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    render(<ShareQueryButton />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Copy Link'));
+    });
+
+    expect(screen.getByText('Link Copied!')).toBeDefined();
 
     act(() => {
       vi.advanceTimersByTime(2000);
     });
 
-    expect(screen.getByRole('button')).toHaveTextContent(/Copy Link/i);
+    expect(screen.getByText('Copy Link')).toBeDefined();
   });
 
-  it('has aria-live attribute for accessibility', () => {
+  it('falls back to execCommand when clipboard API fails', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('denied'));
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    // Define execCommand on document since jsdom doesn't have it
+    document.execCommand = vi.fn().mockReturnValue(true);
+
     render(<ShareQueryButton />);
-    expect(screen.getByRole('button')).toHaveAttribute('aria-live', 'polite');
+    await act(async () => {
+      fireEvent.click(screen.getByText('Copy Link'));
+    });
+
+    expect(document.execCommand).toHaveBeenCalledWith('copy');
+    expect(screen.getByText('Link Copied!')).toBeDefined();
+  });
+
+  it('has aria-live polite for accessibility', () => {
+    render(<ShareQueryButton />);
+    const button = screen.getByRole('button');
+    expect(button.getAttribute('aria-live')).toBe('polite');
   });
 });
