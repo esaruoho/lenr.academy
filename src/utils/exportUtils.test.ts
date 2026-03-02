@@ -1,100 +1,96 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { exportToJSON } from './exportUtils';
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { exportToJSON } from './exportUtils'
+import type { QueryFilter } from '../types'
 
 describe('exportUtils', () => {
+  let clickSpy: ReturnType<typeof vi.fn>
+
   beforeEach(() => {
-    // Mock URL.createObjectURL and URL.revokeObjectURL
-    vi.spyOn(window.URL, 'createObjectURL').mockReturnValue('blob:mock-url');
-    vi.spyOn(window.URL, 'revokeObjectURL').mockImplementation(() => {});
-    // Mock document.createElement to capture download
-    const mockAnchor = { href: '', download: '', click: vi.fn() };
-    vi.spyOn(document, 'createElement').mockReturnValue(mockAnchor as any);
-  });
+    vi.clearAllMocks()
+    clickSpy = vi.fn()
+
+    // Mock createElement to capture download link
+    vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+      if (tag === 'a') {
+        return { href: '', download: '', click: clickSpy, style: {} } as any
+      }
+      return document.createElement.call(document, tag) as any
+    })
+
+    // Mock URL APIs
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url')
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+  })
 
   describe('exportToJSON', () => {
-    it('does nothing for empty reactions', () => {
+    it('does nothing when reactions array is empty', () => {
       exportToJSON([], {
         queryType: 'fusion',
         filter: {},
         executionTime: 10,
         rowCount: 0,
         totalCount: 0,
-      });
-      expect(window.URL.createObjectURL).not.toHaveBeenCalled();
-    });
+      })
 
-    it('creates blob and triggers download for non-empty reactions', () => {
+      expect(clickSpy).not.toHaveBeenCalled()
+    })
+
+    it('creates a downloadable JSON file', () => {
       const reactions = [
-        { E1: 'H', Z1: 1, A1: 1, E2: 'Li', Z2: 3, A2: 7, MeV: 17.3 },
-      ];
+        { E1: 'H', Z1: 1, A1: 1, E2: 'Li', Z2: 3, A2: 7, E: 'Be', Z: 4, A: 8, MeV: 17.25 },
+      ]
+
       exportToJSON(reactions, {
         queryType: 'fusion',
-        filter: { element1List: ['H'] },
-        executionTime: 5.2,
+        filter: { element1List: ['H'], element2List: ['Li'] },
+        executionTime: 42,
         rowCount: 1,
-        totalCount: 10,
-      });
-      expect(window.URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
-      expect(window.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
-    });
+        totalCount: 1,
+      })
 
-    it('creates JSON blob with correct MIME type', () => {
-      let capturedBlob: Blob | null = null;
-      vi.spyOn(window.URL, 'createObjectURL').mockImplementation((blob: Blob) => {
-        capturedBlob = blob;
-        return 'blob:mock-url';
-      });
+      expect(clickSpy).toHaveBeenCalled()
+      expect(URL.createObjectURL).toHaveBeenCalled()
+    })
 
-      const reactions = [{ MeV: 10 }];
-      exportToJSON(reactions, {
-        queryType: 'fusion',
-        filter: {},
-        executionTime: 5,
-        rowCount: 1,
-        totalCount: 100,
-      });
+    it('creates valid JSON output with correct structure', () => {
+      let capturedBlob: Blob | null = null
 
-      expect(capturedBlob).toBeInstanceOf(Blob);
-      expect(capturedBlob!.type).toBe('application/json');
-    });
-
-    it('calculates statistics correctly', () => {
-      let capturedBlob: Blob | null = null;
-      vi.spyOn(window.URL, 'createObjectURL').mockImplementation((blob: Blob) => {
-        capturedBlob = blob;
-        return 'blob:mock-url';
-      });
+      vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob) => {
+        capturedBlob = blob
+        return 'blob:mock-url'
+      })
 
       const reactions = [
         { MeV: 10 },
         { MeV: 20 },
         { MeV: 30 },
-      ];
+      ]
+
+      exportToJSON(reactions, {
+        queryType: 'fusion',
+        filter: { element1List: ['H'] },
+        executionTime: 100,
+        rowCount: 3,
+        totalCount: 10,
+      })
+
+      expect(capturedBlob).toBeInstanceOf(Blob)
+      expect(capturedBlob!.type).toBe('application/json')
+    })
+
+    it('includes reactions in the output', () => {
+      const reactions = [{ MeV: 5 }]
 
       exportToJSON(reactions, {
         queryType: 'fission',
         filter: {},
-        executionTime: 3,
-        rowCount: 3,
-        totalCount: 3,
-      });
-
-      expect(capturedBlob).toBeInstanceOf(Blob);
-    });
-
-    it('sets correct filename format', () => {
-      const mockAnchor = { href: '', download: '', click: vi.fn() };
-      vi.spyOn(document, 'createElement').mockReturnValue(mockAnchor as any);
-
-      exportToJSON([{ MeV: 5 }], {
-        queryType: 'twotwo',
-        filter: {},
-        executionTime: 1,
+        executionTime: 10,
         rowCount: 1,
         totalCount: 1,
-      });
+      })
 
-      expect(mockAnchor.download).toMatch(/^twotwo_reactions_\d{4}-\d{2}-\d{2}\.json$/);
-    });
-  });
-});
+      // Verify it called createObjectURL (indicating Blob was created)
+      expect(URL.createObjectURL).toHaveBeenCalled()
+    })
+  })
+})

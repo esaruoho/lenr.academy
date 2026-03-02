@@ -3,70 +3,95 @@ import { renderHook, act } from '@testing-library/react'
 import { LayoutProvider, useLayout } from './LayoutContext'
 
 describe('LayoutContext', () => {
-  it('sidebar starts closed', () => {
-    const { result } = renderHook(() => useLayout(), {
-      wrapper: LayoutProvider,
+  function renderLayoutHook() {
+    return renderHook(() => useLayout(), {
+      wrapper: ({ children }) => <LayoutProvider>{children}</LayoutProvider>,
+    })
+  }
+
+  describe('LayoutProvider', () => {
+    it('initializes with sidebar closed', () => {
+      const { result } = renderLayoutHook()
+      expect(result.current.sidebarOpen).toBe(false)
     })
 
-    expect(result.current.sidebarOpen).toBe(false)
+    it('initializes with mobile header visible', () => {
+      const { result } = renderLayoutHook()
+      expect(result.current.mobileHeaderHidden).toBe(false)
+    })
   })
 
-  it('openSidebar opens the sidebar', () => {
-    const { result } = renderHook(() => useLayout(), {
-      wrapper: LayoutProvider,
+  describe('sidebar controls', () => {
+    it('opens sidebar with openSidebar()', () => {
+      const { result } = renderLayoutHook()
+
+      act(() => {
+        result.current.openSidebar()
+      })
+
+      expect(result.current.sidebarOpen).toBe(true)
     })
 
-    act(() => { result.current.openSidebar() })
+    it('closes sidebar with closeSidebar()', () => {
+      const { result } = renderLayoutHook()
 
-    expect(result.current.sidebarOpen).toBe(true)
-  })
+      act(() => {
+        result.current.openSidebar()
+      })
+      expect(result.current.sidebarOpen).toBe(true)
 
-  it('closeSidebar closes the sidebar', () => {
-    const { result } = renderHook(() => useLayout(), {
-      wrapper: LayoutProvider,
+      act(() => {
+        result.current.closeSidebar()
+      })
+      expect(result.current.sidebarOpen).toBe(false)
     })
 
-    act(() => { result.current.openSidebar() })
-    act(() => { result.current.closeSidebar() })
+    it('sets sidebar state directly with setSidebarOpen', () => {
+      const { result } = renderLayoutHook()
 
-    expect(result.current.sidebarOpen).toBe(false)
+      act(() => {
+        result.current.setSidebarOpen(true)
+      })
+      expect(result.current.sidebarOpen).toBe(true)
+
+      act(() => {
+        result.current.setSidebarOpen(false)
+      })
+      expect(result.current.sidebarOpen).toBe(false)
+    })
   })
 
-  it('setSidebarOpen sets the sidebar state directly', () => {
-    const { result } = renderHook(() => useLayout(), {
-      wrapper: LayoutProvider,
+  describe('mobile header', () => {
+    it('hides mobile header', () => {
+      const { result } = renderLayoutHook()
+
+      act(() => {
+        result.current.setMobileHeaderHidden(true)
+      })
+
+      expect(result.current.mobileHeaderHidden).toBe(true)
     })
 
-    act(() => { result.current.setSidebarOpen(true) })
-    expect(result.current.sidebarOpen).toBe(true)
+    it('shows mobile header again', () => {
+      const { result } = renderLayoutHook()
 
-    act(() => { result.current.setSidebarOpen(false) })
-    expect(result.current.sidebarOpen).toBe(false)
-  })
+      act(() => {
+        result.current.setMobileHeaderHidden(true)
+      })
 
-  it('mobileHeaderHidden starts as false', () => {
-    const { result } = renderHook(() => useLayout(), {
-      wrapper: LayoutProvider,
+      act(() => {
+        result.current.setMobileHeaderHidden(false)
+      })
+
+      expect(result.current.mobileHeaderHidden).toBe(false)
     })
-
-    expect(result.current.mobileHeaderHidden).toBe(false)
   })
 
-  it('setMobileHeaderHidden updates state', () => {
-    const { result } = renderHook(() => useLayout(), {
-      wrapper: LayoutProvider,
+  describe('useLayout', () => {
+    it('throws when used outside LayoutProvider', () => {
+      expect(() => {
+        renderHook(() => useLayout())
+      }).toThrow('useLayout must be used within a LayoutProvider')
     })
-
-    act(() => { result.current.setMobileHeaderHidden(true) })
-    expect(result.current.mobileHeaderHidden).toBe(true)
-
-    act(() => { result.current.setMobileHeaderHidden(false) })
-    expect(result.current.mobileHeaderHidden).toBe(false)
-  })
-
-  it('throws when used outside LayoutProvider', () => {
-    expect(() => {
-      renderHook(() => useLayout())
-    }).toThrow('useLayout must be used within a LayoutProvider')
   })
 })

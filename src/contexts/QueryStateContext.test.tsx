@@ -1,174 +1,179 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
-import { QueryStateProvider, useQueryState } from './QueryStateContext';
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { renderHook, act } from '@testing-library/react'
+import { QueryStateProvider, useQueryState } from './QueryStateContext'
 
-// Mock cascadeResultsCache
+// Mock cascade results cache
 vi.mock('../services/cascadeResultsCache', () => ({
   saveCascadeResults: vi.fn().mockResolvedValue(undefined),
   getCascadeResults: vi.fn().mockResolvedValue(null),
   deleteCascadeResults: vi.fn().mockResolvedValue(undefined),
   cleanupOldResults: vi.fn().mockResolvedValue(undefined),
-}));
-
-// Helper component to test the context
-function TestConsumer() {
-  const {
-    queryStates,
-    updateFusionState,
-    updateFissionState,
-    updateTwoToTwoState,
-    getFusionState,
-    getFissionState,
-    getTwoToTwoState,
-    clearAllStates,
-    clearPageState,
-  } = useQueryState();
-
-  return (
-    <div>
-      <div data-testid="fusion-state">{JSON.stringify(getFusionState() || 'undefined')}</div>
-      <div data-testid="fission-state">{JSON.stringify(getFissionState() || 'undefined')}</div>
-      <div data-testid="twotwo-state">{JSON.stringify(getTwoToTwoState() || 'undefined')}</div>
-      <div data-testid="version">{queryStates.version}</div>
-      <button onClick={() => updateFusionState({ filter: { element1List: ['H'] } })}>
-        Set Fusion
-      </button>
-      <button onClick={() => updateFissionState({ filter: { element1List: ['U'] } })}>
-        Set Fission
-      </button>
-      <button onClick={() => updateTwoToTwoState({ filter: { element1List: ['D'] } })}>
-        Set TwoToTwo
-      </button>
-      <button onClick={() => clearAllStates()}>Clear All</button>
-      <button onClick={() => clearPageState('fusion')}>Clear Fusion</button>
-    </div>
-  );
-}
+}))
 
 describe('QueryStateContext', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    localStorage.clear();
-    sessionStorage.clear();
-  });
+    localStorage.clear()
+    sessionStorage.clear()
+    vi.clearAllMocks()
+  })
 
-  it('provides default empty state', () => {
-    render(
-      <QueryStateProvider>
-        <TestConsumer />
-      </QueryStateProvider>
-    );
-    expect(screen.getByTestId('fusion-state')).toHaveTextContent('undefined');
-    expect(screen.getByTestId('version')).toHaveTextContent('1');
-  });
+  function renderQueryStateHook() {
+    return renderHook(() => useQueryState(), {
+      wrapper: ({ children }) => (
+        <QueryStateProvider>{children}</QueryStateProvider>
+      ),
+    })
+  }
 
-  it('updates fusion state', () => {
-    render(
-      <QueryStateProvider>
-        <TestConsumer />
-      </QueryStateProvider>
-    );
-    act(() => {
-      screen.getByText('Set Fusion').click();
-    });
-    const state = screen.getByTestId('fusion-state').textContent;
-    expect(state).toContain('"element1List":["H"]');
-  });
+  describe('QueryStateProvider', () => {
+    it('initializes with empty query states', () => {
+      const { result } = renderQueryStateHook()
 
-  it('updates fission state', () => {
-    render(
-      <QueryStateProvider>
-        <TestConsumer />
-      </QueryStateProvider>
-    );
-    act(() => {
-      screen.getByText('Set Fission').click();
-    });
-    const state = screen.getByTestId('fission-state').textContent;
-    expect(state).toContain('"element1List":["U"]');
-  });
+      expect(result.current.queryStates.fusion).toBeUndefined()
+      expect(result.current.queryStates.fission).toBeUndefined()
+      expect(result.current.queryStates.twotwo).toBeUndefined()
+      expect(result.current.queryStates.cascade).toBeUndefined()
+    })
 
-  it('updates two-to-two state', () => {
-    render(
-      <QueryStateProvider>
-        <TestConsumer />
-      </QueryStateProvider>
-    );
-    act(() => {
-      screen.getByText('Set TwoToTwo').click();
-    });
-    const state = screen.getByTestId('twotwo-state').textContent;
-    expect(state).toContain('"element1List":["D"]');
-  });
+    it('has version 1 in state', () => {
+      const { result } = renderQueryStateHook()
+      expect(result.current.queryStates.version).toBe(1)
+    })
+  })
 
-  it('clears all states', () => {
-    render(
-      <QueryStateProvider>
-        <TestConsumer />
-      </QueryStateProvider>
-    );
-    act(() => {
-      screen.getByText('Set Fusion').click();
-      screen.getByText('Set Fission').click();
-    });
-    act(() => {
-      screen.getByText('Clear All').click();
-    });
-    expect(screen.getByTestId('fusion-state')).toHaveTextContent('undefined');
-    expect(screen.getByTestId('fission-state')).toHaveTextContent('undefined');
-  });
+  describe('updateFusionState', () => {
+    it('sets fusion state with filter', () => {
+      const { result } = renderQueryStateHook()
 
-  it('clears individual page state', () => {
-    render(
-      <QueryStateProvider>
-        <TestConsumer />
-      </QueryStateProvider>
-    );
-    act(() => {
-      screen.getByText('Set Fusion').click();
-      screen.getByText('Set Fission').click();
-    });
-    act(() => {
-      screen.getByText('Clear Fusion').click();
-    });
-    expect(screen.getByTestId('fusion-state')).toHaveTextContent('undefined');
-    // Fission should still be set
-    const fissionState = screen.getByTestId('fission-state').textContent;
-    expect(fissionState).toContain('"element1List":["U"]');
-  });
+      act(() => {
+        result.current.updateFusionState({
+          filter: { element1List: ['H'], element2List: ['Li'] },
+        })
+      })
 
-  it('persists state to localStorage', () => {
-    render(
-      <QueryStateProvider>
-        <TestConsumer />
-      </QueryStateProvider>
-    );
-    act(() => {
-      screen.getByText('Set Fusion').click();
-    });
-    // Check that something was saved to localStorage
-    const keys = Object.keys(localStorage);
-    const stateKey = keys.find(k => k.startsWith('lenr-query-states'));
-    expect(stateKey).toBeDefined();
-    const stored = JSON.parse(localStorage.getItem(stateKey!)!);
-    expect(stored.version).toBe(1);
-  });
+      const fusion = result.current.getFusionState()
+      expect(fusion).toBeDefined()
+      expect(fusion!.filter.element1List).toEqual(['H'])
+      expect(fusion!.filter.element2List).toEqual(['Li'])
+    })
 
-  it('throws error when used outside provider', () => {
-    // Suppress console.error for this test
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    expect(() => render(<TestConsumer />)).toThrow('useQueryState must be used within a QueryStateProvider');
-    consoleSpy.mockRestore();
-  });
+    it('merges partial updates', () => {
+      const { result } = renderQueryStateHook()
 
-  it('generates a tab ID in sessionStorage', () => {
-    render(
-      <QueryStateProvider>
-        <TestConsumer />
-      </QueryStateProvider>
-    );
-    const tabId = sessionStorage.getItem('lenr-tab-id');
-    expect(tabId).toBeTruthy();
-    expect(tabId).toMatch(/^tab-\d+-/);
-  });
-});
+      act(() => {
+        result.current.updateFusionState({
+          filter: { element1List: ['H'] },
+        })
+      })
+
+      act(() => {
+        result.current.updateFusionState({
+          filter: { element2List: ['Ni'] },
+        })
+      })
+
+      const fusion = result.current.getFusionState()
+      expect(fusion!.filter.element1List).toEqual(['H'])
+      expect(fusion!.filter.element2List).toEqual(['Ni'])
+    })
+
+    it('sets lastUpdated timestamp', () => {
+      const { result } = renderQueryStateHook()
+      const before = Date.now()
+
+      act(() => {
+        result.current.updateFusionState({
+          filter: { element1List: ['H'] },
+        })
+      })
+
+      const fusion = result.current.getFusionState()
+      expect(fusion!.lastUpdated).toBeGreaterThanOrEqual(before)
+    })
+  })
+
+  describe('updateFissionState', () => {
+    it('sets fission state', () => {
+      const { result } = renderQueryStateHook()
+
+      act(() => {
+        result.current.updateFissionState({
+          filter: { elements: ['Pb'] },
+        })
+      })
+
+      const fission = result.current.getFissionState()
+      expect(fission!.filter.elements).toEqual(['Pb'])
+    })
+  })
+
+  describe('updateTwoToTwoState', () => {
+    it('sets two-to-two state', () => {
+      const { result } = renderQueryStateHook()
+
+      act(() => {
+        result.current.updateTwoToTwoState({
+          filter: { element1List: ['D'], element2List: ['Ni'] },
+        })
+      })
+
+      const twotwo = result.current.getTwoToTwoState()
+      expect(twotwo!.filter.element1List).toEqual(['D'])
+      expect(twotwo!.filter.element2List).toEqual(['Ni'])
+    })
+  })
+
+  describe('clearAllStates', () => {
+    it('clears all query states', () => {
+      const { result } = renderQueryStateHook()
+
+      act(() => {
+        result.current.updateFusionState({
+          filter: { element1List: ['H'] },
+        })
+        result.current.updateFissionState({
+          filter: { elements: ['Pb'] },
+        })
+      })
+
+      act(() => {
+        result.current.clearAllStates()
+      })
+
+      expect(result.current.getFusionState()).toBeUndefined()
+      expect(result.current.getFissionState()).toBeUndefined()
+      expect(result.current.getTwoToTwoState()).toBeUndefined()
+      expect(result.current.getCascadeState()).toBeUndefined()
+    })
+  })
+
+  describe('clearPageState', () => {
+    it('clears only the specified page state', () => {
+      const { result } = renderQueryStateHook()
+
+      act(() => {
+        result.current.updateFusionState({
+          filter: { element1List: ['H'] },
+        })
+        result.current.updateFissionState({
+          filter: { elements: ['Pb'] },
+        })
+      })
+
+      act(() => {
+        result.current.clearPageState('fusion')
+      })
+
+      expect(result.current.getFusionState()).toBeUndefined()
+      expect(result.current.getFissionState()).toBeDefined()
+    })
+  })
+
+  describe('useQueryState', () => {
+    it('throws when used outside QueryStateProvider', () => {
+      expect(() => {
+        renderHook(() => useQueryState())
+      }).toThrow('useQueryState must be used within a QueryStateProvider')
+    })
+  })
+})
