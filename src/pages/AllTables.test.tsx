@@ -145,4 +145,120 @@ describe('AllTables', () => {
     fireEvent.click(screen.getByText(en.allTables.executeQuery));
     expect(screen.getByText('syntax error')).toBeInTheDocument();
   });
+
+  it('blocks DELETE statements', () => {
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: 'DELETE FROM FusionAll' } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(screen.getByText(en.allTables.readOnlyError)).toBeInTheDocument();
+    expect(mockExec).not.toHaveBeenCalled();
+  });
+
+  it('blocks INSERT statements', () => {
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: "INSERT INTO NuclidesPlus VALUES (1,1,'H',1)" } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(screen.getByText(en.allTables.readOnlyError)).toBeInTheDocument();
+    expect(mockExec).not.toHaveBeenCalled();
+  });
+
+  it('blocks UPDATE statements', () => {
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: "UPDATE NuclidesPlus SET Z=999 WHERE E='H'" } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(screen.getByText(en.allTables.readOnlyError)).toBeInTheDocument();
+    expect(mockExec).not.toHaveBeenCalled();
+  });
+
+  it('blocks ALTER TABLE statements', () => {
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: 'ALTER TABLE NuclidesPlus ADD COLUMN foo TEXT' } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(screen.getByText(en.allTables.readOnlyError)).toBeInTheDocument();
+    expect(mockExec).not.toHaveBeenCalled();
+  });
+
+  it('blocks CREATE TABLE statements', () => {
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: 'CREATE TABLE evil (id INTEGER)' } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(screen.getByText(en.allTables.readOnlyError)).toBeInTheDocument();
+    expect(mockExec).not.toHaveBeenCalled();
+  });
+
+  it('blocks WITH...DELETE bypass attempts', () => {
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: 'WITH x AS (SELECT 1) DELETE FROM NuclidesPlus' } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(screen.getByText(en.allTables.readOnlyError)).toBeInTheDocument();
+    expect(mockExec).not.toHaveBeenCalled();
+  });
+
+  it('blocks ATTACH DATABASE statements', () => {
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: "ATTACH DATABASE '/etc/passwd' AS steal" } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(screen.getByText(en.allTables.readOnlyError)).toBeInTheDocument();
+    expect(mockExec).not.toHaveBeenCalled();
+  });
+
+  it('blocks VACUUM statements', () => {
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: 'VACUUM' } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(screen.getByText(en.allTables.readOnlyError)).toBeInTheDocument();
+    expect(mockExec).not.toHaveBeenCalled();
+  });
+
+  it('allows EXPLAIN SELECT queries', () => {
+    mockExec.mockReturnValue([{
+      columns: ['addr', 'opcode', 'p1'],
+      values: [[0, 'Init', 0]],
+    }]);
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: 'EXPLAIN SELECT * FROM NuclidesPlus LIMIT 1' } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(mockExec).toHaveBeenCalled();
+  });
+
+  it('allows WITH (CTE) SELECT queries', () => {
+    mockExec.mockReturnValue([{
+      columns: ['Z'],
+      values: [[1]],
+    }]);
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: 'WITH cte AS (SELECT Z FROM NuclidesPlus) SELECT * FROM cte' } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(mockExec).toHaveBeenCalled();
+  });
+
+  it('strips SQL comments before validation', () => {
+    mockExec.mockReturnValue([{
+      columns: ['Z'],
+      values: [[1]],
+    }]);
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: '-- This is a comment\nSELECT Z FROM NuclidesPlus LIMIT 1' } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(mockExec).toHaveBeenCalled();
+  });
+
+  it('does nothing when query is empty', () => {
+    render(<AllTables />);
+    const textarea = screen.getByPlaceholderText(en.allTables.queryPlaceholder);
+    fireEvent.change(textarea, { target: { value: '' } });
+    fireEvent.click(screen.getByText(en.allTables.executeQuery));
+    expect(mockExec).not.toHaveBeenCalled();
+  });
 });
