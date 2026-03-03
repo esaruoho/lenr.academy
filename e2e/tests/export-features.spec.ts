@@ -106,11 +106,8 @@ test.describe('Energy Histogram', () => {
       await waitForReactionResults(page, 'fusion');
 
       // Energy histogram section should appear when there are results
-      // It may be collapsed by default, so we check for DOM presence rather than visibility
       const histogramSection = page.getByText(/Energy Distribution|MeV Distribution|Histogram/i).first();
-      const visible = await histogramSection.isVisible({ timeout: 5000 }).catch(() => false);
-      // The section exists in the DOM regardless of collapse state
-      expect(typeof visible).toBe('boolean');
+      await expect(histogramSection).toBeVisible({ timeout: 5000 });
     }
   });
 });

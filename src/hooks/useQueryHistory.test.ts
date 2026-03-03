@@ -8,6 +8,7 @@ describe('useQueryHistory', () => {
   beforeEach(() => {
     localStorage.clear();
     vi.stubGlobal('crypto', {
+      ...globalThis.crypto,
       randomUUID: () => `test-${Date.now()}-${Math.random()}`,
     });
   });
