@@ -1,0 +1,112 @@
+import { test, expect } from '@playwright/test';
+import {
+  acceptPrivacyConsent,
+} from '../fixtures/test-helpers';
+
+test.describe('Home Page', () => {
+  test.beforeEach(async ({ page }) => {
+    await acceptPrivacyConsent(page);
+    await page.goto('/');
+  });
+
+  test('should display the main title', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /Nanosoft Package/i })).toBeVisible();
+  });
+
+  test('should display four feature cards', async ({ page }) => {
+    const featureHeadings = [
+      /Query Nuclear Reactions/i,
+      /Cascade Simulations/i,
+      /Element.*Nuclide Data/i,
+      /Advanced Queries/i,
+    ];
+    for (const heading of featureHeadings) {
+      await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+    }
+  });
+
+  test('should have navigation links to query pages in main content', async ({ page }) => {
+    // Main content links include arrow prefix "→"
+    const mainContent = page.locator('.max-w-6xl');
+    await expect(mainContent.getByRole('link', { name: /Fusion Reactions/i })).toBeVisible();
+    await expect(mainContent.getByRole('link', { name: /Fission Reactions/i })).toBeVisible();
+    await expect(mainContent.getByRole('link', { name: /Two-To-Two Reactions/i })).toBeVisible();
+  });
+
+  test('should navigate to fusion query page from home', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    await mainContent.getByRole('link', { name: /Fusion Reactions/i }).click();
+    await page.waitForURL(/\/fusion/);
+    expect(page.url()).toContain('/fusion');
+  });
+
+  test('should navigate to fission query page from home', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    await mainContent.getByRole('link', { name: /Fission Reactions/i }).click();
+    await page.waitForURL(/\/fission/);
+    expect(page.url()).toContain('/fission');
+  });
+
+  test('should navigate to twotwo query page from home', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    await mainContent.getByRole('link', { name: /Two-To-Two Reactions/i }).click();
+    await page.waitForURL(/\/twotwo/);
+    expect(page.url()).toContain('/twotwo');
+  });
+
+  test('should have cascade simulations link', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    await expect(mainContent.getByRole('link', { name: /Cascade Simulations/i })).toBeVisible();
+  });
+
+  test('should have element data link', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    const elementLink = mainContent.getByRole('link', { name: /Show Element Data/i });
+    await elementLink.scrollIntoViewIfNeeded();
+    await expect(elementLink).toBeVisible();
+  });
+
+  test('should have tables in detail link', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    const tablesLink = mainContent.getByRole('link', { name: /Tables in Detail/i });
+    await tablesLink.scrollIntoViewIfNeeded();
+    await expect(tablesLink).toBeVisible();
+  });
+
+  test('should have all tables query tool link', async ({ page }) => {
+    const mainContent = page.locator('.max-w-6xl');
+    const allTablesLink = mainContent.getByRole('link', { name: /All Tables/i });
+    await allTablesLink.scrollIntoViewIfNeeded();
+    await expect(allTablesLink).toBeVisible();
+  });
+
+  test('should display Parkhomov tables section', async ({ page }) => {
+    const parkhomovSection = page.getByText(/1,389/);
+    await parkhomovSection.scrollIntoViewIfNeeded();
+    await expect(parkhomovSection).toBeVisible();
+  });
+
+  test('should display original app section with external link', async ({ page }) => {
+    const nanosoftLink = page.getByRole('link', { name: /Visit|Nanosoft/i });
+    await nanosoftLink.scrollIntoViewIfNeeded();
+    await expect(nanosoftLink).toBeVisible();
+    await expect(nanosoftLink).toHaveAttribute('href', 'https://nanosoft.co.nz');
+    await expect(nanosoftLink).toHaveAttribute('target', '_blank');
+  });
+
+  test('should display open source section with GitHub link', async ({ page }) => {
+    const githubLink = page.getByRole('link', { name: /GitHub/i }).first();
+    await githubLink.scrollIntoViewIfNeeded();
+    await expect(githubLink).toBeVisible();
+    await expect(githubLink).toHaveAttribute('href', /github\.com\/Episk-pos\/lenr\.academy/);
+  });
+
+  test('should have discussions and issues links', async ({ page }) => {
+    const discussionLink = page.getByRole('link', { name: /Discussion/i });
+    await discussionLink.scrollIntoViewIfNeeded();
+    await expect(discussionLink).toBeVisible();
+    const issueLink = page.getByRole('link', { name: /Report|Issue/i }).first();
+    await issueLink.scrollIntoViewIfNeeded();
+    await expect(issueLink).toBeVisible();
+  });
+});
