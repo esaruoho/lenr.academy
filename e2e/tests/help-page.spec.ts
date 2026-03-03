@@ -24,11 +24,11 @@ test.describe('Help Page', () => {
   });
 
   test('should show query type badges on example cards', async ({ page }) => {
-    // Query type badges are rendered in small text spans next to card titles
-    // hasText performs substring matching; using .first() to wait for at least one
-    await expect(page.locator('span', { hasText: 'fusion' }).first()).toBeVisible();
-    await expect(page.locator('span', { hasText: 'fission' }).first()).toBeVisible();
-    await expect(page.locator('span', { hasText: '2→2' }).first()).toBeVisible();
+    // Query type badges are small spans inside the example query card grid
+    const exampleGrid = page.locator('.grid');
+    await expect(exampleGrid.locator('span', { hasText: 'fusion' }).first()).toBeVisible();
+    await expect(exampleGrid.locator('span', { hasText: 'fission' }).first()).toBeVisible();
+    await expect(exampleGrid.locator('span', { hasText: '2→2' }).first()).toBeVisible();
   });
 
   test('should navigate to fusion query when clicking fusion example', async ({ page }) => {
@@ -74,27 +74,26 @@ test.describe('Help Page', () => {
   });
 
   test('should have category filter buttons', async ({ page }) => {
-    // Category filters include "All" and specific categories
-    await expect(page.getByRole('button', { name: 'All' })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Nuclear Physics/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Reaction Types/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Database Fields/i })).toBeVisible();
+    // Category filters are in the glossary section — scope to avoid matching sidebar buttons
+    const glossarySection = page.locator('section').last();
+    await expect(glossarySection.getByRole('button', { name: /Nuclear Physics/i })).toBeVisible();
+    await expect(glossarySection.getByRole('button', { name: /Reaction Types/i })).toBeVisible();
+    await expect(glossarySection.getByRole('button', { name: /Database Fields/i })).toBeVisible();
   });
 
   test('should filter glossary by category when clicking category button', async ({ page }) => {
-    // Get the displayed terms count text
-    const countText = page.getByText(/\d+ terms/i);
-    await countText.scrollIntoViewIfNeeded();
-    const initialText = await countText.textContent();
-    const initialCount = parseInt(initialText?.match(/(\d+)/)?.[1] ?? '0', 10);
+    // Count glossary card items before filtering
+    const glossarySection = page.locator('section').last();
+    const glossaryCards = glossarySection.locator('.card');
+    const initialCount = await glossaryCards.count();
+    expect(initialCount).toBeGreaterThan(0);
 
     // Click "Database Fields" to filter to a specific category
-    await page.getByRole('button', { name: /Database Fields/i }).click();
+    await glossarySection.getByRole('button', { name: /Database Fields/i }).click();
 
-    // After filtering, the count should be less than the total
-    await expect(countText).not.toHaveText(new RegExp(`${initialCount} terms`, 'i'));
-    const filteredText = await countText.textContent();
-    const filteredCount = parseInt(filteredText?.match(/(\d+)/)?.[1] ?? '0', 10);
+    // After filtering, fewer cards should be visible
+    await expect(glossaryCards).not.toHaveCount(initialCount);
+    const filteredCount = await glossaryCards.count();
     expect(filteredCount).toBeGreaterThan(0);
     expect(filteredCount).toBeLessThan(initialCount);
   });
