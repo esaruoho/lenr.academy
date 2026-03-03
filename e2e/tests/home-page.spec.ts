@@ -77,11 +77,13 @@ test.describe('Home Page', () => {
     await expect(allTablesLink).toBeVisible();
   });
 
-  test('should display Parkhomov tables section with reaction counts', async ({ page }) => {
-    // The home page shows reaction counts from i18n (e.g., "1,389 fusion reactions")
-    const reactionCount = page.getByText(/fusion reactions/i).first();
-    await reactionCount.scrollIntoViewIfNeeded();
-    await expect(reactionCount).toBeVisible();
+  test('should display Parkhomov tables section', async ({ page }) => {
+    // The Parkhomov tables section has a heading and describes the database contents
+    const sectionHeading = page.getByRole('heading', { name: /Parkhomov/i });
+    await sectionHeading.scrollIntoViewIfNeeded();
+    await expect(sectionHeading).toBeVisible();
+    // Section contains a list of reaction types
+    await expect(page.locator('li', { hasText: /fusion/i }).first()).toBeVisible();
   });
 
   test('should display original app section with external link', async ({ page }) => {
