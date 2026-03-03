@@ -62,8 +62,8 @@ export function compareAbundances(
 
   // Sort by mass number
   isotopes.sort((a, b) => {
-    const aNum = parseInt(a.nuclideId.split('-')[1], 10);
-    const bNum = parseInt(b.nuclideId.split('-')[1], 10);
+    const aNum = parseInt(a.nuclideId.split('-')[1], 10) || 0;
+    const bNum = parseInt(b.nuclideId.split('-')[1], 10) || 0;
     return aNum - bNum;
   });
 
