@@ -44,7 +44,7 @@ describe('ErrorDisplay', () => {
     await act(async () => {
       render(<ErrorDisplay error={error} />);
     });
-    expect(screen.getByText('Something broke')).toBeDefined();
+    expect(screen.getByText('Something broke')).toBeInTheDocument();
   });
 
   it('shows generic title for non-database errors', async () => {
@@ -52,7 +52,7 @@ describe('ErrorDisplay', () => {
     await act(async () => {
       render(<ErrorDisplay error={error} />);
     });
-    expect(screen.getByText('Something went wrong')).toBeDefined();
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
   });
 
   it('shows database title for database errors', async () => {
@@ -60,7 +60,7 @@ describe('ErrorDisplay', () => {
     await act(async () => {
       render(<ErrorDisplay error={error} isDatabaseError />);
     });
-    expect(screen.getByText('Database Error')).toBeDefined();
+    expect(screen.getByText('Database Error')).toBeInTheDocument();
   });
 
   it('shows Sentry notice', async () => {
@@ -68,7 +68,7 @@ describe('ErrorDisplay', () => {
     await act(async () => {
       render(<ErrorDisplay error={error} />);
     });
-    expect(screen.getByText('This error has been automatically reported to our team.')).toBeDefined();
+    expect(screen.getByText('This error has been automatically reported to our team.')).toBeInTheDocument();
   });
 
   it('shows Technical Details toggle', async () => {
@@ -76,7 +76,7 @@ describe('ErrorDisplay', () => {
     await act(async () => {
       render(<ErrorDisplay error={error} />);
     });
-    expect(screen.getByText('Technical Details')).toBeDefined();
+    expect(screen.getByText('Technical Details')).toBeInTheDocument();
   });
 
   it('expands technical details on click', async () => {
@@ -87,8 +87,8 @@ describe('ErrorDisplay', () => {
     await act(async () => {
       fireEvent.click(screen.getByText('Technical Details'));
     });
-    expect(screen.getByText('Error Fingerprint:')).toBeDefined();
-    expect(screen.getByText('abc123')).toBeDefined();
+    expect(screen.getByText('Error Fingerprint:')).toBeInTheDocument();
+    expect(screen.getByText('abc123')).toBeInTheDocument();
   });
 
   it('shows Search Similar Issues button', async () => {
@@ -96,7 +96,7 @@ describe('ErrorDisplay', () => {
     await act(async () => {
       render(<ErrorDisplay error={error} />);
     });
-    expect(screen.getByText('Search Similar Issues')).toBeDefined();
+    expect(screen.getByText('Search Similar Issues')).toBeInTheDocument();
   });
 
   it('shows Report This Error button (disabled until search)', async () => {
@@ -129,7 +129,7 @@ describe('ErrorDisplay', () => {
       render(<ErrorDisplay error={error} resetError={resetError} />);
     });
     const tryAgain = screen.getByText('Try Again');
-    expect(tryAgain).toBeDefined();
+    expect(tryAgain).toBeInTheDocument();
     fireEvent.click(tryAgain);
     expect(resetError).toHaveBeenCalledTimes(1);
   });
@@ -139,7 +139,7 @@ describe('ErrorDisplay', () => {
     await act(async () => {
       render(<ErrorDisplay error={error} />);
     });
-    expect(screen.getByText('Return to Home')).toBeDefined();
+    expect(screen.getByText('Return to Home')).toBeInTheDocument();
   });
 
   it('shows module load error recovery for module errors', async () => {
@@ -147,7 +147,7 @@ describe('ErrorDisplay', () => {
     await act(async () => {
       render(<ErrorDisplay error={error} />);
     });
-    expect(screen.getByText('Module Loading Failed')).toBeDefined();
+    expect(screen.getByText('Module Loading Failed')).toBeInTheDocument();
   });
 
   it('shows corruption recovery for database corruption', async () => {
@@ -155,8 +155,8 @@ describe('ErrorDisplay', () => {
     await act(async () => {
       render(<ErrorDisplay error={error} isDatabaseError />);
     });
-    expect(screen.getByText('Database Corruption Detected')).toBeDefined();
-    expect(screen.getByText('Clear Cache & Reload')).toBeDefined();
+    expect(screen.getByText('Database Corruption Detected')).toBeInTheDocument();
+    expect(screen.getByText('Clear Cache & Reload')).toBeInTheDocument();
   });
 
   it('shows helper text to search first', async () => {
@@ -164,6 +164,6 @@ describe('ErrorDisplay', () => {
     await act(async () => {
       render(<ErrorDisplay error={error} />);
     });
-    expect(screen.getByText(/search for similar issues/i)).toBeDefined();
+    expect(screen.getByText(/search for similar issues/i)).toBeInTheDocument();
   });
 });

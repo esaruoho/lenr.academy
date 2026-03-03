@@ -1,48 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import MeteredConnectionWarning from './MeteredConnectionWarning';
-import en from '../i18n/locales/en.json';
+import { mockReactI18next } from '../test-utils/i18nMock';
 
-// Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const parts = key.split('.');
-      let value: unknown = en;
-      for (const part of parts) {
-        if (value && typeof value === 'object' && part in value) {
-          value = (value as Record<string, unknown>)[part];
-        } else {
-          return key;
-        }
-      }
-      return value as string;
-    },
-  }),
-  Trans: ({ i18nKey, values }: { i18nKey: string; values?: Record<string, unknown> }) => {
-    let text = i18nKey;
-    const parts = i18nKey.split('.');
-    let value: unknown = en;
-    for (const part of parts) {
-      if (value && typeof value === 'object' && part in value) {
-        value = (value as Record<string, unknown>)[part];
-      } else {
-        break;
-      }
-    }
-    if (typeof value === 'string') {
-      text = value;
-      if (values) {
-        for (const [k, v] of Object.entries(values)) {
-          text = text.replace(`{{${k}}}`, String(v));
-        }
-      }
-      // Strip HTML-like tags
-      text = text.replace(/<[^>]+>/g, '');
-    }
-    return <span>{text}</span>;
-  },
-}));
+vi.mock('react-i18next', () => mockReactI18next);
+
+import MeteredConnectionWarning from './MeteredConnectionWarning';
 
 describe('MeteredConnectionWarning', () => {
   it('renders warning title', () => {

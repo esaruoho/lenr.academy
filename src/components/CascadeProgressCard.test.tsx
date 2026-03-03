@@ -1,29 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import en from '../i18n/locales/en.json';
+import { mockReactI18next } from '../test-utils/i18nMock';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, params?: Record<string, unknown>) => {
-      const parts = key.split('.');
-      let value: unknown = en;
-      for (const part of parts) {
-        if (value && typeof value === 'object' && part in value) {
-          value = (value as Record<string, unknown>)[part];
-        } else {
-          return key;
-        }
-      }
-      let result = value as string;
-      if (params) {
-        Object.entries(params).forEach(([k, v]) => {
-          result = result.replace(`{{${k}}}`, String(v));
-        });
-      }
-      return result;
-    },
-  }),
-}));
+vi.mock('react-i18next', () => mockReactI18next);
 
 vi.mock('lucide-react', () => ({
   Loader2: (props: Record<string, unknown>) => <svg data-testid="loader-icon" className={props.className as string} />,
@@ -42,44 +21,44 @@ describe('CascadeProgressCard', () => {
 
   it('renders running simulation title', () => {
     render(<CascadeProgressCard progress={baseProgress} onCancel={vi.fn()} />);
-    expect(screen.getByText('Running Cascade Simulation...')).toBeDefined();
+    expect(screen.getByText('Running Cascade Simulation...')).toBeInTheDocument();
   });
 
   it('shows loop progress', () => {
     render(<CascadeProgressCard progress={baseProgress} onCancel={vi.fn()} />);
-    expect(screen.getByText('4 / 10')).toBeDefined();
+    expect(screen.getByText('4 / 10')).toBeInTheDocument();
   });
 
   it('shows new reactions count when >= 0', () => {
     render(<CascadeProgressCard progress={baseProgress} onCancel={vi.fn()} />);
-    expect(screen.getByText('5')).toBeDefined();
-    expect(screen.getByText('New Reactions (this loop)')).toBeDefined();
+    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.getByText('New Reactions (this loop)')).toBeInTheDocument();
   });
 
   it('shows finalizing status when newReactionsCount is -1', () => {
     const progress = { ...baseProgress, newReactionsCount: -1 };
     render(<CascadeProgressCard progress={progress} onCancel={vi.fn()} />);
-    expect(screen.getByText('Finalizing...')).toBeDefined();
-    expect(screen.getByText('Starting finalization process...')).toBeDefined();
+    expect(screen.getByText('Finalizing...')).toBeInTheDocument();
+    expect(screen.getByText('Starting finalization process...')).toBeInTheDocument();
   });
 
   it('shows calculating energy status when newReactionsCount is -2', () => {
     const progress = { ...baseProgress, newReactionsCount: -2 };
     render(<CascadeProgressCard progress={progress} onCancel={vi.fn()} />);
-    expect(screen.getByText('Calculating energy...')).toBeDefined();
-    expect(screen.getByText('Computing total energy from all reactions...')).toBeDefined();
+    expect(screen.getByText('Calculating energy...')).toBeInTheDocument();
+    expect(screen.getByText('Computing total energy from all reactions...')).toBeInTheDocument();
   });
 
   it('shows preparing results status when newReactionsCount is -3', () => {
     const progress = { ...baseProgress, newReactionsCount: -3 };
     render(<CascadeProgressCard progress={progress} onCancel={vi.fn()} />);
-    expect(screen.getByText('Preparing results...')).toBeDefined();
-    expect(screen.getByText('Serializing results for display...')).toBeDefined();
+    expect(screen.getByText('Preparing results...')).toBeInTheDocument();
+    expect(screen.getByText('Serializing results for display...')).toBeInTheDocument();
   });
 
   it('shows percentage complete', () => {
     render(<CascadeProgressCard progress={baseProgress} onCancel={vi.fn()} />);
-    expect(screen.getByText('40% complete')).toBeDefined();
+    expect(screen.getByText('40% complete')).toBeInTheDocument();
   });
 
   it('calls onCancel when cancel button clicked', () => {
@@ -91,13 +70,13 @@ describe('CascadeProgressCard', () => {
 
   it('shows searching reactions info text for normal progress', () => {
     render(<CascadeProgressCard progress={baseProgress} onCancel={vi.fn()} />);
-    expect(screen.getByText('Searching for reactions between active nuclides and products...')).toBeDefined();
+    expect(screen.getByText('Searching for reactions between active nuclides and products...')).toBeInTheDocument();
   });
 
   it('renders progress bar with correct width', () => {
     const { container } = render(<CascadeProgressCard progress={baseProgress} onCancel={vi.fn()} />);
     const progressBar = container.querySelector('[style*="width"]');
-    expect(progressBar).toBeDefined();
+    expect(progressBar).toBeInTheDocument();
     expect((progressBar as HTMLElement).style.width).toBe('40%');
   });
 

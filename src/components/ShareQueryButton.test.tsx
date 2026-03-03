@@ -1,23 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import en from '../i18n/locales/en.json';
+import { mockReactI18next } from '../test-utils/i18nMock';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const parts = key.split('.');
-      let value: unknown = en;
-      for (const part of parts) {
-        if (value && typeof value === 'object' && part in value) {
-          value = (value as Record<string, unknown>)[part];
-        } else {
-          return key;
-        }
-      }
-      return value as string;
-    },
-  }),
-}));
+vi.mock('react-i18next', () => mockReactI18next);
 
 vi.mock('lucide-react', () => ({
   Share2: () => <svg data-testid="share-icon" />,
@@ -37,17 +22,17 @@ describe('ShareQueryButton', () => {
 
   it('renders with share text', () => {
     render(<ShareQueryButton />);
-    expect(screen.getByText('Copy Link')).toBeDefined();
+    expect(screen.getByText('Copy Link')).toBeInTheDocument();
   });
 
   it('has correct title attribute', () => {
     render(<ShareQueryButton />);
-    expect(screen.getByTitle('Copy a shareable URL for this query to clipboard')).toBeDefined();
+    expect(screen.getByTitle('Copy a shareable URL for this query to clipboard')).toBeInTheDocument();
   });
 
   it('shows share icon initially', () => {
     render(<ShareQueryButton />);
-    expect(screen.getByTestId('share-icon')).toBeDefined();
+    expect(screen.getByTestId('share-icon')).toBeInTheDocument();
   });
 
   it('copies URL to clipboard and shows success', async () => {
@@ -60,8 +45,8 @@ describe('ShareQueryButton', () => {
     });
 
     expect(writeText).toHaveBeenCalledWith(window.location.href);
-    expect(screen.getByText('Link Copied!')).toBeDefined();
-    expect(screen.getByTestId('check-icon')).toBeDefined();
+    expect(screen.getByText('Link Copied!')).toBeInTheDocument();
+    expect(screen.getByTestId('check-icon')).toBeInTheDocument();
   });
 
   it('reverts to share text after 2 seconds', async () => {
@@ -73,13 +58,13 @@ describe('ShareQueryButton', () => {
       fireEvent.click(screen.getByText('Copy Link'));
     });
 
-    expect(screen.getByText('Link Copied!')).toBeDefined();
+    expect(screen.getByText('Link Copied!')).toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(2000);
     });
 
-    expect(screen.getByText('Copy Link')).toBeDefined();
+    expect(screen.getByText('Copy Link')).toBeInTheDocument();
   });
 
   it('falls back to execCommand when clipboard API fails', async () => {
@@ -95,7 +80,7 @@ describe('ShareQueryButton', () => {
     });
 
     expect(document.execCommand).toHaveBeenCalledWith('copy');
-    expect(screen.getByText('Link Copied!')).toBeDefined();
+    expect(screen.getByText('Link Copied!')).toBeInTheDocument();
   });
 
   it('has aria-live polite for accessibility', () => {

@@ -12,33 +12,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import PathwayBrowserTable from './PathwayBrowserTable';
 import type { PathwayAnalysis } from '../services/pathwayAnalyzer';
-import en from '../i18n/locales/en.json';
+import { mockReactI18next } from '../test-utils/i18nMock';
 
-// Mock react-i18next to return English translations
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, params?: Record<string, unknown>) => {
-      // Navigate nested keys like 'cascades.pathwayBrowser.type'
-      const parts = key.split('.');
-      let value: unknown = en;
-      for (const part of parts) {
-        if (value && typeof value === 'object' && part in value) {
-          value = (value as Record<string, unknown>)[part];
-        } else {
-          return key; // fallback to key
-        }
-      }
-      // Interpolate {{param}} placeholders
-      if (typeof value === 'string' && params) {
-        return value.replace(/\{\{(\w+)\}\}/g, (_, k) => String(params[k] ?? `{{${k}}}`));
-      }
-      return value as string;
-    },
-    i18n: { language: 'en' },
-  }),
-}));
+vi.mock('react-i18next', () => mockReactI18next);
 
 // Mock VirtualizedList to simplify testing
 vi.mock('./VirtualizedList', () => ({
@@ -52,6 +29,8 @@ vi.mock('./VirtualizedList', () => ({
     </div>
   ),
 }));
+
+import PathwayBrowserTable from './PathwayBrowserTable';
 
 // Sample pathway data for testing
 const createMockPathway = (overrides: Partial<PathwayAnalysis> = {}): PathwayAnalysis => ({

@@ -1,29 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import en from '../i18n/locales/en.json';
+import { mockReactI18next } from '../test-utils/i18nMock';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, params?: Record<string, unknown>) => {
-      const parts = key.split('.');
-      let value: unknown = en;
-      for (const part of parts) {
-        if (value && typeof value === 'object' && part in value) {
-          value = (value as Record<string, unknown>)[part];
-        } else {
-          return key;
-        }
-      }
-      let result = value as string;
-      if (params) {
-        Object.entries(params).forEach(([k, v]) => {
-          result = result.replace(`{{${k}}}`, String(v));
-        });
-      }
-      return result;
-    },
-  }),
-}));
+vi.mock('react-i18next', () => mockReactI18next);
 
 vi.mock('lucide-react', () => ({
   X: () => <svg data-testid="x-icon" />,
@@ -99,24 +78,24 @@ describe('MaterialsCatalog', () => {
 
   it('renders modal when open', () => {
     render(<MaterialsCatalog {...defaultProps} />);
-    expect(screen.getByTestId('materials-catalog-modal')).toBeDefined();
+    expect(screen.getByTestId('materials-catalog-modal')).toBeInTheDocument();
   });
 
   it('shows search input', () => {
     render(<MaterialsCatalog {...defaultProps} />);
-    expect(screen.getByTestId('materials-search-input')).toBeDefined();
+    expect(screen.getByTestId('materials-search-input')).toBeInTheDocument();
   });
 
   it('shows material items', () => {
     render(<MaterialsCatalog {...defaultProps} />);
-    expect(screen.getByTestId('material-item-natural-lithium')).toBeDefined();
-    expect(screen.getByTestId('material-item-natural-nickel')).toBeDefined();
+    expect(screen.getByTestId('material-item-natural-lithium')).toBeInTheDocument();
+    expect(screen.getByTestId('material-item-natural-nickel')).toBeInTheDocument();
   });
 
   it('shows tab buttons', () => {
     render(<MaterialsCatalog {...defaultProps} />);
-    expect(screen.getByTestId('materials-tab-all')).toBeDefined();
-    expect(screen.getByTestId('materials-tab-natural-abundance')).toBeDefined();
+    expect(screen.getByTestId('materials-tab-all')).toBeInTheDocument();
+    expect(screen.getByTestId('materials-tab-natural-abundance')).toBeInTheDocument();
   });
 
   it('calls onClose when close button clicked', () => {
@@ -137,26 +116,26 @@ describe('MaterialsCatalog', () => {
 
   it('shows replace/blend mode toggle', () => {
     render(<MaterialsCatalog {...defaultProps} />);
-    expect(screen.getByTestId('mode-replace')).toBeDefined();
-    expect(screen.getByTestId('mode-blend')).toBeDefined();
+    expect(screen.getByTestId('mode-replace')).toBeInTheDocument();
+    expect(screen.getByTestId('mode-blend')).toBeInTheDocument();
   });
 
   it('shows load button in replace mode', () => {
     render(<MaterialsCatalog {...defaultProps} />);
-    expect(screen.getByTestId('load-material-button')).toBeDefined();
+    expect(screen.getByTestId('load-material-button')).toBeInTheDocument();
   });
 
   it('shows blend controls in blend mode', () => {
     render(<MaterialsCatalog {...defaultProps} />);
     fireEvent.click(screen.getByTestId('mode-blend'));
-    expect(screen.getByTestId('add-to-blend-button')).toBeDefined();
-    expect(screen.getByTestId('apply-blend-button')).toBeDefined();
+    expect(screen.getByTestId('add-to-blend-button')).toBeInTheDocument();
+    expect(screen.getByTestId('apply-blend-button')).toBeInTheDocument();
   });
 
   it('shows save button when currentFuel provided', () => {
     const fuel = [{ nuclideId: 'Li-7', proportion: 100, source: 'manual' as const }];
     render(<MaterialsCatalog {...defaultProps} currentFuel={fuel} />);
-    expect(screen.getByTestId('save-custom-material-button')).toBeDefined();
+    expect(screen.getByTestId('save-custom-material-button')).toBeInTheDocument();
   });
 
   it('shows material count in footer', () => {

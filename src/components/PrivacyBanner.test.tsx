@@ -1,30 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import PrivacyBanner from './PrivacyBanner';
-import en from '../i18n/locales/en.json';
+import { mockReactI18next } from '../test-utils/i18nMock';
 
-// Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const parts = key.split('.');
-      let value: unknown = en;
-      for (const part of parts) {
-        if (value && typeof value === 'object' && part in value) {
-          value = (value as Record<string, unknown>)[part];
-        } else {
-          return key;
-        }
-      }
-      return value as string;
-    },
-  }),
-}));
+vi.mock('react-i18next', () => mockReactI18next);
 
 // Mock analytics
 vi.mock('../utils/analytics', () => ({
   loadUmamiScript: vi.fn().mockResolvedValue(undefined),
 }));
+
+import PrivacyBanner from './PrivacyBanner';
 
 const ANALYTICS_CONSENT_KEY = 'lenr-analytics-consent';
 

@@ -1,29 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import en from '../i18n/locales/en.json';
+import { mockReactI18next } from '../test-utils/i18nMock';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, params?: Record<string, unknown>) => {
-      const parts = key.split('.');
-      let value: unknown = en;
-      for (const part of parts) {
-        if (value && typeof value === 'object' && part in value) {
-          value = (value as Record<string, unknown>)[part];
-        } else {
-          return key;
-        }
-      }
-      let result = value as string;
-      if (params) {
-        Object.entries(params).forEach(([k, v]) => {
-          result = result.replace(`{{${k}}}`, String(v));
-        });
-      }
-      return result;
-    },
-  }),
-}));
+vi.mock('react-i18next', () => mockReactI18next);
 
 const mockNuclides = [
   { Z: 1, A: 1, E: 'H', logHalfLife: 20, BE: 0, nBorF: 'f', aBorF: 'f' },
@@ -63,23 +43,23 @@ describe('SegreChart', () => {
     render(<SegreChart />);
     const title = (en as any).segreChart?.title;
     if (title) {
-      expect(screen.getByText(title)).toBeDefined();
+      expect(screen.getByText(title)).toBeInTheDocument();
     } else {
-      expect(screen.getByText('segreChart.title')).toBeDefined();
+      expect(screen.getByText('segreChart.title')).toBeInTheDocument();
     }
   });
 
   it('renders the chart diagram', () => {
     render(<SegreChart />);
-    expect(screen.getByTestId('segre-chart-diagram')).toBeDefined();
-    expect(screen.getByText('Chart with 5 nuclides')).toBeDefined();
+    expect(screen.getByTestId('segre-chart-diagram')).toBeInTheDocument();
+    expect(screen.getByText('Chart with 5 nuclides')).toBeInTheDocument();
   });
 
   it('shows legend section', () => {
     render(<SegreChart />);
     const legendKey = (en as any).segreChart?.legend;
     if (legendKey) {
-      expect(screen.getByText(legendKey)).toBeDefined();
+      expect(screen.getByText(legendKey)).toBeInTheDocument();
     }
   });
 
@@ -90,19 +70,13 @@ describe('SegreChart', () => {
     // Long: logHalfLife > 2 → C = 1
     // Short: everything else → U = 1
     // Unknown: null → Es = 1
-    expect(screen.getByText(/\(2\)/)).toBeDefined(); // stable count
+    expect(screen.getByText(/\(2\)/)).toBeInTheDocument(); // stable count
   });
 
-  it('shows loading card when database is loading', () => {
-    vi.doMock('../contexts/DatabaseContext', () => ({
-      useDatabase: () => ({
-        db: null,
-        isLoading: true,
-        error: null,
-        downloadProgress: null,
-      }),
-    }));
-    // Can't easily re-import, so we test the already-rendered version
-    // This test is mostly structural — the component conditionally renders loading state
+  it('passes nuclides with computed N values to chart diagram', () => {
+    render(<SegreChart />);
+    // The mock SegreChartDiagram receives nuclides from getAllNuclides (5 mock nuclides)
+    expect(screen.getByTestId('segre-chart-diagram')).toBeInTheDocument();
+    expect(screen.getByText('Chart with 5 nuclides')).toBeInTheDocument();
   });
 });

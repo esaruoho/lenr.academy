@@ -189,20 +189,40 @@ describe('useQueryWorker', () => {
     await expect(queryPromise!).rejects.toThrow('Worker terminated on unmount');
   });
 
-  it('rejects if worker not initialized', () => {
-    // Force workerRef to null by terminating
-    const { result, unmount } = renderHook(() => useQueryWorker());
-    unmount();
+  it('sets isRunning while query is in flight', async () => {
+    const { result } = renderHook(() => useQueryWorker());
+    expect(result.current.isRunning).toBe(false);
 
-    // Re-render to get a fresh hook but the worker ref was cleaned up
-    // Actually, let's test this differently - mock Worker to throw
-    const originalWorker = globalThis.Worker;
-    vi.stubGlobal('Worker', vi.fn(() => {
-      throw new Error('Worker construction failed');
-    }));
+    let queryPromise: Promise<any>;
+    act(() => {
+      queryPromise = result.current.runQuery(
+        'fusion',
+        {},
+        new ArrayBuffer(8),
+      );
+    });
 
-    // The hook will fail to create the worker, so workerRef stays null
-    // But renderHook will catch the error. Let's test the "already running" case instead.
-    vi.stubGlobal('Worker', originalWorker);
+    expect(result.current.isRunning).toBe(true);
+
+    // Resolve the query
+    act(() => {
+      mockWorkerInstance.onmessage!({
+        data: {
+          type: 'complete',
+          result: {
+            reactions: [],
+            nuclides: [],
+            elements: [],
+            radioactiveNuclides: [],
+            executionTime: 10,
+            rowCount: 0,
+            totalCount: 0,
+          },
+        },
+      } as any);
+    });
+
+    await queryPromise!;
+    expect(result.current.isRunning).toBe(false);
   });
 });

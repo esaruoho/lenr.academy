@@ -30,21 +30,21 @@ describe('OfflineIndicator', () => {
   it('shows offline banner when starting offline', () => {
     Object.defineProperty(navigator, 'onLine', { value: false, writable: true });
     render(<OfflineIndicator />);
-    expect(screen.getByTestId('offline-indicator')).toBeDefined();
-    expect(screen.getByText("You're offline")).toBeDefined();
+    expect(screen.getByTestId('offline-indicator')).toBeInTheDocument();
+    expect(screen.getByText("You're offline")).toBeInTheDocument();
   });
 
   it('shows full text initially then minimizes after 5 seconds', () => {
     Object.defineProperty(navigator, 'onLine', { value: false, writable: true });
     render(<OfflineIndicator />);
-    expect(screen.getByText("You're offline")).toBeDefined();
-    expect(screen.getByText("You can still query the database if it's cached locally")).toBeDefined();
+    expect(screen.getByText("You're offline")).toBeInTheDocument();
+    expect(screen.getByText("You can still query the database if it's cached locally")).toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(5000);
     });
 
-    expect(screen.getByText('Offline')).toBeDefined();
+    expect(screen.getByText('Offline')).toBeInTheDocument();
   });
 
   it('shows offline banner on offline event', () => {
@@ -56,7 +56,7 @@ describe('OfflineIndicator', () => {
       window.dispatchEvent(new Event('offline'));
     });
 
-    expect(screen.getByTestId('offline-indicator')).toBeDefined();
+    expect(screen.getByTestId('offline-indicator')).toBeInTheDocument();
   });
 
   it('shows reconnected message after being offline', () => {
@@ -68,7 +68,7 @@ describe('OfflineIndicator', () => {
       Object.defineProperty(navigator, 'onLine', { value: false, writable: true });
       window.dispatchEvent(new Event('offline'));
     });
-    expect(screen.getByTestId('offline-indicator')).toBeDefined();
+    expect(screen.getByTestId('offline-indicator')).toBeInTheDocument();
 
     // Go back online
     act(() => {
@@ -76,8 +76,8 @@ describe('OfflineIndicator', () => {
       window.dispatchEvent(new Event('online'));
     });
 
-    expect(screen.getByTestId('offline-reconnected')).toBeDefined();
-    expect(screen.getByText('Connection restored')).toBeDefined();
+    expect(screen.getByTestId('offline-reconnected')).toBeInTheDocument();
+    expect(screen.getByText('Connection restored')).toBeInTheDocument();
   });
 
   it('reconnected message disappears after ~2.8 seconds', () => {
@@ -96,7 +96,7 @@ describe('OfflineIndicator', () => {
       window.dispatchEvent(new Event('online'));
     });
 
-    expect(screen.getByTestId('offline-reconnected')).toBeDefined();
+    expect(screen.getByTestId('offline-reconnected')).toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(2800);

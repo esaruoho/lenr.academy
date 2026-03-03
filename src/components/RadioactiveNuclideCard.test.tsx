@@ -79,44 +79,44 @@ function renderWithRouter(ui: React.ReactElement) {
 describe('RadioactiveNuclideCard', () => {
   it('renders nuclide header', () => {
     renderWithRouter(<RadioactiveNuclideCard nuclideData={baseNuclideData} />);
-    expect(screen.getByText('U-238')).toBeDefined();
+    expect(screen.getByText('U-238')).toBeInTheDocument();
   });
 
   it('shows atomic and mass numbers', () => {
     renderWithRouter(<RadioactiveNuclideCard nuclideData={baseNuclideData} />);
-    expect(screen.getByText(/Atomic Number: 92/)).toBeDefined();
-    expect(screen.getByText(/Mass Number: 238/)).toBeDefined();
+    expect(screen.getByText(/Atomic Number: 92/)).toBeInTheDocument();
+    expect(screen.getByText(/Mass Number: 238/)).toBeInTheDocument();
   });
 
   it('shows limited data banner', () => {
     renderWithRouter(<RadioactiveNuclideCard nuclideData={baseNuclideData} />);
-    expect(screen.getByText(/Limited Data Available/)).toBeDefined();
+    expect(screen.getByText(/Limited Data Available/)).toBeInTheDocument();
   });
 
   it('shows nuclear properties', () => {
     renderWithRouter(<RadioactiveNuclideCard nuclideData={baseNuclideData} />);
-    expect(screen.getByText('Nuclear Properties')).toBeDefined();
-    expect(screen.getByText('U')).toBeDefined();
+    expect(screen.getByText('Nuclear Properties')).toBeInTheDocument();
+    expect(screen.getByText('U')).toBeInTheDocument();
   });
 
   it('shows stability section', () => {
     renderWithRouter(<RadioactiveNuclideCard nuclideData={baseNuclideData} />);
-    expect(screen.getByText('Stability')).toBeDefined();
-    expect(screen.getByText('Primary Decay Mode:')).toBeDefined();
+    expect(screen.getByText('Stability')).toBeInTheDocument();
+    expect(screen.getByText('Primary Decay Mode:')).toBeInTheDocument();
   });
 
   it('shows decay data table', () => {
     renderWithRouter(<RadioactiveNuclideCard nuclideData={baseNuclideData} />);
-    expect(screen.getByText('Radioactive Decay')).toBeDefined();
-    expect(screen.getByText('Decay Mode')).toBeDefined();
-    expect(screen.getByText('Radiation')).toBeDefined();
+    expect(screen.getByText('Radioactive Decay')).toBeInTheDocument();
+    expect(screen.getByText('Decay Mode')).toBeInTheDocument();
+    expect(screen.getByText('Radiation')).toBeInTheDocument();
   });
 
   it('shows close button when onClose provided', () => {
     const onClose = vi.fn();
     renderWithRouter(<RadioactiveNuclideCard nuclideData={baseNuclideData} onClose={onClose} />);
     const closeBtn = screen.getByTitle('Close nuclide details');
-    expect(closeBtn).toBeDefined();
+    expect(closeBtn).toBeInTheDocument();
     fireEvent.click(closeBtn);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -139,17 +139,17 @@ describe('RadioactiveNuclideCard', () => {
       })),
     };
     renderWithRouter(<RadioactiveNuclideCard nuclideData={manyDecays} />);
-    expect(screen.getByText(/Show 2 more decay modes/)).toBeDefined();
+    expect(screen.getByText(/Show 2 more decay modes/)).toBeInTheDocument();
   });
 
   it('shows radiation type legend', () => {
     renderWithRouter(<RadioactiveNuclideCard nuclideData={baseNuclideData} />);
-    expect(screen.getByText('Radiation Type Legend')).toBeDefined();
+    expect(screen.getByText('Radiation Type Legend')).toBeInTheDocument();
   });
 
   it('shows neutron count', () => {
     renderWithRouter(<RadioactiveNuclideCard nuclideData={baseNuclideData} />);
     // N = A - Z = 238 - 92 = 146
-    expect(screen.getByText('146')).toBeDefined();
+    expect(screen.getByText('146')).toBeInTheDocument();
   });
 });

@@ -1,26 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import en from '../i18n/locales/en.json';
+import { mockReactI18next } from '../test-utils/i18nMock';
 
-// Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, opts?: Record<string, string>) => {
-      const parts = key.split('.');
-      let value: unknown = en;
-      for (const part of parts) {
-        if (value && typeof value === 'object' && part in value) {
-          value = (value as Record<string, unknown>)[part];
-        } else {
-          // Return defaultValue if provided
-          return opts?.defaultValue || key;
-        }
-      }
-      return value as string;
-    },
-  }),
-}));
+vi.mock('react-i18next', () => mockReactI18next);
 
 import ElementDetailsCard from './ElementDetailsCard';
 import type { Element } from '../types';

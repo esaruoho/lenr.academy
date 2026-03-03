@@ -1,27 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import en from '../i18n/locales/en.json';
+import { mockReactI18next } from '../test-utils/i18nMock';
 
 const mockSetLanguage = vi.fn();
 const mockMarkLanguageSelected = vi.fn();
 
-// Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const parts = key.split('.');
-      let value: unknown = en;
-      for (const part of parts) {
-        if (value && typeof value === 'object' && part in value) {
-          value = (value as Record<string, unknown>)[part];
-        } else {
-          return key;
-        }
-      }
-      return value as string;
-    },
-  }),
-}));
+vi.mock('react-i18next', () => mockReactI18next);
 
 // Mock LanguageContext
 vi.mock('../contexts/LanguageContext', () => ({

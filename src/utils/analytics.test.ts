@@ -2,8 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { loadUmamiScript, isUmamiLoaded } from './analytics';
 
 describe('analytics', () => {
-  const originalEnv = import.meta.env.MODE;
-
   beforeEach(() => {
     // Clean up any injected scripts
     document.querySelectorAll('script[src*="umami"]').forEach((el) => el.remove());

@@ -115,9 +115,8 @@ describe('DatabaseContext', () => {
     expect(screen.getByTestId('update').textContent).toBe('false');
   });
 
-  it('useDatabase throws outside provider', () => {
-    // useDatabase returns default context value when used outside provider
-    // (createContext has a default, so it won't throw in this implementation)
+  it('useDatabase does not throw outside provider (uses default context)', () => {
+    // createContext provides a default value, so useDatabase works outside the provider
     expect(() => {
       render(<TestConsumer />);
     }).not.toThrow();

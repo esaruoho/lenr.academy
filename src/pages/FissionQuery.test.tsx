@@ -1,30 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import en from '../i18n/locales/en.json';
+import { mockReactI18next } from '../test-utils/i18nMock';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, params?: Record<string, unknown>) => {
-      const parts = key.split('.');
-      let value: unknown = en;
-      for (const part of parts) {
-        if (value && typeof value === 'object' && part in value) {
-          value = (value as Record<string, unknown>)[part];
-        } else {
-          return key;
-        }
-      }
-      let result = value as string;
-      if (params) {
-        Object.entries(params).forEach(([k, v]) => {
-          result = result.replace(`{{${k}}}`, String(v));
-        });
-      }
-      return result;
-    },
-  }),
-}));
+vi.mock('react-i18next', () => mockReactI18next);
 
 const mockUseDatabase = vi.fn();
 vi.mock('../contexts/DatabaseContext', () => ({
@@ -142,7 +121,7 @@ describe('FissionQuery', () => {
         <FissionQuery />
       </MemoryRouter>
     );
-    expect(screen.getByTestId('database-loading')).toBeDefined();
+    expect(screen.getByTestId('database-loading')).toBeInTheDocument();
   });
 
   it('throws error to ErrorBoundary when database fails to load', () => {
@@ -190,7 +169,7 @@ describe('FissionQuery', () => {
         <FissionQuery />
       </MemoryRouter>
     );
-    expect(screen.getByRole('heading', { level: 1 })).toBeDefined();
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 
   it('parses URL search params for element selection', () => {

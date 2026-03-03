@@ -1,23 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import en from '../i18n/locales/en.json';
+import { mockReactI18next } from '../test-utils/i18nMock';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const parts = key.split('.');
-      let value: unknown = en;
-      for (const part of parts) {
-        if (value && typeof value === 'object' && part in value) {
-          value = (value as Record<string, unknown>)[part];
-        } else {
-          return key;
-        }
-      }
-      return value as string;
-    },
-  }),
-}));
+vi.mock('react-i18next', () => mockReactI18next);
 
 vi.mock('../contexts/DatabaseContext', () => ({
   useDatabase: () => ({ db: { exec: vi.fn(() => []) } }),
@@ -55,17 +40,17 @@ describe('PeriodicTable', () => {
 
   it('renders element buttons for available elements', () => {
     render(<PeriodicTable {...defaultProps} />);
-    expect(screen.getByText('H')).toBeDefined();
-    expect(screen.getByText('He')).toBeDefined();
-    expect(screen.getByText('Li')).toBeDefined();
-    expect(screen.getByText('Fe')).toBeDefined();
+    expect(screen.getByText('H')).toBeInTheDocument();
+    expect(screen.getByText('He')).toBeInTheDocument();
+    expect(screen.getByText('Li')).toBeInTheDocument();
+    expect(screen.getByText('Fe')).toBeInTheDocument();
   });
 
   it('highlights the selected element', () => {
     render(<PeriodicTable {...defaultProps} selectedElement="Fe" />);
     // Iron should be findable in the rendered output
     const feText = screen.getByText('Fe');
-    expect(feText).toBeDefined();
+    expect(feText).toBeInTheDocument();
   });
 
   it('calls onElementClick when element is clicked', () => {
@@ -100,9 +85,9 @@ describe('PeriodicTable', () => {
 
   it('shows legend when hideLegend is not set', () => {
     render(<PeriodicTable {...defaultProps} />);
-    // Legend should show "Selected" and "Available" labels
-    const selectedLabel = screen.queryByText(/Selected/i);
-    expect(selectedLabel).toBeDefined();
+    // Legend section should be present with the "Legend:" label
+    const legendLabel = screen.queryByText(/Legend/i);
+    expect(legendLabel).toBeInTheDocument();
   });
 
   it('hides legend when hideLegend is true', () => {

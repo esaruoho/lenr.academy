@@ -31,9 +31,9 @@ describe('TabNavigation', () => {
     renderWithRouter(
       <TabNavigation tabs={mockTabs} activeTab="overview" onTabChange={onTabChange} />
     );
-    expect(screen.getByText('Overview')).toBeDefined();
-    expect(screen.getByText('Details')).toBeDefined();
-    expect(screen.getByText('Chart')).toBeDefined();
+    expect(screen.getByText('Overview')).toBeInTheDocument();
+    expect(screen.getByText('Details')).toBeInTheDocument();
+    expect(screen.getByText('Chart')).toBeInTheDocument();
   });
 
   it('marks active tab with aria-selected', () => {
@@ -51,7 +51,7 @@ describe('TabNavigation', () => {
     renderWithRouter(
       <TabNavigation tabs={mockTabs} activeTab="overview" onTabChange={onTabChange} />
     );
-    expect(screen.getByText('42')).toBeDefined();
+    expect(screen.getByText('42')).toBeInTheDocument();
   });
 
   it('calls onTabChange when tab clicked', () => {
@@ -84,7 +84,7 @@ describe('TabNavigation', () => {
     renderWithRouter(
       <TabNavigation tabs={mockTabs} activeTab="overview" onTabChange={onTabChange} />
     );
-    expect(screen.getByRole('tablist')).toBeDefined();
+    expect(screen.getByRole('tablist')).toBeInTheDocument();
   });
 
   it('sets tabIndex 0 on active tab and -1 on others', () => {
@@ -102,6 +102,6 @@ describe('TabNavigation', () => {
     const { container } = renderWithRouter(
       <TabNavigation tabs={mockTabs} activeTab="overview" onTabChange={onTabChange} className="custom-class" />
     );
-    expect(container.querySelector('.custom-class')).toBeDefined();
+    expect(container.querySelector('.custom-class')).toBeInTheDocument();
   });
 });

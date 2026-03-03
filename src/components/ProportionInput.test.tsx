@@ -63,34 +63,34 @@ describe('ProportionInput', () => {
 
   it('renders empty state when no nuclides selected', () => {
     render(<ProportionInput {...defaultProps} nuclideIds={[]} weightedNuclides={[]} />);
-    expect(screen.getByText('Select fuel nuclides to configure proportions')).toBeDefined();
+    expect(screen.getByText('Select fuel nuclides to configure proportions')).toBeInTheDocument();
   });
 
   it('renders label', () => {
     render(<ProportionInput {...defaultProps} />);
-    expect(screen.getByText('Fuel Proportions')).toBeDefined();
+    expect(screen.getByText('Fuel Proportions')).toBeInTheDocument();
   });
 
   it('renders custom label', () => {
     render(<ProportionInput {...defaultProps} label="Target Mix" />);
-    expect(screen.getByText('Target Mix')).toBeDefined();
+    expect(screen.getByText('Target Mix')).toBeInTheDocument();
   });
 
   it('renders nuclide labels', () => {
     render(<ProportionInput {...defaultProps} />);
-    expect(screen.getByText('Li-6')).toBeDefined();
-    expect(screen.getByText('Li-7')).toBeDefined();
+    expect(screen.getByText('Li-6')).toBeInTheDocument();
+    expect(screen.getByText('Li-7')).toBeInTheDocument();
   });
 
   it('renders input fields for each nuclide', () => {
     render(<ProportionInput {...defaultProps} />);
-    expect(screen.getByTestId('proportion-input-input-Li-6')).toBeDefined();
-    expect(screen.getByTestId('proportion-input-input-Li-7')).toBeDefined();
+    expect(screen.getByTestId('proportion-input-input-Li-6')).toBeInTheDocument();
+    expect(screen.getByTestId('proportion-input-input-Li-7')).toBeInTheDocument();
   });
 
   it('shows Equal button', () => {
     render(<ProportionInput {...defaultProps} />);
-    expect(screen.getByText('Equal')).toBeDefined();
+    expect(screen.getByText('Equal')).toBeInTheDocument();
   });
 
   it('calls createEqualProportions when Equal clicked', () => {
@@ -101,7 +101,7 @@ describe('ProportionInput', () => {
 
   it('shows Natural button', () => {
     render(<ProportionInput {...defaultProps} />);
-    expect(screen.getByText('Natural')).toBeDefined();
+    expect(screen.getByText('Natural')).toBeInTheDocument();
   });
 
   it('Natural button is disabled when db is null', () => {
@@ -112,12 +112,12 @@ describe('ProportionInput', () => {
 
   it('shows Normalize button', () => {
     render(<ProportionInput {...defaultProps} />);
-    expect(screen.getByText('Normalize')).toBeDefined();
+    expect(screen.getByText('Normalize')).toBeInTheDocument();
   });
 
   it('shows format selector by default', () => {
     render(<ProportionInput {...defaultProps} />);
-    expect(screen.getByTestId('proportion-input-format-selector')).toBeDefined();
+    expect(screen.getByTestId('proportion-input-format-selector')).toBeInTheDocument();
   });
 
   it('hides format selector when showFormatSelector=false', () => {
@@ -127,7 +127,7 @@ describe('ProportionInput', () => {
 
   it('shows Total line', () => {
     render(<ProportionInput {...defaultProps} />);
-    expect(screen.getByText('Total:')).toBeDefined();
+    expect(screen.getByText('Total:')).toBeInTheDocument();
   });
 
   it('handles input change', () => {
@@ -144,11 +144,11 @@ describe('ProportionInput', () => {
       errors: [{ nuclideId: 'Li-6', message: 'Value too high' }],
     });
     render(<ProportionInput {...defaultProps} />);
-    expect(screen.getByText('Value too high')).toBeDefined();
+    expect(screen.getByText('Value too high')).toBeInTheDocument();
   });
 
   it('uses custom testId', () => {
     render(<ProportionInput {...defaultProps} testId="my-proportions" />);
-    expect(screen.getByTestId('my-proportions')).toBeDefined();
+    expect(screen.getByTestId('my-proportions')).toBeInTheDocument();
   });
 });
