@@ -2,19 +2,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { ThemeProvider, useTheme } from './ThemeContext'
 
-// Mock matchMedia globally for jsdom
+// Mock matchMedia for jsdom (which doesn't provide it)
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
+  value: vi.fn(),
 })
 
 describe('ThemeContext', () => {

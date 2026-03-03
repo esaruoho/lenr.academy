@@ -80,6 +80,7 @@ describe('exportUtils', () => {
 
       expect(capturedBlob).toBeInstanceOf(Blob)
       expect(capturedBlob!.type).toBe('application/json')
+      expect(capturedBlob!.size).toBeGreaterThan(0)
     })
 
     it('creates a Blob with JSON content type for non-empty reactions', () => {

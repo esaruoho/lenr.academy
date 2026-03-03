@@ -51,16 +51,18 @@ describe('collectErrorContext', () => {
     const error = new Error('Test')
     const ctx = collectErrorContext(error)
 
-    // jsdom doesn't have a real user agent, but should detect something
-    expect(typeof ctx.browser).toBe('string')
-    expect(typeof ctx.browserVersion).toBe('string')
+    // jsdom UA returns a fallback — verify it's a non-empty string
+    expect(ctx.browser).toBeTruthy()
+    expect(ctx.browser.length).toBeGreaterThan(0)
+    expect(ctx.browserVersion).toBeTruthy()
   })
 
   it('detects OS from user agent', () => {
     const error = new Error('Test')
     const ctx = collectErrorContext(error)
 
-    expect(typeof ctx.os).toBe('string')
+    expect(ctx.os).toBeTruthy()
+    expect(ctx.os.length).toBeGreaterThan(0)
   })
 
   it('detects device type', () => {

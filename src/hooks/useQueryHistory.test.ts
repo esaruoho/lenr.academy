@@ -5,6 +5,7 @@ import { useQueryHistory } from './useQueryHistory'
 // Mock crypto.randomUUID with incrementing values
 let uuidCounter = 0
 vi.stubGlobal('crypto', {
+  ...globalThis.crypto,
   randomUUID: vi.fn(() => `test-uuid-${++uuidCounter}`),
 })
 

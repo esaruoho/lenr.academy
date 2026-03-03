@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useQueryWorker } from './useQueryWorker'
 
@@ -21,6 +21,10 @@ vi.stubGlobal('Worker', class MockWorker {
   terminate() {
     // no-op
   }
+})
+
+afterAll(() => {
+  vi.unstubAllGlobals()
 })
 
 describe('useQueryWorker', () => {
