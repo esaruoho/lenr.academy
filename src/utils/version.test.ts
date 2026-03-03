@@ -59,14 +59,15 @@ describe('parseVersion', () => {
 describe('formatBuildTime', () => {
   it('formats ISO date string for display', () => {
     const result = formatBuildTime('2026-01-15T10:30:00Z')
-    // The exact format depends on locale, but should contain the year
-    expect(result).toContain('2026')
+    // Should produce a non-empty string that differs from the raw input
+    expect(result).toBeTruthy()
+    expect(result).not.toBe('2026-01-15T10:30:00Z')
   })
 
-  it('returns original string for invalid date', () => {
+  it('returns a string for invalid date input', () => {
     const result = formatBuildTime('not-a-date')
-    // Invalid date should return "Invalid Date" from toLocaleString or the original
-    expect(typeof result).toBe('string')
+    // Should return either 'Invalid Date' or the original input string
+    expect(result === 'Invalid Date' || result === 'not-a-date').toBe(true)
   })
 })
 

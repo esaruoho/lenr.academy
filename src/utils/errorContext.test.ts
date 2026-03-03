@@ -83,6 +83,8 @@ describe('collectErrorContext', () => {
 
     // Stack trace should not start with the error message
     expect(ctx.stackTrace.startsWith('Error: My error message')).toBe(false)
+    // Stack trace should be a non-empty string (containing actual frame info)
+    expect(ctx.stackTrace.length).toBeGreaterThan(0)
   })
 
   it('handles error with no stack trace', () => {

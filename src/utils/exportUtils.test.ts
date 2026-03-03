@@ -1,25 +1,29 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { exportToJSON } from './exportUtils'
-import type { QueryFilter } from '../types'
 
 describe('exportUtils', () => {
   let clickSpy: ReturnType<typeof vi.fn>
+  const originalCreateElement = document.createElement.bind(document)
 
   beforeEach(() => {
     vi.clearAllMocks()
     clickSpy = vi.fn()
 
-    // Mock createElement to capture download link
+    // Mock createElement — use the saved original for non-'a' tags to avoid recursion
     vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
       if (tag === 'a') {
         return { href: '', download: '', click: clickSpy, style: {} } as any
       }
-      return document.createElement.call(document, tag) as any
+      return originalCreateElement(tag) as any
     })
 
     // Mock URL APIs
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url')
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   describe('exportToJSON', () => {
@@ -78,8 +82,15 @@ describe('exportUtils', () => {
       expect(capturedBlob!.type).toBe('application/json')
     })
 
-    it('includes reactions in the output', () => {
-      const reactions = [{ MeV: 5 }]
+    it('creates a Blob with JSON content type for non-empty reactions', () => {
+      let capturedBlob: Blob | null = null
+
+      vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob) => {
+        capturedBlob = blob
+        return 'blob:mock-url'
+      })
+
+      const reactions = [{ MeV: 5, E1: 'H', E2: 'Li' }]
 
       exportToJSON(reactions, {
         queryType: 'fission',
@@ -89,8 +100,12 @@ describe('exportUtils', () => {
         totalCount: 1,
       })
 
-      // Verify it called createObjectURL (indicating Blob was created)
-      expect(URL.createObjectURL).toHaveBeenCalled()
+      expect(capturedBlob).toBeInstanceOf(Blob)
+      expect(capturedBlob!.type).toBe('application/json')
+      // Verify Blob has non-zero size (contains serialized data)
+      expect(capturedBlob!.size).toBeGreaterThan(0)
+      // Verify the download was triggered
+      expect(clickSpy).toHaveBeenCalled()
     })
   })
 })

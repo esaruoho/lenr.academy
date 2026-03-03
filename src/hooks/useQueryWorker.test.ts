@@ -110,10 +110,10 @@ describe('useQueryWorker', () => {
       }
     })
 
-    // Wait for rejection to propagate
-    await new Promise(resolve => setTimeout(resolve, 0))
-
-    expect(rejected).toBe(true)
+    // Wait for microtask queue to flush (rejection propagation)
+    await vi.waitFor(() => {
+      expect(rejected).toBe(true)
+    })
     expect(result.current.isRunning).toBe(false)
     expect(result.current.error).toBe('SQL execution failed')
   })
