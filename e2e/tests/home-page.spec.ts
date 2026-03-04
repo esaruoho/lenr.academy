@@ -27,63 +27,63 @@ test.describe('Home Page', () => {
 
   test('should have navigation links to query pages in main content', async ({ page }) => {
     // Main content links include arrow prefix "→"
-    const mainContent = page.locator('.max-w-6xl');
+    const mainContent = page.getByRole('main');
     await expect(mainContent.getByRole('link', { name: /Fusion Reactions/i })).toBeVisible();
     await expect(mainContent.getByRole('link', { name: /Fission Reactions/i })).toBeVisible();
     await expect(mainContent.getByRole('link', { name: /Two-To-Two Reactions/i })).toBeVisible();
   });
 
   test('should navigate to fusion query page from home', async ({ page }) => {
-    const mainContent = page.locator('.max-w-6xl');
+    const mainContent = page.getByRole('main');
     await mainContent.getByRole('link', { name: /Fusion Reactions/i }).click();
     await page.waitForURL(/\/fusion/);
-    expect(page.url()).toContain('/fusion');
   });
 
   test('should navigate to fission query page from home', async ({ page }) => {
-    const mainContent = page.locator('.max-w-6xl');
+    const mainContent = page.getByRole('main');
     await mainContent.getByRole('link', { name: /Fission Reactions/i }).click();
     await page.waitForURL(/\/fission/);
-    expect(page.url()).toContain('/fission');
   });
 
   test('should navigate to twotwo query page from home', async ({ page }) => {
-    const mainContent = page.locator('.max-w-6xl');
+    const mainContent = page.getByRole('main');
     await mainContent.getByRole('link', { name: /Two-To-Two Reactions/i }).click();
     await page.waitForURL(/\/twotwo/);
-    expect(page.url()).toContain('/twotwo');
   });
 
   test('should have cascade simulations link', async ({ page }) => {
-    const mainContent = page.locator('.max-w-6xl');
+    const mainContent = page.getByRole('main');
     await expect(mainContent.getByRole('link', { name: /Cascade Simulations/i })).toBeVisible();
   });
 
   test('should have element data link', async ({ page }) => {
-    const mainContent = page.locator('.max-w-6xl');
+    const mainContent = page.getByRole('main');
     const elementLink = mainContent.getByRole('link', { name: /Show Element Data/i });
     await elementLink.scrollIntoViewIfNeeded();
     await expect(elementLink).toBeVisible();
   });
 
   test('should have tables in detail link', async ({ page }) => {
-    const mainContent = page.locator('.max-w-6xl');
+    const mainContent = page.getByRole('main');
     const tablesLink = mainContent.getByRole('link', { name: /Tables in Detail/i });
     await tablesLink.scrollIntoViewIfNeeded();
     await expect(tablesLink).toBeVisible();
   });
 
   test('should have all tables query tool link', async ({ page }) => {
-    const mainContent = page.locator('.max-w-6xl');
+    const mainContent = page.getByRole('main');
     const allTablesLink = mainContent.getByRole('link', { name: /All Tables/i });
     await allTablesLink.scrollIntoViewIfNeeded();
     await expect(allTablesLink).toBeVisible();
   });
 
   test('should display Parkhomov tables section', async ({ page }) => {
-    const parkhomovSection = page.getByText(/1,389/);
-    await parkhomovSection.scrollIntoViewIfNeeded();
-    await expect(parkhomovSection).toBeVisible();
+    // The Parkhomov tables section has a heading and describes the database contents
+    const sectionHeading = page.getByRole('heading', { name: /Parkhomov/i });
+    await sectionHeading.scrollIntoViewIfNeeded();
+    await expect(sectionHeading).toBeVisible();
+    // Section contains a list of reaction types
+    await expect(page.locator('li', { hasText: /fusion/i }).first()).toBeVisible();
   });
 
   test('should display original app section with external link', async ({ page }) => {

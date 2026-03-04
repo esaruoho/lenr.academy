@@ -24,39 +24,31 @@ test.describe('Help Page', () => {
   });
 
   test('should show query type badges on example cards', async ({ page }) => {
-    // Query type badges are rendered in small text spans next to card titles
-    // Use exact matching to avoid matching substring in card names
-    const fusionBadges = page.locator('span', { hasText: 'fusion' });
-    const fissionBadges = page.locator('span', { hasText: 'fission' });
-    const twotwoBadges = page.locator('span', { hasText: '2→2' });
-    expect(await fusionBadges.count()).toBeGreaterThan(0);
-    expect(await fissionBadges.count()).toBeGreaterThan(0);
-    expect(await twotwoBadges.count()).toBeGreaterThan(0);
+    // Query type badges are small spans inside the example queries section
+    const exampleSection = page.getByRole('heading', { name: /Example Queries/i }).locator('..');
+    await expect(exampleSection.locator('span', { hasText: 'fusion' }).first()).toBeVisible();
+    await expect(exampleSection.locator('span', { hasText: 'fission' }).first()).toBeVisible();
+    await expect(exampleSection.locator('span', { hasText: '2→2' }).first()).toBeVisible();
   });
 
   test('should navigate to fusion query when clicking fusion example', async ({ page }) => {
     await page.getByText('Hydrogen-Lithium Fusion').click();
     await page.waitForURL(/\/fusion/);
-    expect(page.url()).toContain('/fusion');
   });
 
   test('should navigate to fission query when clicking fission example', async ({ page }) => {
     await page.getByText('Uranium Fission Pathways').click();
     await page.waitForURL(/\/fission/);
-    expect(page.url()).toContain('/fission');
   });
 
   test('should navigate to twotwo query when clicking twotwo example', async ({ page }) => {
     await page.getByText('Deuterium-Nickel Reactions').click();
     await page.waitForURL(/\/twotwo/);
-    expect(page.url()).toContain('/twotwo');
   });
 
   test('should display glossary section heading', async ({ page }) => {
     // The glossary section has its own heading distinct from the page title
-    const glossaryHeadings = page.getByRole('heading', { name: /Glossary/i });
-    // At least one heading containing "Glossary"
-    expect(await glossaryHeadings.count()).toBeGreaterThan(0);
+    await expect(page.getByRole('heading', { name: /Glossary/i }).first()).toBeVisible();
   });
 
   test('should have glossary search input', async ({ page }) => {
@@ -80,22 +72,30 @@ test.describe('Help Page', () => {
   });
 
   test('should have category filter buttons', async ({ page }) => {
-    const categoryButtons = page.locator('button.rounded-full');
-    const count = await categoryButtons.count();
-    expect(count).toBeGreaterThanOrEqual(4);
+    // Category filters are in the glossary section — scope via main content area
+    const mainContent = page.getByRole('main');
+    await expect(mainContent.getByRole('button', { name: /Nuclear Physics/i })).toBeVisible();
+    await expect(mainContent.getByRole('button', { name: /Reaction Types/i })).toBeVisible();
+    await expect(mainContent.getByRole('button', { name: /Database Fields/i })).toBeVisible();
   });
 
   test('should filter glossary by category when clicking category button', async ({ page }) => {
-    // Get total entry count first by scrolling down to see glossary
-    const allItems = page.locator('section').last().locator('.card');
-    const totalCount = await allItems.count();
+    // Count glossary card items before filtering
+    const mainContent = page.getByRole('main');
+    const glossaryCards = mainContent.locator('.card');
+    // Wait for cards to render before capturing initial count
+    await expect(glossaryCards.first()).toBeVisible();
+    const initialCount = await glossaryCards.count();
+    expect(initialCount).toBeGreaterThan(0);
 
-    // Click a specific category (not "All")
-    const categoryButtons = page.locator('button.rounded-full');
-    await categoryButtons.nth(1).click();
+    // Click "Database Fields" to filter to a specific category
+    await mainContent.getByRole('button', { name: /Database Fields/i }).click();
 
-    const filteredCount = await allItems.count();
-    expect(filteredCount).toBeLessThanOrEqual(totalCount);
+    // After filtering, fewer cards should be visible
+    await expect(glossaryCards).not.toHaveCount(initialCount);
+    const filteredCount = await glossaryCards.count();
+    expect(filteredCount).toBeGreaterThan(0);
+    expect(filteredCount).toBeLessThan(initialCount);
   });
 
   test('should display glossary entry count', async ({ page }) => {
