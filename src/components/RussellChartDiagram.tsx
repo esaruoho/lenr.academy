@@ -432,7 +432,7 @@ export default function RussellChartDiagram({ onElementClick }: RussellChartDiag
             <div className="text-xs opacity-75">Z = {hovered.el.Z}</div>
           )}
           {hovered.el.note && (
-            <div className="text-xs mt-1 italic opacity-60">{hovered.el.note}</div>
+            <div className="text-xs mt-1 italic opacity-60">{t(hovered.el.note)}</div>
           )}
           {hovered.el.Z && (
             <div className="text-xs mt-1 text-blue-500 dark:text-blue-400">

@@ -499,7 +499,23 @@
     "aboutParagraph3": "Russell a notamment prédit l'existence du Deutérium (qu'il appelait « Ethlogen »), du Tritium (« Bebegen »), du Neptunium et du Plutonium des années avant leur découverte officielle en laboratoire.",
     "view3D": "Vue 3D",
     "view3DControls": "Glisser pour tourner, défiler pour zoomer",
-    "experimentalNote": "Cette visualisation est basée sur le tableau original de Russell de 1926. Le système de Russell diffère significativement de la table périodique moderne — il représente son modèle philosophique et cosmologique de la matière."
+    "experimentalNote": "Cette visualisation est basée sur le tableau original de Russell de 1926. Le système de Russell diffère significativement de la table périodique moderne — il représente son modèle philosophique et cosmologique de la matière.",
+    "predictionFormat": "{{russellName}} → {{modernName}} ({{symbol}})",
+    "notes": {
+      "hypotheticalFirstInertGas": "Premier gaz inerte hypothétique — le commencement de la matière",
+      "hypotheticalSecondInertGas": "Deuxième gaz inerte hypothétique",
+      "hypotheticalThirdInertGas": "Troisième gaz inerte hypothétique",
+      "hypotheticalElement": "Élément hypothétique dans le système de Russell",
+      "hypotheticalTransUranicInSystem": "Élément transuranique hypothétique dans le système de Russell",
+      "hypotheticalTransUranic": "Élément transuranique hypothétique",
+      "hypotheticalFinalInertGas": "Dernier gaz inerte hypothétique — la fin de la matière",
+      "ethlogenPrediction": "Russell a prédit « Ethlogen » — identifié comme Deutérium (1931)",
+      "bebegenPrediction": "Russell a prédit « Bebegen » — identifié comme Tritium (1934)",
+      "heliumPlacement": "Russell a placé l'Hélium comme gaz inerte de l'octave 4",
+      "carbonAmplitude": "Carbone — l'amplitude de l'onde ; point de compression maximale",
+      "neptuniumPrediction": "Russell a prédit l'élément 93 en 1926 — découvert comme Neptunium en 1940",
+      "plutoniumPrediction": "Russell a prédit l'élément 94 en 1926 — découvert comme Plutonium en 1941"
+    }
   },
   "networkGraph": {
     "reactionNetwork": "Réseau de Réactions",

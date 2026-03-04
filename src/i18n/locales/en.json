@@ -501,7 +501,23 @@
     "aboutParagraph3": "Russell notably predicted the existence of Deuterium (which he called \"Ethlogen\"), Tritium (\"Bebegen\"), Neptunium, and Plutonium years before their official laboratory discovery — validating his wave-based model's predictive capacity.",
     "view3D": "3D View",
     "view3DControls": "Drag to rotate, scroll to zoom",
-    "experimentalNote": "This visualization is based on Russell's original 1926 chart. Russell's system differs significantly from the modern periodic table — it represents his philosophical and cosmological model of matter rather than the quantum mechanical model used in contemporary chemistry."
+    "experimentalNote": "This visualization is based on Russell's original 1926 chart. Russell's system differs significantly from the modern periodic table — it represents his philosophical and cosmological model of matter rather than the quantum mechanical model used in contemporary chemistry.",
+    "predictionFormat": "{{russellName}} → {{modernName}} ({{symbol}})",
+    "notes": {
+      "hypotheticalFirstInertGas": "Hypothetical first inert gas — the beginning of matter",
+      "hypotheticalSecondInertGas": "Hypothetical second inert gas",
+      "hypotheticalThirdInertGas": "Hypothetical third inert gas",
+      "hypotheticalElement": "Hypothetical element in Russell's system",
+      "hypotheticalTransUranicInSystem": "Hypothetical trans-uranic element in Russell's system",
+      "hypotheticalTransUranic": "Hypothetical trans-uranic element",
+      "hypotheticalFinalInertGas": "Hypothetical final inert gas — the end of matter",
+      "ethlogenPrediction": "Russell predicted \"Ethlogen\" — identified as Deuterium (1931)",
+      "bebegenPrediction": "Russell predicted \"Bebegen\" — identified as Tritium (1934)",
+      "heliumPlacement": "Russell placed Helium as the inert gas of octave 4",
+      "carbonAmplitude": "Carbon — the amplitude of the wave; maximum compression point",
+      "neptuniumPrediction": "Russell predicted element 93 in 1926 — discovered as Neptunium in 1940",
+      "plutoniumPrediction": "Russell predicted element 94 in 1926 — discovered as Plutonium in 1941"
+    }
   },
   "networkGraph": {
     "reactionNetwork": "Reaction Network",

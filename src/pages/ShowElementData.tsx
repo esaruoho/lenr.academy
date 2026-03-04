@@ -2249,11 +2249,11 @@ export default function ShowElementData() {
                   </span>
                   <div>
                     <div className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                      {el.russellName} → {el.modernName} ({el.modernSymbol})
+                      {t('russellChart.predictionFormat', { russellName: el.russellName, modernName: el.modernName, symbol: el.modernSymbol })}
                     </div>
                     {el.note && (
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {el.note}
+                        {t(el.note)}
                       </div>
                     )}
                   </div>

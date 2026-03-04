@@ -502,7 +502,23 @@
     "aboutParagraph3": "拉塞尔显著地预测了氘（他称为\"Ethlogen\"）、氚（\"Bebegen\"）、镎和钚的存在，比它们在实验室的正式发现早了数年。",
     "view3D": "3D视图",
     "view3DControls": "拖动旋转，滚动缩放",
-    "experimentalNote": "此可视化基于拉塞尔1926年的原始图表。拉塞尔的系统与现代周期表有显著不同——它代表了他对物质的哲学和宇宙学模型，而非当代化学使用的量子力学模型。"
+    "experimentalNote": "此可视化基于拉塞尔1926年的原始图表。拉塞尔的系统与现代周期表有显著不同——它代表了他对物质的哲学和宇宙学模型，而非当代化学使用的量子力学模型。",
+    "predictionFormat": "{{russellName}} → {{modernName}}（{{symbol}}）",
+    "notes": {
+      "hypotheticalFirstInertGas": "假设的第一种惰性气体 - 物质的起源",
+      "hypotheticalSecondInertGas": "假设的第二种惰性气体",
+      "hypotheticalThirdInertGas": "假设的第三种惰性气体",
+      "hypotheticalElement": "拉塞尔体系中的假设元素",
+      "hypotheticalTransUranicInSystem": "拉塞尔体系中的假设超铀元素",
+      "hypotheticalTransUranic": "假设的超铀元素",
+      "hypotheticalFinalInertGas": "假设的最后一种惰性气体 - 物质的终结",
+      "ethlogenPrediction": "拉塞尔预测了「Ethlogen」— 被确认为氘（1931年）",
+      "bebegenPrediction": "拉塞尔预测了「Bebegen」— 被确认为氚（1934年）",
+      "heliumPlacement": "拉塞尔将氦定位为第4八度音阶的惰性气体",
+      "carbonAmplitude": "碳 - 波的振幅；最大压缩点",
+      "neptuniumPrediction": "拉塞尔于1926年预测了第93号元素 - 1940年发现为镎",
+      "plutoniumPrediction": "拉塞尔于1926年预测了第94号元素 - 1941年发现为钚"
+    }
   },
   "networkGraph": {
     "reactionNetwork": "反应网络",

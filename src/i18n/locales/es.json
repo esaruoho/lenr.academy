@@ -499,7 +499,23 @@
     "aboutParagraph3": "Russell predijo notablemente la existencia del Deuterio (que llamó \"Ethlogen\"), Tritio (\"Bebegen\"), Neptunio y Plutonio años antes de su descubrimiento oficial en laboratorio.",
     "view3D": "Vista 3D",
     "view3DControls": "Arrastrar para rotar, scroll para zoom",
-    "experimentalNote": "Esta visualización está basada en el gráfico original de Russell de 1926. El sistema de Russell difiere significativamente de la tabla periódica moderna — representa su modelo filosófico y cosmológico de la materia."
+    "experimentalNote": "Esta visualización está basada en el gráfico original de Russell de 1926. El sistema de Russell difiere significativamente de la tabla periódica moderna — representa su modelo filosófico y cosmológico de la materia.",
+    "predictionFormat": "{{russellName}} → {{modernName}} ({{symbol}})",
+    "notes": {
+      "hypotheticalFirstInertGas": "Primer gas inerte hipotético — el comienzo de la materia",
+      "hypotheticalSecondInertGas": "Segundo gas inerte hipotético",
+      "hypotheticalThirdInertGas": "Tercer gas inerte hipotético",
+      "hypotheticalElement": "Elemento hipotético en el sistema de Russell",
+      "hypotheticalTransUranicInSystem": "Elemento transuránico hipotético en el sistema de Russell",
+      "hypotheticalTransUranic": "Elemento transuránico hipotético",
+      "hypotheticalFinalInertGas": "Último gas inerte hipotético — el fin de la materia",
+      "ethlogenPrediction": "Russell predijo \"Ethlogen\" — identificado como Deuterio (1931)",
+      "bebegenPrediction": "Russell predijo \"Bebegen\" — identificado como Tritio (1934)",
+      "heliumPlacement": "Russell situó el Helio como gas inerte de la octava 4",
+      "carbonAmplitude": "Carbono — la amplitud de la onda; punto de máxima compresión",
+      "neptuniumPrediction": "Russell predijo el elemento 93 en 1926 — descubierto como Neptunio en 1940",
+      "plutoniumPrediction": "Russell predijo el elemento 94 en 1926 — descubierto como Plutonio en 1941"
+    }
   },
   "networkGraph": {
     "reactionNetwork": "Red de Reacciones",

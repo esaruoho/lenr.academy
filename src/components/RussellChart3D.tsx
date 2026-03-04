@@ -336,7 +336,7 @@ function Scene({ isDark, onElementClick }: SceneProps) {
               <div className="text-xs opacity-75">Z = {hoveredNode.el.Z}</div>
             )}
             {hoveredNode.el.note && (
-              <div className="text-xs mt-1 italic opacity-60">{hoveredNode.el.note}</div>
+              <div className="text-xs mt-1 italic opacity-60">{t(hoveredNode.el.note)}</div>
             )}
           </div>
         </Html>

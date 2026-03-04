@@ -499,7 +499,23 @@
     "aboutParagraph3": "Russell sagte bemerkenswert die Existenz von Deuterium (das er \"Ethlogen\" nannte), Tritium (\"Bebegen\"), Neptunium und Plutonium Jahre vor ihrer offiziellen Laborentdeckung voraus.",
     "view3D": "3D-Ansicht",
     "view3DControls": "Ziehen zum Drehen, Scrollen zum Zoomen",
-    "experimentalNote": "Diese Visualisierung basiert auf Russells Originaldiagramm von 1926. Russells System unterscheidet sich erheblich vom modernen Periodensystem — es repräsentiert sein philosophisches und kosmologisches Modell der Materie."
+    "experimentalNote": "Diese Visualisierung basiert auf Russells Originaldiagramm von 1926. Russells System unterscheidet sich erheblich vom modernen Periodensystem — es repräsentiert sein philosophisches und kosmologisches Modell der Materie.",
+    "predictionFormat": "{{russellName}} → {{modernName}} ({{symbol}})",
+    "notes": {
+      "hypotheticalFirstInertGas": "Hypothetisches erstes Edelgas — der Beginn der Materie",
+      "hypotheticalSecondInertGas": "Hypothetisches zweites Edelgas",
+      "hypotheticalThirdInertGas": "Hypothetisches drittes Edelgas",
+      "hypotheticalElement": "Hypothetisches Element in Russells System",
+      "hypotheticalTransUranicInSystem": "Hypothetisches transuranisches Element in Russells System",
+      "hypotheticalTransUranic": "Hypothetisches transuranisches Element",
+      "hypotheticalFinalInertGas": "Hypothetisches letztes Edelgas — das Ende der Materie",
+      "ethlogenPrediction": "Russell sagte \"Ethlogen\" voraus — identifiziert als Deuterium (1931)",
+      "bebegenPrediction": "Russell sagte \"Bebegen\" voraus — identifiziert als Tritium (1934)",
+      "heliumPlacement": "Russell ordnete Helium als Edelgas der Oktave 4 ein",
+      "carbonAmplitude": "Kohlenstoff — die Amplitude der Welle; Punkt maximaler Kompression",
+      "neptuniumPrediction": "Russell sagte Element 93 im Jahr 1926 voraus — entdeckt als Neptunium 1940",
+      "plutoniumPrediction": "Russell sagte Element 94 im Jahr 1926 voraus — entdeckt als Plutonium 1941"
+    }
   },
   "networkGraph": {
     "reactionNetwork": "Reaktionsnetzwerk",

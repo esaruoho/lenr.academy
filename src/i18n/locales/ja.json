@@ -502,7 +502,23 @@
     "aboutParagraph3": "ラッセルは特に重水素（「エスロゲン」と呼んだ）、トリチウム（「ベベゲン」）、ネプツニウム、プルトニウムの存在を公式の実験室発見の何年も前に予測しました。",
     "view3D": "3Dビュー",
     "view3DControls": "ドラッグで回転、スクロールでズーム",
-    "experimentalNote": "この視覚化はラッセルの1926年の原図に基づいています。ラッセルのシステムは現代の周期表とは大きく異なり、現代化学で使用される量子力学モデルではなく、彼の哲学的・宇宙論的な物質モデルを表しています。"
+    "experimentalNote": "この視覚化はラッセルの1926年の原図に基づいています。ラッセルのシステムは現代の周期表とは大きく異なり、現代化学で使用される量子力学モデルではなく、彼の哲学的・宇宙論的な物質モデルを表しています。",
+    "predictionFormat": "{{russellName}} → {{modernName}} ({{symbol}})",
+    "notes": {
+      "hypotheticalFirstInertGas": "仮説上の最初の不活性ガス — 物質の始まり",
+      "hypotheticalSecondInertGas": "仮説上の2番目の不活性ガス",
+      "hypotheticalThirdInertGas": "仮説上の3番目の不活性ガス",
+      "hypotheticalElement": "ラッセルの体系における仮説上の元素",
+      "hypotheticalTransUranicInSystem": "ラッセルの体系における仮説上の超ウラン元素",
+      "hypotheticalTransUranic": "仮説上の超ウラン元素",
+      "hypotheticalFinalInertGas": "仮説上の最後の不活性ガス — 物質の終わり",
+      "ethlogenPrediction": "ラッセルは「エスローゲン」を予測 — 重水素として同定（1931年）",
+      "bebegenPrediction": "ラッセルは「ベベゲン」を予測 — 三重水素として同定（1934年）",
+      "heliumPlacement": "ラッセルはヘリウムをオクターブ4の不活性ガスとして配置",
+      "carbonAmplitude": "炭素 — 波の振幅；最大圧縮点",
+      "neptuniumPrediction": "ラッセルは1926年に元素93を予測 — 1940年にネプツニウムとして発見",
+      "plutoniumPrediction": "ラッセルは1926年に元素94を予測 — 1941年にプルトニウムとして発見"
+    }
   },
   "networkGraph": {
     "reactionNetwork": "反応ネットワーク",
