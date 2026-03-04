@@ -20,6 +20,7 @@
     "upload": "アップロード",
     "delete": "削除",
     "edit": "編集",
+    "selected": "選択済み",
     "view": "表示",
     "back": "戻る",
     "next": "次へ",
@@ -43,7 +44,8 @@
     "allTables": "すべてのテーブル",
     "privacySettings": "プライバシー設定",
     "openMenu": "メニューを開く",
-    "closeMenu": "メニューを閉じる"
+    "closeMenu": "メニューを閉じる",
+    "help": "ヘルプ＆用語集"
   },
   "theme": {
     "lightMode": "ライトモード",
@@ -196,6 +198,19 @@
     "filters": "フィルター",
     "results": "結果",
     "details": "詳細"
+  },
+  "queryHistory": {
+    "title": "履歴",
+    "recent": "最近",
+    "bookmarked": "ブックマーク",
+    "clearHistory": "クリア",
+    "noHistory": "クエリ履歴はまだありません",
+    "loadQuery": "クエリを読み込む",
+    "querySaved": "クエリが履歴に保存されました",
+    "filterAll": "すべて",
+    "filterFusion": "核融合",
+    "filterFission": "核分裂",
+    "filterTwoToTwo": "2→2"
   },
   "elements": {
     "element": "元素",
@@ -365,6 +380,8 @@
     "copyShareLink": "共有リンクをコピー",
     "copyShareLinkTitle": "このクエリの共有URLをクリップボードにコピー",
     "linkCopied": "リンクをコピーしました!",
+    "exportJson": "JSONエクスポート",
+    "exportPdf": "PDFエクスポート",
     "inputs": "入力",
     "output": "出力",
     "outputs": "出力",
@@ -899,6 +916,7 @@
     "executeQuery": "クエリを実行",
     "clear": "クリア",
     "queryError": "クエリエラー",
+    "readOnlyError": "読み取り専用クエリ（SELECT）のみ許可されています。DROP、CREATE、ALTER、DELETE、INSERT、UPDATE等の命令はデータベース保護のためブロックされています。",
     "queryResults": "クエリ結果: {{count}}行",
     "executedIn": "実行時間: {{time}}ms",
     "exportCsv": "CSVエクスポート",
@@ -946,12 +964,38 @@
     "databaseUpdateAvailable": "データベースの更新が利用可能です：v{{current}} → v{{available}}",
     "databaseUpdateReady": "データベースの更新が準備完了 (v{{version}}) - 新しいデータを使用するには更新してください",
     "downloadingUpdate": "バックグラウンドで更新をダウンロード中...",
-    "downloadUpdate": "更新をダウンロード"
+    "downloadUpdate": "更新をダウンロード",
+    "updating": "更新中..."
+  },
+  "columnToggle": {
+    "title": "表示列をカスタマイズ",
+    "columns": "列",
+    "showHide": "列の表示/非表示",
+    "resetToDefault": "デフォルト列にリセット",
+    "reset": "リセット"
   },
   "offline": {
     "youAreOffline": "オフラインです",
     "offlineMessage": "一部の機能が利用できない可能性があります",
     "reconnecting": "再接続中...",
     "backOnline": "オンラインに戻りました"
+  },
+  "help": {
+    "title": "ヘルプ＆用語集",
+    "subtitle": "核物理学の用語、データベースフィールドについて学び、LENR核変換データを探索するためのサンプルクエリを試してください。",
+    "exampleQueries": "クエリ例",
+    "exampleQueriesDescription": "任意の例をクリックしてクエリページに読み込み、実行します。",
+    "tryQuery": "このクエリを試す",
+    "glossary": "用語集",
+    "searchGlossary": "用語を検索...",
+    "allCategories": "すべて",
+    "noResults": "一致する用語が見つかりません。",
+    "glossaryCount": "{{count}}件の用語",
+    "category": {
+      "nuclear": "核物理学",
+      "reaction": "反応タイプ",
+      "database": "データベースフィールド",
+      "measurement": "測定と単位"
+    }
   }
 }

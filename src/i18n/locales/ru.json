@@ -20,6 +20,7 @@
     "upload": "Загрузить",
     "delete": "Удалить",
     "edit": "Редактировать",
+    "selected": "выбрано",
     "view": "Просмотр",
     "back": "Назад",
     "next": "Далее",
@@ -43,7 +44,8 @@
     "allTables": "Все таблицы",
     "privacySettings": "Настройки конфиденциальности",
     "openMenu": "Открыть меню",
-    "closeMenu": "Закрыть меню"
+    "closeMenu": "Закрыть меню",
+    "help": "Справка и глоссарий"
   },
   "theme": {
     "lightMode": "Светлая тема",
@@ -196,6 +198,19 @@
     "filters": "Фильтры",
     "results": "Результаты",
     "details": "Подробности"
+  },
+  "queryHistory": {
+    "title": "История",
+    "recent": "Недавние",
+    "bookmarked": "Избранные",
+    "clearHistory": "Очистить",
+    "noHistory": "Истории запросов пока нет",
+    "loadQuery": "Загрузить запрос",
+    "querySaved": "Запрос сохранён в истории",
+    "filterAll": "Все",
+    "filterFusion": "Синтез",
+    "filterFission": "Деление",
+    "filterTwoToTwo": "2→2"
   },
   "elements": {
     "element": "Элемент",
@@ -365,6 +380,8 @@
     "copyShareLink": "Копировать ссылку",
     "copyShareLinkTitle": "Копировать ссылку на этот запрос в буфер обмена",
     "linkCopied": "Ссылка скопирована!",
+    "exportJson": "Экспорт JSON",
+    "exportPdf": "Экспорт PDF",
     "inputs": "Входы",
     "output": "Выход",
     "outputs": "Выходы",
@@ -896,6 +913,7 @@
     "executeQuery": "Выполнить запрос",
     "clear": "Очистить",
     "queryError": "Ошибка запроса",
+    "readOnlyError": "Разрешены только запросы на чтение (SELECT). Операции DROP, CREATE, ALTER, DELETE, INSERT и UPDATE заблокированы для защиты базы данных.",
     "queryResults": "Результаты запроса: {{count}} строк",
     "executedIn": "Выполнено за {{time}}мс",
     "exportCsv": "Экспорт CSV",
@@ -943,12 +961,38 @@
     "databaseUpdateAvailable": "Доступно обновление базы данных: v{{current}} → v{{available}}",
     "databaseUpdateReady": "Обновление базы данных готово (v{{version}}) - Обновите для использования новых данных",
     "downloadingUpdate": "Загрузка обновления в фоновом режиме...",
-    "downloadUpdate": "Скачать обновление"
+    "downloadUpdate": "Скачать обновление",
+    "updating": "Обновление..."
+  },
+  "columnToggle": {
+    "title": "Настроить видимые столбцы",
+    "columns": "Столбцы",
+    "showHide": "Показать/Скрыть столбцы",
+    "resetToDefault": "Сбросить к столбцам по умолчанию",
+    "reset": "Сбросить"
   },
   "offline": {
     "youAreOffline": "Вы не в сети",
     "offlineMessage": "Некоторые функции могут быть недоступны",
     "reconnecting": "Переподключение...",
     "backOnline": "Вы снова в сети"
+  },
+  "help": {
+    "title": "Справка и глоссарий",
+    "subtitle": "Узнайте о терминах ядерной физики, полях базы данных и попробуйте примеры запросов для изучения данных о LENR-трансмутации.",
+    "exampleQueries": "Примеры запросов",
+    "exampleQueriesDescription": "Нажмите на любой пример, чтобы загрузить его на страницу запросов и выполнить.",
+    "tryQuery": "Попробовать этот запрос",
+    "glossary": "Глоссарий",
+    "searchGlossary": "Искать термины...",
+    "allCategories": "Все",
+    "noResults": "Совпадающих терминов не найдено.",
+    "glossaryCount": "{{count}} терминов",
+    "category": {
+      "nuclear": "Ядерная физика",
+      "reaction": "Типы реакций",
+      "database": "Поля базы данных",
+      "measurement": "Измерения и единицы"
+    }
   }
 }

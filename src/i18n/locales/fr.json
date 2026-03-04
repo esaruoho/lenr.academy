@@ -20,6 +20,7 @@
     "upload": "Téléverser",
     "delete": "Supprimer",
     "edit": "Modifier",
+    "selected": "sélectionné",
     "view": "Afficher",
     "back": "Retour",
     "next": "Suivant",
@@ -43,7 +44,8 @@
     "allTables": "Toutes les tables",
     "privacySettings": "Paramètres de confidentialité",
     "openMenu": "Ouvrir le menu",
-    "closeMenu": "Fermer le menu"
+    "closeMenu": "Fermer le menu",
+    "help": "Aide et glossaire"
   },
   "theme": {
     "lightMode": "Mode clair",
@@ -196,6 +198,19 @@
     "filters": "Filtres",
     "results": "Résultats",
     "details": "Détails"
+  },
+  "queryHistory": {
+    "title": "Historique",
+    "recent": "Récents",
+    "bookmarked": "Favoris",
+    "clearHistory": "Effacer",
+    "noHistory": "Pas encore d'historique de requêtes",
+    "loadQuery": "Charger la requête",
+    "querySaved": "Requête enregistrée dans l'historique",
+    "filterAll": "Tous",
+    "filterFusion": "Fusion",
+    "filterFission": "Fission",
+    "filterTwoToTwo": "2→2"
   },
   "elements": {
     "element": "Élément",
@@ -365,6 +380,8 @@
     "copyShareLink": "Copier le lien",
     "copyShareLinkTitle": "Copier une URL partageable pour cette requete dans le presse-papiers",
     "linkCopied": "Lien copie !",
+    "exportJson": "Exporter JSON",
+    "exportPdf": "Exporter PDF",
     "inputs": "Entrées",
     "output": "Sortie",
     "outputs": "Sorties",
@@ -899,6 +916,7 @@
     "executeQuery": "Exécuter la requête",
     "clear": "Effacer",
     "queryError": "Erreur de requête",
+    "readOnlyError": "Seules les requêtes en lecture seule (SELECT) sont autorisées. Les instructions telles que DROP, CREATE, ALTER, DELETE, INSERT et UPDATE sont bloquées pour protéger la base de données.",
     "queryResults": "Résultats de la requête : {{count}} lignes",
     "executedIn": "Exécuté en {{time}}ms",
     "exportCsv": "Exporter CSV",
@@ -946,12 +964,38 @@
     "databaseUpdateAvailable": "Mise à jour de base de données disponible : v{{current}} → v{{available}}",
     "databaseUpdateReady": "Mise à jour de base de données prête (v{{version}}) - Actualisez pour utiliser les nouvelles données",
     "downloadingUpdate": "Téléchargement de la mise à jour en arrière-plan...",
-    "downloadUpdate": "Télécharger la mise à jour"
+    "downloadUpdate": "Télécharger la mise à jour",
+    "updating": "Mise à jour en cours..."
+  },
+  "columnToggle": {
+    "title": "Personnaliser les colonnes visibles",
+    "columns": "Colonnes",
+    "showHide": "Afficher/Masquer les colonnes",
+    "resetToDefault": "Réinitialiser les colonnes par défaut",
+    "reset": "Réinitialiser"
   },
   "offline": {
     "youAreOffline": "Vous êtes hors ligne",
     "offlineMessage": "Certaines fonctionnalités peuvent ne pas être disponibles",
     "reconnecting": "Reconnexion...",
     "backOnline": "Vous êtes de nouveau en ligne"
+  },
+  "help": {
+    "title": "Aide et glossaire",
+    "subtitle": "Découvrez les termes de physique nucléaire, les champs de base de données et essayez des requêtes d'exemple pour explorer les données de transmutation LENR.",
+    "exampleQueries": "Requêtes d'exemple",
+    "exampleQueriesDescription": "Cliquez sur un exemple pour le charger dans la page de requête et l'exécuter.",
+    "tryQuery": "Essayer cette requête",
+    "glossary": "Glossaire",
+    "searchGlossary": "Rechercher des termes...",
+    "allCategories": "Tous",
+    "noResults": "Aucun terme correspondant trouvé.",
+    "glossaryCount": "{{count}} termes",
+    "category": {
+      "nuclear": "Physique nucléaire",
+      "reaction": "Types de réaction",
+      "database": "Champs de base de données",
+      "measurement": "Mesures et unités"
+    }
   }
 }

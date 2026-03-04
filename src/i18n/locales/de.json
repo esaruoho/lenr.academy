@@ -20,6 +20,7 @@
     "upload": "Hochladen",
     "delete": "Löschen",
     "edit": "Bearbeiten",
+    "selected": "ausgewählt",
     "view": "Ansehen",
     "back": "Zurück",
     "next": "Weiter",
@@ -43,7 +44,8 @@
     "allTables": "Alle Tabellen",
     "privacySettings": "Datenschutzeinstellungen",
     "openMenu": "Menü öffnen",
-    "closeMenu": "Menü schließen"
+    "closeMenu": "Menü schließen",
+    "help": "Hilfe &amp; Glossar"
   },
   "theme": {
     "lightMode": "Heller Modus",
@@ -196,6 +198,19 @@
     "filters": "Filter",
     "results": "Ergebnisse",
     "details": "Details"
+  },
+  "queryHistory": {
+    "title": "Verlauf",
+    "recent": "Kürzlich",
+    "bookmarked": "Markiert",
+    "clearHistory": "Löschen",
+    "noHistory": "Noch kein Abfrageverlauf",
+    "loadQuery": "Abfrage laden",
+    "querySaved": "Abfrage im Verlauf gespeichert",
+    "filterAll": "Alle",
+    "filterFusion": "Fusion",
+    "filterFission": "Spaltung",
+    "filterTwoToTwo": "2→2"
   },
   "elements": {
     "element": "Element",
@@ -365,6 +380,8 @@
     "copyShareLink": "Link kopieren",
     "copyShareLinkTitle": "Eine teilbare URL fuer diese Abfrage in die Zwischenablage kopieren",
     "linkCopied": "Link kopiert!",
+    "exportJson": "JSON exportieren",
+    "exportPdf": "PDF exportieren",
     "inputs": "Eingaben",
     "output": "Ausgabe",
     "outputs": "Ausgaben",
@@ -895,6 +912,7 @@
     "executeQuery": "Abfrage ausführen",
     "clear": "Löschen",
     "queryError": "Abfragefehler",
+    "readOnlyError": "Nur lesende Abfragen (SELECT) sind erlaubt. Anweisungen wie DROP, CREATE, ALTER, DELETE, INSERT und UPDATE sind zum Schutz der Datenbank blockiert.",
     "queryResults": "Abfrageergebnisse: {{count}} Zeilen",
     "executedIn": "Ausgeführt in {{time}}ms",
     "exportCsv": "CSV exportieren",
@@ -942,12 +960,38 @@
     "databaseUpdateAvailable": "Datenbank-Update verfügbar: v{{current}} → v{{available}}",
     "databaseUpdateReady": "Datenbank-Update bereit (v{{version}}) - Aktualisieren, um die neuen Daten zu verwenden",
     "downloadingUpdate": "Datenbank-Update wird im Hintergrund heruntergeladen...",
-    "downloadUpdate": "Update herunterladen"
+    "downloadUpdate": "Update herunterladen",
+    "updating": "Aktualisierung läuft..."
+  },
+  "columnToggle": {
+    "title": "Sichtbare Spalten anpassen",
+    "columns": "Spalten",
+    "showHide": "Spalten ein-/ausblenden",
+    "resetToDefault": "Auf Standardspalten zurücksetzen",
+    "reset": "Zurücksetzen"
   },
   "offline": {
     "youAreOffline": "Sie sind offline",
     "offlineMessage": "Einige Funktionen sind möglicherweise nicht verfügbar",
     "reconnecting": "Verbindung wird wiederhergestellt...",
     "backOnline": "Sie sind wieder online"
+  },
+  "help": {
+    "title": "Hilfe &amp; Glossar",
+    "subtitle": "Erfahren Sie mehr über kernphysikalische Begriffe, Datenbankfelder und probieren Sie Beispielabfragen aus, um LENR-Transmutationsdaten zu erkunden.",
+    "exampleQueries": "Beispielabfragen",
+    "exampleQueriesDescription": "Klicken Sie auf ein Beispiel, um es auf der Abfrageseite zu laden und auszuführen.",
+    "tryQuery": "Diese Abfrage ausprobieren",
+    "glossary": "Glossar",
+    "searchGlossary": "Begriffe suchen...",
+    "allCategories": "Alle",
+    "noResults": "Keine passenden Begriffe gefunden.",
+    "glossaryCount": "{{count}} Begriffe",
+    "category": {
+      "nuclear": "Kernphysik",
+      "reaction": "Reaktionstypen",
+      "database": "Datenbankfelder",
+      "measurement": "Messungen &amp; Einheiten"
+    }
   }
 }

@@ -20,6 +20,7 @@
     "upload": "上传",
     "delete": "删除",
     "edit": "编辑",
+    "selected": "已选择",
     "view": "查看",
     "back": "返回",
     "next": "下一步",
@@ -43,7 +44,8 @@
     "allTables": "所有表格",
     "privacySettings": "隐私设置",
     "openMenu": "打开菜单",
-    "closeMenu": "关闭菜单"
+    "closeMenu": "关闭菜单",
+    "help": "帮助与术语表"
   },
   "theme": {
     "lightMode": "浅色模式",
@@ -196,6 +198,19 @@
     "filters": "筛选器",
     "results": "结果",
     "details": "详细信息"
+  },
+  "queryHistory": {
+    "title": "历史",
+    "recent": "最近",
+    "bookmarked": "已收藏",
+    "clearHistory": "清除",
+    "noHistory": "暂无查询历史",
+    "loadQuery": "加载查询",
+    "querySaved": "查询已保存到历史",
+    "filterAll": "全部",
+    "filterFusion": "聚变",
+    "filterFission": "裂变",
+    "filterTwoToTwo": "2→2"
   },
   "elements": {
     "element": "元素",
@@ -365,6 +380,8 @@
     "copyShareLink": "复制分享链接",
     "copyShareLinkTitle": "将此查询的可分享URL复制到剪贴板",
     "linkCopied": "链接已复制!",
+    "exportJson": "导出JSON",
+    "exportPdf": "导出PDF",
     "inputs": "输入",
     "output": "输出",
     "outputs": "输出",
@@ -899,6 +916,7 @@
     "executeQuery": "执行查询",
     "clear": "清除",
     "queryError": "查询错误",
+    "readOnlyError": "仅允许只读查询（SELECT）。DROP、CREATE、ALTER、DELETE、INSERT和UPDATE等语句已被禁止以保护数据库。",
     "queryResults": "查询结果: {{count}} 行",
     "executedIn": "执行时间: {{time}}毫秒",
     "exportCsv": "导出CSV",
@@ -946,12 +964,38 @@
     "databaseUpdateAvailable": "数据库更新可用：v{{current}} → v{{available}}",
     "databaseUpdateReady": "数据库更新就绪 (v{{version}}) - 刷新以使用新数据",
     "downloadingUpdate": "正在后台下载更新...",
-    "downloadUpdate": "下载更新"
+    "downloadUpdate": "下载更新",
+    "updating": "更新中..."
+  },
+  "columnToggle": {
+    "title": "自定义可见列",
+    "columns": "列",
+    "showHide": "显示/隐藏列",
+    "resetToDefault": "恢复默认列",
+    "reset": "重置"
   },
   "offline": {
     "youAreOffline": "您已离线",
     "offlineMessage": "某些功能可能不可用",
     "reconnecting": "正在重新连接...",
     "backOnline": "您已重新上线"
+  },
+  "help": {
+    "title": "帮助与术语表",
+    "subtitle": "了解核物理术语、数据库字段，并尝试示例查询来探索LENR嬗变数据。",
+    "exampleQueries": "示例查询",
+    "exampleQueriesDescription": "点击任何示例将其加载到查询页面并执行。",
+    "tryQuery": "试试这个查询",
+    "glossary": "术语表",
+    "searchGlossary": "搜索术语...",
+    "allCategories": "全部",
+    "noResults": "未找到匹配的术语。",
+    "glossaryCount": "{{count}}个术语",
+    "category": {
+      "nuclear": "核物理",
+      "reaction": "反应类型",
+      "database": "数据库字段",
+      "measurement": "测量与单位"
+    }
   }
 }
