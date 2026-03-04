@@ -363,6 +363,13 @@ export type ProportionSourceType = 'manual' | 'material' | 'natural';
 export type ProportionFormat = 'percentage' | 'atomic-ratio' | 'mass-ratio';
 
 /**
+ * Source for isotopic abundance data
+ * - 'parkhomov': Original Parkhomov database (pcaNCrust field, older IUPAC evaluation)
+ * - 'iaea': IAEA Nuclear Data Services (NuBase 2020 / CIAAW current evaluation)
+ */
+export type AbundanceSource = 'parkhomov' | 'iaea';
+
+/**
  * A fuel nuclide with its proportion in the mixture
  */
 export interface WeightedNuclide {
