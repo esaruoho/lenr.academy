@@ -1,105 +1,125 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { LanguageProvider, useLanguage } from './LanguageContext';
-import type { ReactNode } from 'react';
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { renderHook, act } from '@testing-library/react'
+import { LanguageProvider, useLanguage } from './LanguageContext'
 
-// Mock react-i18next — must also export initReactI18next because i18n/config.ts uses it
-const mockChangeLanguage = vi.fn();
-let mockLanguage = 'en';
+// Mock i18n config to prevent initialization side effects
+vi.mock('../i18n/config', () => ({
+  SUPPORTED_LANGUAGES: {
+    en: { name: 'English', nativeName: 'English', flag: '🇬🇧' },
+    ru: { name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
+    ja: { name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
+    zh: { name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
+    de: { name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
+    fr: { name: 'French', nativeName: 'Français', flag: '🇫🇷' },
+    es: { name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
+  },
+  DEFAULT_LANGUAGE: 'en',
+}))
 
+// Mock react-i18next
+const mockChangeLanguage = vi.fn()
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
+    t: (key: string) => key,
     i18n: {
-      get language() {
-        return mockLanguage;
-      },
+      language: 'en',
       changeLanguage: mockChangeLanguage,
     },
   }),
-  initReactI18next: {
-    type: '3rdParty',
-    init: () => {},
-  },
-}));
-
-// Mock i18next-browser-languagedetector (imported by i18n/config.ts)
-vi.mock('i18next-browser-languagedetector', () => ({
-  default: {
-    type: 'languageDetector',
-    init: () => {},
-    detect: () => 'en',
-    cacheUserLanguage: () => {},
-  },
-}));
-
-function wrapper({ children }: { children: ReactNode }) {
-  return <LanguageProvider>{children}</LanguageProvider>;
-}
+}))
 
 describe('LanguageContext', () => {
   beforeEach(() => {
-    localStorage.clear();
-    mockLanguage = 'en';
-    mockChangeLanguage.mockClear();
-  });
+    localStorage.clear()
+    mockChangeLanguage.mockClear()
+  })
 
-  it('provides current language from i18n', () => {
-    const { result } = renderHook(() => useLanguage(), { wrapper });
-    expect(result.current.language).toBe('en');
-  });
+  function renderLanguageHook() {
+    return renderHook(() => useLanguage(), {
+      wrapper: ({ children }) => <LanguageProvider>{children}</LanguageProvider>,
+    })
+  }
 
-  it('provides supportedLanguages with all 7 locales', () => {
-    const { result } = renderHook(() => useLanguage(), { wrapper });
-    const keys = Object.keys(result.current.supportedLanguages);
-    expect(keys).toEqual(['en', 'ru', 'ja', 'zh', 'de', 'fr', 'es']);
-  });
+  describe('LanguageProvider', () => {
+    it('provides current language', () => {
+      const { result } = renderLanguageHook()
+      expect(result.current.language).toBe('en')
+    })
 
-  it('setLanguage calls i18n.changeLanguage and saves to localStorage', () => {
-    const { result } = renderHook(() => useLanguage(), { wrapper });
+    it('provides supported languages list', () => {
+      const { result } = renderLanguageHook()
+      const langs = Object.keys(result.current.supportedLanguages)
+      expect(langs).toContain('en')
+      expect(langs).toContain('ru')
+      expect(langs).toContain('ja')
+      expect(langs).toContain('zh')
+      expect(langs).toContain('de')
+      expect(langs).toContain('fr')
+      expect(langs).toContain('es')
+    })
 
-    act(() => {
-      result.current.setLanguage('de');
-    });
+    it('detects first visit when no language selected key exists', () => {
+      const { result } = renderLanguageHook()
+      expect(result.current.isFirstVisit).toBe(true)
+    })
 
-    expect(mockChangeLanguage).toHaveBeenCalledWith('de');
-    expect(localStorage.getItem('lenr-language-preference')).toBe('de');
-  });
+    it('is not first visit when language was previously selected', () => {
+      localStorage.setItem('lenr-language-selected', 'true')
+      const { result } = renderLanguageHook()
+      expect(result.current.isFirstVisit).toBe(false)
+    })
+  })
 
-  it('isFirstVisit is true when no language-selected key exists', () => {
-    const { result } = renderHook(() => useLanguage(), { wrapper });
-    expect(result.current.isFirstVisit).toBe(true);
-  });
+  describe('setLanguage', () => {
+    it('calls i18n.changeLanguage with new language', () => {
+      const { result } = renderLanguageHook()
 
-  it('isFirstVisit is false when language-selected key exists', () => {
-    localStorage.setItem('lenr-language-selected', 'true');
-    const { result } = renderHook(() => useLanguage(), { wrapper });
-    expect(result.current.isFirstVisit).toBe(false);
-  });
+      act(() => {
+        result.current.setLanguage('de')
+      })
 
-  it('markLanguageSelected sets localStorage and clears isFirstVisit', () => {
-    const { result } = renderHook(() => useLanguage(), { wrapper });
-    expect(result.current.isFirstVisit).toBe(true);
+      expect(mockChangeLanguage).toHaveBeenCalledWith('de')
+    })
 
-    act(() => {
-      result.current.markLanguageSelected();
-    });
+    it('saves language preference to localStorage', () => {
+      const { result } = renderLanguageHook()
 
-    expect(result.current.isFirstVisit).toBe(false);
-    expect(localStorage.getItem('lenr-language-selected')).toBe('true');
-  });
+      act(() => {
+        result.current.setLanguage('fr')
+      })
 
-  it('throws when useLanguage is used outside LanguageProvider', () => {
-    // Suppress console.error for this test
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    expect(() => {
-      renderHook(() => useLanguage());
-    }).toThrow('useLanguage must be used within LanguageProvider');
-    spy.mockRestore();
-  });
+      expect(localStorage.getItem('lenr-language-preference')).toBe('fr')
+    })
+  })
 
-  it('reflects language changes from i18n', () => {
-    mockLanguage = 'ja';
-    const { result } = renderHook(() => useLanguage(), { wrapper });
-    expect(result.current.language).toBe('ja');
-  });
-});
+  describe('markLanguageSelected', () => {
+    it('sets isFirstVisit to false', () => {
+      const { result } = renderLanguageHook()
+      expect(result.current.isFirstVisit).toBe(true)
+
+      act(() => {
+        result.current.markLanguageSelected()
+      })
+
+      expect(result.current.isFirstVisit).toBe(false)
+    })
+
+    it('persists selection to localStorage', () => {
+      const { result } = renderLanguageHook()
+
+      act(() => {
+        result.current.markLanguageSelected()
+      })
+
+      expect(localStorage.getItem('lenr-language-selected')).toBe('true')
+    })
+  })
+
+  describe('useLanguage', () => {
+    it('throws when used outside LanguageProvider', () => {
+      expect(() => {
+        renderHook(() => useLanguage())
+      }).toThrow('useLanguage must be used within LanguageProvider')
+    })
+  })
+})

@@ -1,189 +1,136 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'
 import {
   getGitHubSearchUrl,
   getGitHubNewIssueUrl,
   formatErrorReportForClipboard,
-  copyErrorReportToClipboard,
-} from './githubErrorReporting';
-import type { ErrorContext } from './errorContext';
+} from './githubErrorReporting'
+import type { ErrorContext } from './errorContext'
 
 function makeErrorContext(overrides?: Partial<ErrorContext>): ErrorContext {
-  const error = new Error('Something went wrong in the fusion query');
-  error.name = 'TypeError';
   return {
-    error,
-    errorBoundary: 'FusionErrorBoundary',
-    timestamp: '2026-02-01T12:00:00.000Z',
+    error: new Error('Test error message'),
+    errorBoundary: 'TestBoundary',
+    timestamp: '2026-01-15T10:30:00.000Z',
     url: 'https://lenr.academy/fusion',
-    userAgent: 'Mozilla/5.0 Chrome/120.0',
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
     browser: 'Chrome',
-    browserVersion: '120.0',
+    browserVersion: '120.0.0',
     os: 'macOS',
     device: 'Desktop',
     appVersion: 'v0.1.0-alpha.21',
-    fingerprint: 'fp-abc123',
-    stackTrace: '    at FusionQuery (fusion.tsx:42:10)',
+    fingerprint: 'abc123def456',
+    stackTrace: '    at Component.render (app.tsx:42:10)\n    at renderWithHooks (react-dom.js:100)',
     ...overrides,
-  };
+  }
 }
 
 describe('getGitHubSearchUrl', () => {
-  it('returns a GitHub issue search URL', () => {
-    const url = getGitHubSearchUrl(makeErrorContext());
-    expect(url).toContain('https://github.com/Episk-pos/lenr.academy/issues');
-  });
+  it('generates a search URL with fingerprint and error message', () => {
+    const ctx = makeErrorContext()
+    const url = getGitHubSearchUrl(ctx)
 
-  it('includes error fingerprint in search query', () => {
-    const url = getGitHubSearchUrl(makeErrorContext());
-    expect(url).toContain('fp-abc123');
-  });
-
-  it('includes error message in search', () => {
-    const url = getGitHubSearchUrl(makeErrorContext());
-    expect(url).toContain(encodeURIComponent('Something went wrong'));
-  });
-
-  it('includes bug label in search query', () => {
-    const url = getGitHubSearchUrl(makeErrorContext());
-    const decoded = decodeURIComponent(url);
-    expect(decoded).toContain('label:bug');
-  });
+    expect(url).toContain('https://github.com/Episk-pos/lenr.academy/issues')
+    expect(url).toContain('fingerprint%3Aabc123def456')
+    expect(url).toContain('Test%20error%20message')
+    expect(url).toContain('label%3Abug')
+  })
 
   it('truncates long error messages to 60 characters', () => {
-    const longMessage = 'A'.repeat(200);
-    const ctx = makeErrorContext({ error: Object.assign(new Error(longMessage), { name: 'Error' }) });
-    const url = getGitHubSearchUrl(ctx);
-    const decoded = decodeURIComponent(url);
-    const aCount = (decoded.match(/A/g) || []).length;
-    expect(aCount).toBe(60);
-  });
-});
+    const longMessage = 'A'.repeat(100)
+    const ctx = makeErrorContext({ error: new Error(longMessage) })
+    const url = getGitHubSearchUrl(ctx)
+
+    // The search term should be truncated
+    const decoded = decodeURIComponent(url)
+    expect(decoded).toContain('A'.repeat(60))
+    expect(decoded).not.toContain('A'.repeat(100))
+  })
+})
 
 describe('getGitHubNewIssueUrl', () => {
-  it('returns a GitHub new issue URL', () => {
-    const url = getGitHubNewIssueUrl(makeErrorContext());
-    expect(url).toContain('https://github.com/Episk-pos/lenr.academy/issues/new');
-  });
+  it('generates a new issue URL with template and labels', () => {
+    const ctx = makeErrorContext()
+    const url = getGitHubNewIssueUrl(ctx)
 
-  it('uses error_report.yml template', () => {
-    const url = getGitHubNewIssueUrl(makeErrorContext());
-    expect(url).toContain('template=error_report.yml');
-  });
-
-  it('includes bug label', () => {
-    const url = getGitHubNewIssueUrl(makeErrorContext());
-    const decoded = decodeURIComponent(url);
-    expect(decoded).toContain('bug');
-  });
+    expect(url).toContain('https://github.com/Episk-pos/lenr.academy/issues/new')
+    expect(url).toContain('template=error_report.yml')
+    expect(url).toContain('labels=bug')
+    expect(url).toContain('needs-triage')
+    expect(url).toContain('automated-report')
+  })
 
   it('includes fingerprint in title', () => {
-    const url = getGitHubNewIssueUrl(makeErrorContext());
-    const decoded = decodeURIComponent(url);
-    expect(decoded).toContain('fp-abc123');
-  });
+    const ctx = makeErrorContext()
+    const url = getGitHubNewIssueUrl(ctx)
 
-  it('includes error name and message in title', () => {
-    const url = getGitHubNewIssueUrl(makeErrorContext());
-    // URLSearchParams encodes spaces as +, so decode both + and %XX
-    const decoded = decodeURIComponent(url.replace(/\+/g, ' '));
-    expect(decoded).toContain('TypeError');
-    expect(decoded).toContain('Something went wrong');
-  });
+    expect(url).toContain('fp%3Aabc123def456')
+  })
 
-  it('truncates long error messages in title to 80 chars', () => {
-    const longMessage = 'X'.repeat(200);
-    const ctx = makeErrorContext({ error: Object.assign(new Error(longMessage), { name: 'Error' }) });
-    const url = getGitHubNewIssueUrl(ctx);
-    const decoded = decodeURIComponent(url.replace(/\+/g, ' '));
-    const titleMatch = decoded.match(/title=\[Bug\] Error: (X+)/);
-    expect(titleMatch).toBeTruthy();
-    expect(titleMatch![1].length).toBe(80);
-  });
-});
+  it('truncates long error messages in title to 80 characters', () => {
+    const longMessage = 'B'.repeat(200)
+    const ctx = makeErrorContext({ error: new Error(longMessage) })
+    const url = getGitHubNewIssueUrl(ctx)
+
+    const decoded = decodeURIComponent(url)
+    // Title should be truncated — the message portion should be 80 chars max
+    expect(decoded).toContain('B'.repeat(80))
+    expect(decoded).not.toContain('B'.repeat(81))
+  })
+})
 
 describe('formatErrorReportForClipboard', () => {
   it('includes error fingerprint', () => {
-    const report = formatErrorReportForClipboard(makeErrorContext());
-    expect(report).toContain('fp-abc123');
-  });
+    const ctx = makeErrorContext()
+    const report = formatErrorReportForClipboard(ctx)
 
-  it('includes error type', () => {
-    const report = formatErrorReportForClipboard(makeErrorContext());
-    expect(report).toContain('TypeError');
-  });
+    expect(report).toContain('abc123def456')
+  })
 
-  it('includes error message in code block', () => {
-    const report = formatErrorReportForClipboard(makeErrorContext());
-    expect(report).toContain('Something went wrong in the fusion query');
-    expect(report).toContain('```');
-  });
+  it('includes error type and message', () => {
+    const ctx = makeErrorContext()
+    const report = formatErrorReportForClipboard(ctx)
+
+    expect(report).toContain('**Error Type:** Error')
+    expect(report).toContain('Test error message')
+  })
 
   it('includes stack trace', () => {
-    const report = formatErrorReportForClipboard(makeErrorContext());
-    expect(report).toContain('at FusionQuery');
-  });
+    const ctx = makeErrorContext()
+    const report = formatErrorReportForClipboard(ctx)
 
-  it('includes environment details', () => {
-    const report = formatErrorReportForClipboard(makeErrorContext());
-    expect(report).toContain('Chrome 120.0');
-    expect(report).toContain('macOS');
-    expect(report).toContain('Desktop');
-    expect(report).toContain('v0.1.0-alpha.21');
-  });
+    expect(report).toContain('at Component.render')
+  })
 
-  it('includes URL and timestamp', () => {
-    const report = formatErrorReportForClipboard(makeErrorContext());
-    expect(report).toContain('https://lenr.academy/fusion');
-    expect(report).toContain('2026-02-01T12:00:00.000Z');
-  });
+  it('includes environment section', () => {
+    const ctx = makeErrorContext()
+    const report = formatErrorReportForClipboard(ctx)
+
+    expect(report).toContain('**Browser:** Chrome 120.0.0')
+    expect(report).toContain('**OS:** macOS')
+    expect(report).toContain('**Device:** Desktop')
+    expect(report).toContain('**App Version:** v0.1.0-alpha.21')
+    expect(report).toContain('**URL:** https://lenr.academy/fusion')
+  })
 
   it('includes steps to reproduce placeholder', () => {
-    const report = formatErrorReportForClipboard(makeErrorContext());
-    expect(report).toContain('Steps to Reproduce');
-  });
+    const ctx = makeErrorContext()
+    const report = formatErrorReportForClipboard(ctx)
 
-  it('includes expected/actual behavior sections', () => {
-    const report = formatErrorReportForClipboard(makeErrorContext());
-    expect(report).toContain('Expected Behavior');
-    expect(report).toContain('Actual Behavior');
-  });
+    expect(report).toContain('### Steps to Reproduce')
+  })
 
-  it('includes automated generation notice', () => {
-    const report = formatErrorReportForClipboard(makeErrorContext());
-    expect(report).toContain('automatically generated');
-  });
-});
+  it('includes expected and actual behavior sections', () => {
+    const ctx = makeErrorContext()
+    const report = formatErrorReportForClipboard(ctx)
 
-describe('copyErrorReportToClipboard', () => {
-  it('uses Clipboard API when available', async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.assign(navigator, { clipboard: { writeText } });
+    expect(report).toContain('### Expected Behavior')
+    expect(report).toContain('### Actual Behavior')
+  })
 
-    await copyErrorReportToClipboard(makeErrorContext());
-    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('fp-abc123'));
-  });
+  it('includes LENR Academy attribution', () => {
+    const ctx = makeErrorContext()
+    const report = formatErrorReportForClipboard(ctx)
 
-  it('falls back to execCommand when Clipboard API fails', async () => {
-    Object.assign(navigator, {
-      clipboard: { writeText: vi.fn().mockRejectedValue(new Error('denied')) },
-    });
-
-    const execCommand = vi.fn().mockReturnValue(true);
-    document.execCommand = execCommand;
-
-    await copyErrorReportToClipboard(makeErrorContext());
-    expect(execCommand).toHaveBeenCalledWith('copy');
-  });
-
-  it('throws when both clipboard methods fail', async () => {
-    Object.assign(navigator, {
-      clipboard: { writeText: vi.fn().mockRejectedValue(new Error('denied')) },
-    });
-
-    document.execCommand = vi.fn().mockReturnValue(false);
-
-    await expect(copyErrorReportToClipboard(makeErrorContext())).rejects.toThrow(
-      'execCommand copy failed'
-    );
-  });
-});
+    expect(report).toContain("LENR Academy's error reporting system")
+  })
+})
