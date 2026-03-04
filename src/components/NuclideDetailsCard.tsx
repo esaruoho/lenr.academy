@@ -309,11 +309,14 @@ export default function NuclideDetailsCard({ nuclide, onClose }: NuclideDetailsC
                   <dt className="text-gray-600 dark:text-gray-400 flex-shrink-0">{t('elements.isotopicPercent')}:</dt>
                   <dd className="font-medium text-gray-900 dark:text-gray-100 text-right truncate">
                     {nuclide.pcaNCrust.toFixed(2)}%
-                    {iaeaAbundance !== null && (
-                      <span className="ml-1 text-xs text-gray-400 dark:text-gray-500" title={iaeaDelta !== null ? `IAEA: ${iaeaAbundance.toFixed(4)}% (Δ${iaeaDelta >= 0 ? '+' : ''}${iaeaDelta.toFixed(4)})` : `IAEA: ${iaeaAbundance.toFixed(4)}%`}>
-                        (IAEA: {iaeaAbundance.toFixed(4)}%)
-                      </span>
-                    )}
+                  </dd>
+                </div>
+              )}
+              {typeof nuclide.pcaNCrust === 'number' && iaeaAbundance !== null && (
+                <div className="flex justify-between gap-2">
+                  <dt className="text-gray-600 dark:text-gray-400 flex-shrink-0">{t('elements.isotopicPercent')} (IAEA):</dt>
+                  <dd className="font-medium text-gray-900 dark:text-gray-100 text-right truncate" title={iaeaDelta !== null ? `Δ${iaeaDelta >= 0 ? '+' : ''}${iaeaDelta.toFixed(4)}` : undefined}>
+                    {iaeaAbundance.toFixed(4)}%
                   </dd>
                 </div>
               )}
