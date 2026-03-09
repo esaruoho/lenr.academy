@@ -57,8 +57,8 @@
     "collapse": "折叠侧边栏"
   },
   "footer": {
-    "basedOnWork": "基于亚历山大·帕尔霍莫夫博士的研究",
-    "project": "马丁·弗莱施曼纪念项目"
+    "basedOnWork": "基于<parkhomovLink>亚历山大·帕尔霍莫夫博士</parkhomovLink>的研究",
+    "project": "<mfmpLink>马丁·弗莱施曼纪念项目</mfmpLink>"
   },
   "language": {
     "selectLanguage": "选择语言",
@@ -126,7 +126,7 @@
   "home": {
     "title": "Nanosoft软件包",
     "subtitle": "探索低能核反应（LENR）和冷聚变嬗变途径的交互式工具",
-    "basedOn": "基于亚历山大·帕尔霍莫夫博士的开创性研究",
+    "basedOn": "基于<parkhomovLink>亚历山大·帕尔霍莫夫博士</parkhomovLink>的开创性研究",
     "queryReactions": {
       "title": "查询核反应",
       "description": "搜索数千种放热聚变、裂变和二对二核嬗变反应",

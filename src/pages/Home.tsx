@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, Trans } from 'react-i18next'
 import { Atom, Database, Beaker, Zap } from 'lucide-react'
 
 export default function Home() {
@@ -18,7 +18,12 @@ export default function Home() {
           {t('home.subtitle')}
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-          {t('home.basedOn')}
+          <Trans
+            i18nKey="home.basedOn"
+            components={{
+              parkhomovLink: <a href="https://lenr-canr.org/wordpress/?page_id=1081" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors" />
+            }}
+          />
         </p>
       </div>
 

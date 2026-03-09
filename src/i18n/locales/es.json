@@ -57,8 +57,8 @@
     "collapse": "Contraer barra lateral"
   },
   "footer": {
-    "basedOnWork": "Basado en el trabajo del Dr. Alexander Parkhomov",
-    "project": "Proyecto Memorial Martin Fleischmann"
+    "basedOnWork": "Basado en el trabajo del <parkhomovLink>Dr. Alexander Parkhomov</parkhomovLink>",
+    "project": "<mfmpLink>Proyecto Memorial Martin Fleischmann</mfmpLink>"
   },
   "language": {
     "selectLanguage": "Seleccionar idioma",
@@ -126,7 +126,7 @@
   "home": {
     "title": "El Paquete Nanosoft",
     "subtitle": "Herramientas interactivas para explorar reacciones nucleares de baja energía (LENR) y vías de transmutación por fusión fría",
-    "basedOn": "Basado en el trabajo innovador del Dr. Alexander Parkhomov",
+    "basedOn": "Basado en el trabajo innovador del <parkhomovLink>Dr. Alexander Parkhomov</parkhomovLink>",
     "queryReactions": {
       "title": "Consultar reacciones nucleares",
       "description": "Busque entre miles de reacciones de transmutación nuclear exotérmicas: fusión, fisión y dos a dos",

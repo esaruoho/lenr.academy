@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useCallback, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, Atom, Moon, Sun, ChevronLeft, ChevronRight, Home as HomeIcon, GitMerge, Scissors, ArrowLeftRight, FlaskConical, Table, TableProperties, Shield, Workflow, HelpCircle } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, Trans } from 'react-i18next'
 import { useTheme } from '../contexts/ThemeContext'
 import { useLayout } from '../contexts/LayoutContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -251,8 +251,22 @@ export default function Layout({ children }: LayoutProps) {
               <span>{t('navigation.privacySettings')}</span>
             </Link>
             <div className="text-xs text-gray-500 dark:text-gray-400 px-3">
-              <p>{t('footer.basedOnWork')}</p>
-              <p className="mt-1">{t('footer.project')}</p>
+              <p>
+                <Trans
+                  i18nKey="footer.basedOnWork"
+                  components={{
+                    parkhomovLink: <a href="https://lenr-canr.org/wordpress/?page_id=1081" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors" />
+                  }}
+                />
+              </p>
+              <p className="mt-1">
+                <Trans
+                  i18nKey="footer.project"
+                  components={{
+                    mfmpLink: <a href="https://www.quantumheat.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors" />
+                  }}
+                />
+              </p>
               <a
                 href={getGitHubReleaseUrl(versionInfo)}
                 target="_blank"
@@ -350,8 +364,22 @@ export default function Layout({ children }: LayoutProps) {
               </div>
             </Link>
             <div className={`text-xs text-gray-500 dark:text-gray-400 transition-all duration-150 overflow-hidden ${desktopSidebarCollapsed ? 'opacity-0 max-h-0 delay-0' : 'opacity-100 max-h-96 delay-150'}`}>
-              <p>{t('footer.basedOnWork')}</p>
-              <p className="mt-1">{t('footer.project')}</p>
+              <p>
+                <Trans
+                  i18nKey="footer.basedOnWork"
+                  components={{
+                    parkhomovLink: <a href="https://lenr-canr.org/wordpress/?page_id=1081" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors" />
+                  }}
+                />
+              </p>
+              <p className="mt-1">
+                <Trans
+                  i18nKey="footer.project"
+                  components={{
+                    mfmpLink: <a href="https://www.quantumheat.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors" />
+                  }}
+                />
+              </p>
               <a
                 href={getGitHubReleaseUrl(versionInfo)}
                 target="_blank"
