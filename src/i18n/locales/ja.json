@@ -1159,6 +1159,19 @@
     "metricStability": "安定性スコア",
     "reactionSteps": "反応ステップ",
     "feedbackLabel": "フィードバック",
-    "transformationChain": "変換チェーン"
+    "transformationChain": "変換チェーン",
+    "quickStart": "クイックスタート — プリセットをクリックして設定・実行：",
+    "presetLightElements": "軽元素",
+    "presetLightElementsDesc": "H〜Oを検索 — 高速、一般的なLENR燃料候補に焦点",
+    "presetLENRClassics": "LENRクラシック",
+    "presetLENRClassicsDesc": "H, D, Li, Ni, Pd, C, N, O — 最も研究されたLENRシステム",
+    "presetDeepSearch": "ディープサーチ",
+    "presetDeepSearchDesc": "全元素、深いサイクル、核分裂含む — 遅いが包括的",
+    "presetHydrogenOnly": "水素のみ",
+    "presetHydrogenOnlyDesc": "H, D, Tアイソトープのみ — 純粋な水素核融合サイクル",
+    "topDiscoveries": "トップ発見",
+    "topBestEnergy": "最高エネルギー",
+    "topBestFeedback": "最高フィードバック",
+    "topMostPractical": "最も実用的"
   }
 }

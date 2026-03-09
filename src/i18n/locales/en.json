@@ -1175,6 +1175,19 @@
     "reactionTypeFusion": "FUSION",
     "reactionTypeTwoToTwo": "TWO-TO-TWO",
     "reactionTypeFission": "FISSION",
-    "reactionTypeTwoToTwoShort": "2→2"
+    "reactionTypeTwoToTwoShort": "2→2",
+    "quickStart": "Quick start — click a preset to configure and run:",
+    "presetLightElements": "Light Elements",
+    "presetLightElementsDesc": "Search H through O — fast, focused on common LENR fuel candidates",
+    "presetLENRClassics": "LENR Classics",
+    "presetLENRClassicsDesc": "H, D, Li, Ni, Pd, C, N, O — the most-studied LENR systems",
+    "presetDeepSearch": "Deep Search",
+    "presetDeepSearchDesc": "All elements, deeper cycles, includes fission — slower but comprehensive",
+    "presetHydrogenOnly": "Hydrogen Only",
+    "presetHydrogenOnlyDesc": "H, D, T isotopes only — pure hydrogen fusion cycles",
+    "topDiscoveries": "Top Discoveries",
+    "topBestEnergy": "Highest Energy",
+    "topBestFeedback": "Best Feedback",
+    "topMostPractical": "Most Practical"
   }
 }

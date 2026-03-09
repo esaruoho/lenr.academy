@@ -1,17 +1,28 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, XCircle, CheckCircle, RefreshCw } from 'lucide-react'
+import {
+  AlertCircle,
+  XCircle,
+  CheckCircle,
+  RefreshCw,
+  Trophy,
+  Zap,
+  Leaf,
+} from 'lucide-react'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { useQueryState } from '../contexts/QueryStateContext'
 import { useCycleDiscoveryWorker } from '../hooks/useCycleDiscoveryWorker'
+import { getAllElements } from '../services/queryService'
 import CycleDiscoverySearch from '../components/CycleDiscoverySearch'
+import type { CyclePreset } from '../constants/cyclePresets'
 import CycleResultsTable from '../components/CycleResultsTable'
 import CycleVisualization from '../components/CycleVisualization'
 import type {
   CycleDiscoveryParameters,
   CycleDiscoveryResults,
   DiscoveredCycle,
+  Element,
 } from '../types'
 
 const DEFAULT_PARAMS: CycleDiscoveryParameters = {
@@ -41,6 +52,14 @@ export default function CycleDiscovery() {
   const [selectedCycle, setSelectedCycle] = useState<DiscoveredCycle | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [hasRestoredFromContext, setHasRestoredFromContext] = useState(false)
+  const [elements, setElements] = useState<Element[]>([])
+
+  // Load elements for the PeriodicTableSelector
+  useEffect(() => {
+    if (db) {
+      setElements(getAllElements(db))
+    }
+  }, [db])
 
   // Restore state from context on mount
   useEffect(() => {
@@ -90,6 +109,27 @@ export default function CycleDiscovery() {
     }
   }
 
+  const handlePresetSelect = (preset: CyclePreset) => {
+    setParams(preset.params)
+    // Auto-run search after a short delay to let state settle
+    setTimeout(() => {
+      if (!db) return
+      setError(null)
+      setResults(null)
+      setSelectedCycle(null)
+      const dbBuffer = db.export().buffer
+      runDiscovery(preset.params, dbBuffer as ArrayBuffer)
+        .then((discoveryResults) => setResults(discoveryResults))
+        .catch((err) => {
+          const message =
+            err instanceof Error ? err.message : 'Unknown error occurred'
+          if (message !== 'Cycle discovery cancelled by user') {
+            setError(message)
+          }
+        })
+    }, 0)
+  }
+
   const handleViewCycle = (cycle: DiscoveredCycle) => {
     const cycleIndex = results?.cycles.indexOf(cycle) ?? -1
     setSelectedCycle(cycle)
@@ -120,6 +160,24 @@ export default function CycleDiscovery() {
   const handleBack = () => {
     window.history.back()
   }
+
+  // Compute top discoveries for the summary card
+  const topDiscoveries = useMemo(() => {
+    if (!results || results.cycles.length === 0) return null
+    const cycles = results.cycles
+    const bestEnergy = [...cycles].sort(
+      (a, b) => b.totalEnergy - a.totalEnergy
+    )[0]
+    const bestFeedback = [...cycles].sort(
+      (a, b) => b.feedbackRatio - a.feedbackRatio
+    )[0]
+    const mostPractical = [...cycles].sort(
+      (a, b) =>
+        b.abundanceScore + b.stabilityScore -
+        (a.abundanceScore + a.stabilityScore)
+    )[0]
+    return { bestEnergy, bestFeedback, mostPractical }
+  }, [results])
 
   const displayError = error || workerError
 
@@ -158,6 +216,8 @@ export default function CycleDiscovery() {
           onCancel={cancelDiscovery}
           isSearching={isRunning}
           progress={progress}
+          availableElements={elements}
+          onPresetSelect={handlePresetSelect}
         />
       </div>
 
@@ -224,6 +284,84 @@ export default function CycleDiscovery() {
               </div>
             </div>
           </div>
+
+          {/* Top Discoveries */}
+          {topDiscoveries && results.cycles.length >= 3 && (
+            <div className="card p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-amber-500" />
+                {t('cycleDiscovery.topDiscoveries')}
+              </h3>
+              <div className="grid md:grid-cols-3 gap-4">
+                {/* Best Energy */}
+                <button
+                  onClick={() => handleViewCycle(topDiscoveries.bestEnergy)}
+                  className="text-left p-4 rounded-lg bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                      {t('cycleDiscovery.topBestEnergy')}
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                    {topDiscoveries.bestEnergy.totalEnergy.toFixed(2)} MeV
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    {topDiscoveries.bestEnergy.fuelNuclides
+                      .map((n) => `${n.A}${n.E}`)
+                      .join(' + ')}
+                  </p>
+                </button>
+
+                {/* Best Feedback */}
+                <button
+                  onClick={() => handleViewCycle(topDiscoveries.bestFeedback)}
+                  className="text-left p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <RefreshCw className="w-4 h-4 text-amber-600" />
+                    <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                      {t('cycleDiscovery.topBestFeedback')}
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">
+                    {topDiscoveries.bestFeedback.feedbackRatio.toFixed(0)}%
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    {topDiscoveries.bestFeedback.fuelNuclides
+                      .map((n) => `${n.A}${n.E}`)
+                      .join(' + ')}
+                  </p>
+                </button>
+
+                {/* Most Practical */}
+                <button
+                  onClick={() => handleViewCycle(topDiscoveries.mostPractical)}
+                  className="text-left p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Leaf className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                      {t('cycleDiscovery.topMostPractical')}
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                    {(
+                      (topDiscoveries.mostPractical.abundanceScore +
+                        topDiscoveries.mostPractical.stabilityScore) /
+                      2
+                    ).toFixed(0)}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    {topDiscoveries.mostPractical.fuelNuclides
+                      .map((n) => `${n.A}${n.E}`)
+                      .join(' + ')}
+                  </p>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Results table */}
           <CycleResultsTable

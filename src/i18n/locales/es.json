@@ -1167,6 +1167,19 @@
     "metricStability": "Puntuación de estabilidad",
     "reactionSteps": "Pasos de reacción",
     "feedbackLabel": "RETROALIMENTACIÓN",
-    "transformationChain": "Cadena de transformación"
+    "transformationChain": "Cadena de transformación",
+    "quickStart": "Inicio rápido — haga clic en un preset para configurar y ejecutar:",
+    "presetLightElements": "Elementos ligeros",
+    "presetLightElementsDesc": "Buscar H a O — rápido, enfocado en candidatos comunes de combustible LENR",
+    "presetLENRClassics": "Clásicos LENR",
+    "presetLENRClassicsDesc": "H, D, Li, Ni, Pd, C, N, O — los sistemas LENR más estudiados",
+    "presetDeepSearch": "Búsqueda profunda",
+    "presetDeepSearchDesc": "Todos los elementos, ciclos más profundos, incluye fisión — más lento pero exhaustivo",
+    "presetHydrogenOnly": "Solo hidrógeno",
+    "presetHydrogenOnlyDesc": "Solo isótopos H, D, T — ciclos puros de fusión de hidrógeno",
+    "topDiscoveries": "Principales descubrimientos",
+    "topBestEnergy": "Mayor energía",
+    "topBestFeedback": "Mejor retroalimentación",
+    "topMostPractical": "Más práctico"
   }
 }

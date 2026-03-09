@@ -1159,6 +1159,19 @@
     "metricStability": "稳定性评分",
     "reactionSteps": "反应步骤",
     "feedbackLabel": "反馈",
-    "transformationChain": "转化链"
+    "transformationChain": "转化链",
+    "quickStart": "快速开始 — 点击预设来配置并运行：",
+    "presetLightElements": "轻元素",
+    "presetLightElementsDesc": "搜索H到O — 快速，专注于常见的LENR燃料候选",
+    "presetLENRClassics": "LENR经典",
+    "presetLENRClassicsDesc": "H, D, Li, Ni, Pd, C, N, O — 研究最多的LENR系统",
+    "presetDeepSearch": "深度搜索",
+    "presetDeepSearchDesc": "所有元素，更深循环，包括裂变 — 较慢但全面",
+    "presetHydrogenOnly": "仅氢",
+    "presetHydrogenOnlyDesc": "仅H, D, T同位素 — 纯氢聚变循环",
+    "topDiscoveries": "顶级发现",
+    "topBestEnergy": "最高能量",
+    "topBestFeedback": "最佳反馈",
+    "topMostPractical": "最实用"
   }
 }
