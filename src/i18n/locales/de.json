@@ -1043,6 +1043,56 @@
     "about1": "Frithjof Mullers Gleichung L = Z × C × 2ᴺ weist jedem Element bei jeder Oktave eine Resonanzwellenlänge zu. Wenn die Compton-Wellenlänge des Elektrons eines Elements und die Compton-Wellenlänge des Protons eines anderen Elements bei exakt ganzzahligen Oktavzahlen die gleiche Wellenlänge erzeugen, teilen sie eine Kreuz-Teilchen-Resonanz.",
     "about2": "Beispiel: Kupfer (Z=29) bei Elektronenoktave N=31 und Eisen (Z=26) bei Protonenoktave N=42 erzeugen beide L = 151,1 mm — eine Übereinstimmung von 0,0008%.",
     "about3": "Die angezeigten Reaktionszahlen stammen aus Dr. Alexander Parkhomovs Tabellen exothermer Kernreaktionen. Die statistische Analyse zeigt keine signifikante Korrelation zwischen Muller-Resonanz und Parkhomov-Reaktionsdichte. Dieses Tool ist explorativ.",
-    "disclaimer": "Hinweis: Mullers Gleichung erzeugt elegante Mathematik, aber es fehlt eine unabhängige experimentelle Verifizierung des Resonanzmechanismus. Dieses Tool dient der Erkundung und Hypothesengenerierung."
+    "disclaimer": "Hinweis: Mullers Gleichung erzeugt elegante Mathematik, aber es fehlt eine unabhängige experimentelle Verifizierung des Resonanzmechanismus. Dieses Tool dient der Erkundung und Hypothesengenerierung.",
+    "tabs": {
+      "resonancePairs": "Resonanzpaare",
+      "naePredictions": "NAE-Vorhersagen"
+    },
+    "nae": {
+      "title": "NAE-Gittervorhersagen",
+      "description": "Elemente sortiert nach Nähe der Elektronenresonanz-Wellenlänge zum ~1 nm NAE-Spalt (Nuclear Active Environment), identifiziert von Edmund Storms (JCMNS 41, 2026). Hervorgehobene Elemente haben Resonanz im Bereich 0,5–2,0 nm bei niedrigen Oktaven.",
+      "element": "Element",
+      "octave": "Oktave (N)",
+      "electronResonance": "e⁻-Resonanz",
+      "naeQuality": "NAE-Übereinstimmung",
+      "naeScore": "NAE-Score",
+      "deuteriumOverlap": "D-Überlappung",
+      "deuteriumOctave": "D-Oktave (N)",
+      "deuteriumMismatch": "D-Abweichung",
+      "phononFrequency": "Phonon-Freq.",
+      "knownLENR": "Bekannte LENR",
+      "parkhomovReactions": "Parkhomov-Rxn.",
+      "showNAEOnly": "Nur Elemente mit Resonanz im NAE-Bereich anzeigen",
+      "elementsInRange": "Elemente im NAE-Bereich (0,5–2,0 nm)",
+      "withDOverlap": "Mit D-Überlappung (<30%)",
+      "confirmedLENR": "Bekannte LENR-aktive",
+      "qualityLabels": {
+        "optimal": "Optimal",
+        "good": "Gut",
+        "marginal": "Marginal",
+        "distant": "Entfernt"
+      },
+      "lenrLabels": {
+        "strong": "Stark",
+        "moderate": "Mittel",
+        "weak": "Schwach"
+      },
+      "octaveDetail": "Oktavendetail",
+      "electronOctaves": "Elektronenresonanz-Oktaven (N=1–10)",
+      "inNAERange": "Im NAE?",
+      "deuteriumProtonResonance": "Deuterium-Protonen-Resonanzüberlappung",
+      "hostElectron": "Wirt-Elektronenresonanz",
+      "dProton": "D-Protonenresonanz",
+      "overlapMismatch": "Überlappungsabweichung",
+      "phononCalc": "Phononfrequenz (v_Schall / L)",
+      "lenrRefs": "LENR-Referenzen",
+      "noNAEResonance": "Keine Resonanz im NAE-Bereich bei niedrigen Oktaven.",
+      "aboutNAETitle": "Über NAE-Vorhersagen",
+      "aboutNAE1": "Edmund Storms hat identifiziert, dass Kalte Fusion (LENR) in Nuclear Active Environments (NAE) stattfindet — nanoskalige Lücken oder Risse im Metallgitter, typischerweise ~1 nm breit (JCMNS 41, 2026).",
+      "aboutNAE2": "Mullers Gleichung L = Z × Cₑ × 2ᴺ bei niedrigen Oktavzahlen (N=3, N=4) sagt Elektronenresonanz-Wellenlängen voraus. Palladium (Z=46) bei N=3 ergibt 0,89 nm und bei N=4 ergibt 1,79 nm — der NAE-Spalt fällt genau zwischen diese Oktaven.",
+      "aboutNAE3": "Die Überlappung mit Deuterium ist bemerkenswert: Bei Protonenoktave N=20 hat Deuterium eine Resonanzwellenlänge von 1,39 nm — genau im NAE-Bereich.",
+      "aboutNAE4": "Die bekannten LENR-aktiven Metalle (Pd, Ni, Pt, Ti) haben alle Elektronenresonanzlängen im Bereich 0,9–1,8 nm bei N=3 oder N=4. Elemente ohne LENR-Berichte verfehlen diesen Bereich.",
+      "naeDisclaimer": "Diese Analyse kombiniert Mullers Resonanzrahmenwerk mit Storms' NAE-Modell. Beide sind theoretische Modelle. Ergebnisse werden zur Erkundung und Hypothesengenerierung präsentiert."
+    }
   }
 }

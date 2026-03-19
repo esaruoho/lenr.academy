@@ -1,25 +1,38 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { getAllElements } from '../services/queryService'
 import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import PeriodicTable from '../components/PeriodicTable'
+import TabNavigation from '../components/TabNavigation'
+import type { Tab } from '../components/TabNavigation'
 import type { Element } from '../types'
 import {
   findResonantPartners,
   queryResonantReactions,
   formatWavelength,
+  formatFrequency,
   getResonanceQuality,
+  getNAEQuality,
   computeMullerMismatch,
+  computeNAEPredictions,
+  queryElementReactionCounts,
   type MullerResonancePair,
   type ReactionOverlap,
+  type NAEPrediction,
 } from '../services/mullerResonanceService'
+import { NAE_GAP_MIN, NAE_GAP_MAX } from '../constants/naeConstants'
 
 const THRESHOLD_OPTIONS = [0.1, 0.5, 1.0, 2.0, 5.0, 10.0]
+
+type SortColumn = 'element' | 'naeScore' | 'wavelength' | 'deuterium' | 'phonon' | 'reactions' | 'lenr'
+type SortDirection = 'asc' | 'desc'
 
 export default function MullerResonance() {
   const { t } = useTranslation()
   const { db, isLoading: dbLoading, downloadProgress } = useDatabase()
+  const [searchParams] = useSearchParams()
   const [elements, setElements] = useState<Element[]>([])
   const [selectedElement, setSelectedElement] = useState<string | null>(null)
   const [threshold, setThreshold] = useState(5.0)
@@ -27,11 +40,48 @@ export default function MullerResonance() {
   const [overlaps, setOverlaps] = useState<ReactionOverlap[]>([])
   const [loading, setLoading] = useState(false)
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'resonance')
+
+  // NAE state
+  const [naePredictions, setNaePredictions] = useState<NAEPrediction[]>([])
+  const [reactionCounts, setReactionCounts] = useState<Map<number, number>>(new Map())
+  const [naeFilter, setNaeFilter] = useState(false)
+  const [naeSortColumn, setNaeSortColumn] = useState<SortColumn>('naeScore')
+  const [naeSortDirection, setNaeSortDirection] = useState<SortDirection>('asc')
+  const [expandedRow, setExpandedRow] = useState<number | null>(null)
+
+  const tabs: Tab[] = useMemo(() => [
+    { id: 'resonance', label: t('mullerResonance.tabs.resonancePairs') },
+    { id: 'nae', label: t('mullerResonance.tabs.naePredictions') },
+  ], [t])
+
   useEffect(() => {
     if (!db) return
     const allElements = getAllElements(db)
     setElements(allElements)
   }, [db])
+
+  // Compute NAE predictions when elements are loaded
+  useEffect(() => {
+    if (elements.length === 0) return
+
+    const predictions = computeNAEPredictions(
+      elements.map(e => ({ Z: e.Z, E: e.E }))
+    )
+    setNaePredictions(predictions)
+  }, [elements])
+
+  // Query reaction counts when switching to NAE tab
+  useEffect(() => {
+    if (!db || activeTab !== 'nae' || reactionCounts.size > 0) return
+
+    const counts = queryElementReactionCounts(
+      db,
+      elements.map(e => ({ Z: e.Z }))
+    )
+    setReactionCounts(counts)
+  }, [db, activeTab, elements, reactionCounts.size])
 
   const handleElementClick = useCallback((symbol: string) => {
     setSelectedElement(prev => prev === symbol ? null : symbol)
@@ -86,6 +136,22 @@ export default function MullerResonance() {
     return map
   }, [selectedElement, elements, threshold])
 
+  // NAE heatmap: highlight elements by NAE score
+  const naeHeatmapData = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const pred of naePredictions) {
+      const inRange = pred.naeWavelength !== null &&
+        pred.naeWavelength >= NAE_GAP_MIN &&
+        pred.naeWavelength <= NAE_GAP_MAX
+      if (inRange) {
+        // Score 0 = perfect match at 1nm, higher = worse
+        const intensity = Math.max(0, 1 - pred.naeScore / 1.5)
+        map.set(pred.E, intensity)
+      }
+    }
+    return map
+  }, [naePredictions])
+
   // Stats
   const stats = useMemo(() => {
     const exact = pairs.filter(p => p.mismatch < 0.01).length
@@ -94,6 +160,70 @@ export default function MullerResonance() {
     const totalReactions = overlaps.reduce((s, o) => s + o.twoToTwoCount + o.fusionCount, 0)
     return { exact, strong, withReactions, totalReactions }
   }, [pairs, overlaps])
+
+  // NAE stats
+  const naeStats = useMemo(() => {
+    const inRange = naePredictions.filter(p =>
+      p.naeWavelength !== null &&
+      p.naeWavelength >= NAE_GAP_MIN &&
+      p.naeWavelength <= NAE_GAP_MAX
+    ).length
+    const withLENR = naePredictions.filter(p => p.lenrStrength !== null).length
+    const withOverlap = naePredictions.filter(p =>
+      p.deuteriumMismatch !== null && p.deuteriumMismatch < 50
+    ).length
+    return { inRange, withLENR, withOverlap }
+  }, [naePredictions])
+
+  // Sorted and filtered NAE predictions
+  const sortedNAEPredictions = useMemo(() => {
+    let filtered = naePredictions
+    if (naeFilter) {
+      filtered = naePredictions.filter(p =>
+        p.naeWavelength !== null &&
+        p.naeWavelength >= NAE_GAP_MIN &&
+        p.naeWavelength <= NAE_GAP_MAX
+      )
+    }
+
+    return [...filtered].sort((a, b) => {
+      const dir = naeSortDirection === 'asc' ? 1 : -1
+      switch (naeSortColumn) {
+        case 'element': return dir * a.E.localeCompare(b.E)
+        case 'naeScore': return dir * (a.naeScore - b.naeScore)
+        case 'wavelength': return dir * ((a.naeWavelength ?? Infinity) - (b.naeWavelength ?? Infinity))
+        case 'deuterium': return dir * ((a.deuteriumMismatch ?? Infinity) - (b.deuteriumMismatch ?? Infinity))
+        case 'phonon': return dir * ((a.phononFrequency ?? 0) - (b.phononFrequency ?? 0))
+        case 'reactions': {
+          const aRxn = reactionCounts.get(a.Z) ?? 0
+          const bRxn = reactionCounts.get(b.Z) ?? 0
+          return dir * (aRxn - bRxn)
+        }
+        case 'lenr': {
+          const aVal = a.lenrStrength === 'strong' ? 3 : a.lenrStrength === 'moderate' ? 2 : a.lenrStrength === 'weak' ? 1 : 0
+          const bVal = b.lenrStrength === 'strong' ? 3 : b.lenrStrength === 'moderate' ? 2 : b.lenrStrength === 'weak' ? 1 : 0
+          return dir * (aVal - bVal)
+        }
+        default: return 0
+      }
+    })
+  }, [naePredictions, naeFilter, naeSortColumn, naeSortDirection, reactionCounts])
+
+  const handleNAESort = useCallback((col: SortColumn) => {
+    setNaeSortColumn(prev => {
+      if (prev === col) {
+        setNaeSortDirection(d => d === 'asc' ? 'desc' : 'asc')
+        return col
+      }
+      setNaeSortDirection('asc')
+      return col
+    })
+  }, [])
+
+  const sortIndicator = useCallback((col: SortColumn) => {
+    if (naeSortColumn !== col) return ''
+    return naeSortDirection === 'asc' ? ' ↑' : ' ↓'
+  }, [naeSortColumn, naeSortDirection])
 
   if (dbLoading || !db) {
     return (
@@ -123,136 +253,361 @@ export default function MullerResonance() {
         </div>
       </div>
 
-      {/* Threshold selector */}
-      <div className="card p-4 mb-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t('mullerResonance.threshold')}:
-          </span>
-          {THRESHOLD_OPTIONS.map(t_val => (
-            <button
-              key={t_val}
-              onClick={() => setThreshold(t_val)}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                threshold === t_val
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              &lt; {t_val}%
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Tab Navigation */}
+      <TabNavigation
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        className="mb-6"
+      />
 
-      {/* Periodic Table */}
-      <div className="card p-4 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-          {t('mullerResonance.selectElement')}
-        </h2>
-        <PeriodicTable
-          availableElements={elements}
-          selectedElement={selectedElement}
-          onElementClick={handleElementClick}
-          heatmapData={heatmapData}
-          showHeatmap={!!selectedElement}
-          hideLegend
-          hideCardContainer
-        />
-        {selectedElement && (
-          <div className="mt-3 flex flex-wrap gap-4 text-sm">
-            <span className="text-gray-600 dark:text-gray-400">
-              {t('mullerResonance.resonantPartners')}: <strong className="text-gray-900 dark:text-white">{pairs.length}</strong>
-            </span>
-            {stats.exact > 0 && (
-              <span className="text-emerald-600 dark:text-emerald-400">
-                {t('mullerResonance.exactMatches')}: <strong>{stats.exact}</strong>
+      {/* ================================================================ */}
+      {/* RESONANCE PAIRS TAB                                              */}
+      {/* ================================================================ */}
+      {activeTab === 'resonance' && (
+        <>
+          {/* Threshold selector */}
+          <div className="card p-4 mb-6">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('mullerResonance.threshold')}:
               </span>
-            )}
-            <span className="text-gray-600 dark:text-gray-400">
-              {t('mullerResonance.withReactions')}: <strong className="text-gray-900 dark:text-white">{stats.withReactions}</strong>
-            </span>
-            <span className="text-gray-600 dark:text-gray-400">
-              {t('mullerResonance.totalReactions')}: <strong className="text-gray-900 dark:text-white">{stats.totalReactions.toLocaleString()}</strong>
-            </span>
+              {THRESHOLD_OPTIONS.map(t_val => (
+                <button
+                  key={t_val}
+                  onClick={() => setThreshold(t_val)}
+                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                    threshold === t_val
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  &lt; {t_val}%
+                </button>
+              ))}
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Results table */}
-      {selectedElement && (
-        <div className="card p-4 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            {t('mullerResonance.resonancePairs')}
-          </h2>
+          {/* Periodic Table */}
+          <div className="card p-4 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+              {t('mullerResonance.selectElement')}
+            </h2>
+            <PeriodicTable
+              availableElements={elements}
+              selectedElement={selectedElement}
+              onElementClick={handleElementClick}
+              heatmapData={heatmapData}
+              showHeatmap={!!selectedElement}
+              hideLegend
+              hideCardContainer
+            />
+            {selectedElement && (
+              <div className="mt-3 flex flex-wrap gap-4 text-sm">
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('mullerResonance.resonantPartners')}: <strong className="text-gray-900 dark:text-white">{pairs.length}</strong>
+                </span>
+                {stats.exact > 0 && (
+                  <span className="text-emerald-600 dark:text-emerald-400">
+                    {t('mullerResonance.exactMatches')}: <strong>{stats.exact}</strong>
+                  </span>
+                )}
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('mullerResonance.withReactions')}: <strong className="text-gray-900 dark:text-white">{stats.withReactions}</strong>
+                </span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {t('mullerResonance.totalReactions')}: <strong className="text-gray-900 dark:text-white">{stats.totalReactions.toLocaleString()}</strong>
+                </span>
+              </div>
+            )}
+          </div>
 
-          {loading ? (
-            <p className="text-gray-500 dark:text-gray-400">{t('common.loading')}</p>
-          ) : pairs.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400">{t('mullerResonance.noResonantPairs')}</p>
-          ) : (
+          {/* Results table */}
+          {selectedElement && (
+            <div className="card p-4 mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                {t('mullerResonance.resonancePairs')}
+              </h2>
+
+              {loading ? (
+                <p className="text-gray-500 dark:text-gray-400">{t('common.loading')}</p>
+              ) : pairs.length === 0 ? (
+                <p className="text-gray-500 dark:text-gray-400">{t('mullerResonance.noResonantPairs')}</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-gray-700">
+                        <th className="text-left py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.partner')}</th>
+                        <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.mismatchHeader')}</th>
+                        <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.quality')}</th>
+                        <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.wavelength')}</th>
+                        <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.octaves')}</th>
+                        <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.twoToTwo')}</th>
+                        <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.fusion')}</th>
+                        <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.avgMeV')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {overlaps.map((overlap, i) => {
+                        const pair = pairs[i]
+                        if (!pair) return null
+                        const quality = getResonanceQuality(pair.mismatch)
+                        const qualityColors: Record<string, string> = {
+                          exact: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+                          strong: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                          moderate: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+                          weak: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+                        }
+
+                        return (
+                          <tr
+                            key={`${pair.Z1}-${pair.Z2}`}
+                            className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                          >
+                            <td className="py-2 px-3 font-medium text-gray-900 dark:text-white">
+                              {pair.E2} <span className="text-gray-400 dark:text-gray-500">(Z={pair.Z2})</span>
+                            </td>
+                            <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                              {pair.mismatch < 0.01 ? pair.mismatch.toFixed(4) : pair.mismatch.toFixed(2)}%
+                            </td>
+                            <td className="py-2 px-3 text-center">
+                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${qualityColors[quality]}`}>
+                                {t(`mullerResonance.qualityLabels.${quality}`)}
+                              </span>
+                            </td>
+                            <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                              {formatWavelength(pair.wavelength)}
+                            </td>
+                            <td className="py-2 px-3 text-center text-gray-500 dark:text-gray-400 font-mono text-xs">
+                              <span title={t('mullerResonance.electronOctave')}>e:{pair.electronOctave}</span>
+                              {' / '}
+                              <span title={t('mullerResonance.protonOctave')}>p:{pair.protonOctave}</span>
+                            </td>
+                            <td className="py-2 px-3 text-right text-gray-700 dark:text-gray-300">
+                              {overlap.twoToTwoCount > 0 ? overlap.twoToTwoCount.toLocaleString() : (
+                                <span className="text-gray-400 dark:text-gray-600">-</span>
+                              )}
+                            </td>
+                            <td className="py-2 px-3 text-right text-gray-700 dark:text-gray-300">
+                              {overlap.fusionCount > 0 ? overlap.fusionCount : (
+                                <span className="text-gray-400 dark:text-gray-600">-</span>
+                              )}
+                            </td>
+                            <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                              {overlap.avgMeV > 0 ? overlap.avgMeV.toFixed(1) : (
+                                <span className="text-gray-400 dark:text-gray-600">-</span>
+                              )}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Explanation card */}
+          <div className="card p-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+              {t('mullerResonance.aboutTitle')}
+            </h2>
+            <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+              <p>{t('mullerResonance.about1')}</p>
+              <p>{t('mullerResonance.about2')}</p>
+              <p>{t('mullerResonance.about3')}</p>
+              <div className="p-3 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                <p className="text-amber-800 dark:text-amber-300 text-xs">
+                  {t('mullerResonance.disclaimer')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ================================================================ */}
+      {/* NAE PREDICTIONS TAB                                              */}
+      {/* ================================================================ */}
+      {activeTab === 'nae' && (
+        <>
+          {/* NAE Periodic Table */}
+          <div className="card p-4 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              {t('mullerResonance.nae.title')}
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              {t('mullerResonance.nae.description')}
+            </p>
+            <PeriodicTable
+              availableElements={elements}
+              selectedElement={null}
+              onElementClick={handleElementClick}
+              heatmapData={naeHeatmapData}
+              showHeatmap={true}
+              hideLegend
+              hideCardContainer
+            />
+            <div className="mt-3 flex flex-wrap gap-4 text-sm">
+              <span className="text-gray-600 dark:text-gray-400">
+                {t('mullerResonance.nae.elementsInRange')}: <strong className="text-emerald-600 dark:text-emerald-400">{naeStats.inRange}</strong>
+              </span>
+              <span className="text-gray-600 dark:text-gray-400">
+                {t('mullerResonance.nae.withDOverlap')}: <strong className="text-blue-600 dark:text-blue-400">{naeStats.withOverlap}</strong>
+              </span>
+              <span className="text-gray-600 dark:text-gray-400">
+                {t('mullerResonance.nae.confirmedLENR')}: <strong className="text-amber-600 dark:text-amber-400">{naeStats.withLENR}</strong>
+              </span>
+            </div>
+          </div>
+
+          {/* Filter toggle */}
+          <div className="card p-4 mb-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={naeFilter}
+                onChange={(e) => setNaeFilter(e.target.checked)}
+                className="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+              />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('mullerResonance.nae.showNAEOnly')}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                (0.5–2.0 nm)
+              </span>
+            </label>
+          </div>
+
+          {/* NAE Predictions Table */}
+          <div className="card p-4 mb-6">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="text-left py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.partner')}</th>
-                    <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.mismatchHeader')}</th>
-                    <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.quality')}</th>
-                    <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.wavelength')}</th>
-                    <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.octaves')}</th>
-                    <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.twoToTwo')}</th>
-                    <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.fusion')}</th>
-                    <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.avgMeV')}</th>
+                    <th
+                      className="text-left py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      onClick={() => handleNAESort('element')}
+                    >
+                      {t('mullerResonance.nae.element')}{sortIndicator('element')}
+                    </th>
+                    <th
+                      className="text-center py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      onClick={() => handleNAESort('naeScore')}
+                    >
+                      {t('mullerResonance.nae.octave')}{sortIndicator('naeScore')}
+                    </th>
+                    <th
+                      className="text-right py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      onClick={() => handleNAESort('wavelength')}
+                    >
+                      {t('mullerResonance.nae.electronResonance')}{sortIndicator('wavelength')}
+                    </th>
+                    <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">
+                      {t('mullerResonance.nae.naeQuality')}
+                    </th>
+                    <th
+                      className="text-center py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      onClick={() => handleNAESort('deuterium')}
+                    >
+                      {t('mullerResonance.nae.deuteriumOverlap')}{sortIndicator('deuterium')}
+                    </th>
+                    <th
+                      className="text-right py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      onClick={() => handleNAESort('phonon')}
+                    >
+                      {t('mullerResonance.nae.phononFrequency')}{sortIndicator('phonon')}
+                    </th>
+                    <th
+                      className="text-right py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      onClick={() => handleNAESort('reactions')}
+                    >
+                      {t('mullerResonance.nae.parkhomovReactions')}{sortIndicator('reactions')}
+                    </th>
+                    <th
+                      className="text-center py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      onClick={() => handleNAESort('lenr')}
+                    >
+                      {t('mullerResonance.nae.knownLENR')}{sortIndicator('lenr')}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {overlaps.map((overlap, i) => {
-                    const pair = pairs[i]
-                    if (!pair) return null
-                    const quality = getResonanceQuality(pair.mismatch)
+                  {sortedNAEPredictions.map((pred) => {
+                    const inRange = pred.naeWavelength !== null &&
+                      pred.naeWavelength >= NAE_GAP_MIN &&
+                      pred.naeWavelength <= NAE_GAP_MAX
+                    const quality = getNAEQuality(pred.naeScore, inRange)
+                    const isExpanded = expandedRow === pred.Z
+
                     const qualityColors: Record<string, string> = {
-                      exact: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-                      strong: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-                      moderate: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-                      weak: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+                      optimal: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+                      good: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                      marginal: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+                      distant: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
                     }
+
+                    const lenrColors: Record<string, string> = {
+                      strong: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+                      moderate: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                      weak: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+                    }
+
+                    const rxCount = reactionCounts.get(pred.Z) ?? 0
 
                     return (
                       <tr
-                        key={`${pair.Z1}-${pair.Z2}`}
-                        className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                        key={pred.Z}
+                        className={`border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors ${
+                          inRange
+                            ? 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                        } ${isExpanded ? 'bg-gray-50 dark:bg-gray-800/50' : ''}`}
+                        onClick={() => setExpandedRow(isExpanded ? null : pred.Z)}
                       >
-                        <td className="py-2 px-3 font-medium text-gray-900 dark:text-white">
-                          {pair.E2} <span className="text-gray-400 dark:text-gray-500">(Z={pair.Z2})</span>
+                        <td className={`py-2 px-3 font-medium ${pred.lenrStrength ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                          {pred.E} <span className="text-gray-400 dark:text-gray-500 text-xs">(Z={pred.Z})</span>
+                        </td>
+                        <td className="py-2 px-3 text-center font-mono text-gray-700 dark:text-gray-300">
+                          N={pred.naeOctave ?? '-'}
                         </td>
                         <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                          {pair.mismatch < 0.01 ? pair.mismatch.toFixed(4) : pair.mismatch.toFixed(2)}%
+                          {pred.naeWavelength !== null ? `${(pred.naeWavelength * 1e9).toFixed(2)} nm` : '-'}
                         </td>
                         <td className="py-2 px-3 text-center">
                           <span className={`px-2 py-0.5 rounded text-xs font-medium ${qualityColors[quality]}`}>
-                            {t(`mullerResonance.qualityLabels.${quality}`)}
+                            {t(`mullerResonance.nae.qualityLabels.${quality}`)}
                           </span>
                         </td>
+                        <td className="py-2 px-3 text-center font-mono text-xs text-gray-500 dark:text-gray-400">
+                          {pred.deuteriumMismatch !== null ? (
+                            <>
+                              <span>N={pred.deuteriumOverlapN}</span>
+                              {' '}
+                              <span className={pred.deuteriumMismatch < 30 ? 'text-emerald-600 dark:text-emerald-400' : ''}>
+                                ({pred.deuteriumMismatch.toFixed(1)}%)
+                              </span>
+                            </>
+                          ) : '-'}
+                        </td>
                         <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                          {formatWavelength(pair.wavelength)}
-                        </td>
-                        <td className="py-2 px-3 text-center text-gray-500 dark:text-gray-400 font-mono text-xs">
-                          <span title={t('mullerResonance.electronOctave')}>e:{pair.electronOctave}</span>
-                          {' / '}
-                          <span title={t('mullerResonance.protonOctave')}>p:{pair.protonOctave}</span>
-                        </td>
-                        <td className="py-2 px-3 text-right text-gray-700 dark:text-gray-300">
-                          {overlap.twoToTwoCount > 0 ? overlap.twoToTwoCount.toLocaleString() : (
+                          {pred.phononFrequency !== null ? formatFrequency(pred.phononFrequency) : (
                             <span className="text-gray-400 dark:text-gray-600">-</span>
                           )}
                         </td>
                         <td className="py-2 px-3 text-right text-gray-700 dark:text-gray-300">
-                          {overlap.fusionCount > 0 ? overlap.fusionCount : (
+                          {rxCount > 0 ? rxCount.toLocaleString() : (
                             <span className="text-gray-400 dark:text-gray-600">-</span>
                           )}
                         </td>
-                        <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                          {overlap.avgMeV > 0 ? overlap.avgMeV.toFixed(1) : (
+                        <td className="py-2 px-3 text-center">
+                          {pred.lenrStrength ? (
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${lenrColors[pred.lenrStrength]}`}>
+                              {t(`mullerResonance.nae.lenrLabels.${pred.lenrStrength}`)}
+                            </span>
+                          ) : (
                             <span className="text-gray-400 dark:text-gray-600">-</span>
                           )}
                         </td>
@@ -262,26 +617,118 @@ export default function MullerResonance() {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Explanation card */}
-      <div className="card p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-          {t('mullerResonance.aboutTitle')}
-        </h2>
-        <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-          <p>{t('mullerResonance.about1')}</p>
-          <p>{t('mullerResonance.about2')}</p>
-          <p>{t('mullerResonance.about3')}</p>
-          <div className="p-3 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-            <p className="text-amber-800 dark:text-amber-300 text-xs">
-              {t('mullerResonance.disclaimer')}
-            </p>
           </div>
-        </div>
-      </div>
+
+          {/* Expanded Row Detail */}
+          {expandedRow !== null && (() => {
+            const pred = naePredictions.find(p => p.Z === expandedRow)
+            if (!pred) return null
+
+            return (
+              <div className="card p-4 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                  {pred.E} (Z={pred.Z}) — {t('mullerResonance.nae.octaveDetail')}
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Electron resonance octaves */}
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {t('mullerResonance.nae.electronOctaves')}
+                    </h4>
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b border-gray-200 dark:border-gray-700">
+                          <th className="text-center py-1 px-2 text-gray-500 dark:text-gray-400">N</th>
+                          <th className="text-right py-1 px-2 text-gray-500 dark:text-gray-400">{t('mullerResonance.wavelength')}</th>
+                          <th className="text-center py-1 px-2 text-gray-500 dark:text-gray-400">{t('mullerResonance.nae.inNAERange')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pred.electronResonances.map(res => {
+                          const inNAE = res.L >= NAE_GAP_MIN && res.L <= NAE_GAP_MAX
+                          return (
+                            <tr
+                              key={res.N}
+                              className={`border-b border-gray-50 dark:border-gray-800/50 ${
+                                inNAE ? 'bg-emerald-50 dark:bg-emerald-900/20 font-medium' : ''
+                              }`}
+                            >
+                              <td className="py-1 px-2 text-center text-gray-600 dark:text-gray-400">{res.N}</td>
+                              <td className="py-1 px-2 text-right font-mono text-gray-700 dark:text-gray-300">
+                                {formatWavelength(res.L)}
+                              </td>
+                              <td className="py-1 px-2 text-center">
+                                {inNAE ? (
+                                  <span className="text-emerald-600 dark:text-emerald-400">NAE</span>
+                                ) : null}
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Deuterium proton overlap */}
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {t('mullerResonance.nae.deuteriumProtonResonance')}
+                    </h4>
+                    {pred.naeWavelength !== null ? (
+                      <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400">
+                        <p>
+                          {t('mullerResonance.nae.hostElectron')}: <strong className="text-gray-900 dark:text-white font-mono">{(pred.naeWavelength * 1e9).toFixed(2)} nm</strong> (N={pred.naeOctave})
+                        </p>
+                        {pred.deuteriumOverlapL !== null && (
+                          <>
+                            <p>
+                              {t('mullerResonance.nae.dProton')}: <strong className="text-gray-900 dark:text-white font-mono">{(pred.deuteriumOverlapL * 1e9).toFixed(2)} nm</strong> (N={pred.deuteriumOverlapN})
+                            </p>
+                            <p>
+                              {t('mullerResonance.nae.overlapMismatch')}: <strong className={`font-mono ${pred.deuteriumMismatch !== null && pred.deuteriumMismatch < 30 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>{pred.deuteriumMismatch?.toFixed(1)}%</strong>
+                            </p>
+                          </>
+                        )}
+                        {pred.phononFrequency !== null && pred.speedOfSound !== null && (
+                          <p>
+                            {t('mullerResonance.nae.phononCalc')}: {pred.speedOfSound.toLocaleString()} m/s / {(pred.naeWavelength * 1e9).toFixed(2)} nm = <strong className="text-gray-900 dark:text-white font-mono">{formatFrequency(pred.phononFrequency)}</strong>
+                          </p>
+                        )}
+                        {pred.lenrReference && (
+                          <p className="pt-1 border-t border-gray-200 dark:border-gray-700">
+                            {t('mullerResonance.nae.lenrRefs')}: <span className="text-gray-500 dark:text-gray-400">{pred.lenrReference}</span>
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('mullerResonance.nae.noNAEResonance')}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* NAE Explanation Card */}
+          <div className="card p-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+              {t('mullerResonance.nae.aboutNAETitle')}
+            </h2>
+            <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+              <p>{t('mullerResonance.nae.aboutNAE1')}</p>
+              <p>{t('mullerResonance.nae.aboutNAE2')}</p>
+              <p>{t('mullerResonance.nae.aboutNAE3')}</p>
+              <p>{t('mullerResonance.nae.aboutNAE4')}</p>
+              <div className="p-3 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                <p className="text-amber-800 dark:text-amber-300 text-xs">
+                  {t('mullerResonance.nae.naeDisclaimer')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

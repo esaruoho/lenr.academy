@@ -1047,6 +1047,56 @@
     "about1": "弗里乔夫·穆勒方程 L = Z × C × 2ᴺ 为每个八度的每个元素分配一个共振波长。",
     "about2": "示例：铜（Z=29）在电子八度N=31和铁（Z=26）在质子八度N=42都产生L = 151.1 mm — 匹配度为0.0008%。",
     "about3": "显示的反应计数来自帕尔霍莫夫博士的放热核反应表。统计分析显示穆勒共振与帕尔霍莫夫反应密度之间没有显著相关性。此工具是探索性的。",
-    "disclaimer": "注意：穆勒方程产生了优雅的数学，但缺乏共振机制的独立实验验证。此工具用于探索和假设生成。"
+    "disclaimer": "注意：穆勒方程产生了优雅的数学，但缺乏共振机制的独立实验验证。此工具用于探索和假设生成。",
+    "tabs": {
+      "resonancePairs": "共振对",
+      "naePredictions": "NAE预测"
+    },
+    "nae": {
+      "title": "NAE晶格预测",
+      "description": "按电子共振波长与Edmund Storms（JCMNS 41, 2026）确定的~1 nm核活性环境（NAE）间隙的接近程度对元素进行排名。高亮元素在低八度具有0.5–2.0 nm范围的共振。",
+      "element": "元素",
+      "octave": "八度 (N)",
+      "electronResonance": "e⁻共振",
+      "naeQuality": "NAE匹配",
+      "naeScore": "NAE评分",
+      "deuteriumOverlap": "D重叠",
+      "deuteriumOctave": "D八度 (N)",
+      "deuteriumMismatch": "D偏差",
+      "phononFrequency": "声子频率",
+      "knownLENR": "已知LENR",
+      "parkhomovReactions": "帕尔霍莫夫反应",
+      "showNAEOnly": "仅显示NAE范围内有共振的元素",
+      "elementsInRange": "NAE范围内元素（0.5–2.0 nm）",
+      "withDOverlap": "有D重叠（<30%）",
+      "confirmedLENR": "已知LENR活性",
+      "qualityLabels": {
+        "optimal": "最佳",
+        "good": "良好",
+        "marginal": "边缘",
+        "distant": "远离"
+      },
+      "lenrLabels": {
+        "strong": "强",
+        "moderate": "中等",
+        "weak": "弱"
+      },
+      "octaveDetail": "八度详情",
+      "electronOctaves": "电子共振八度（N=1–10）",
+      "inNAERange": "在NAE内？",
+      "deuteriumProtonResonance": "氘质子共振重叠",
+      "hostElectron": "宿主电子共振",
+      "dProton": "D质子共振",
+      "overlapMismatch": "重叠偏差",
+      "phononCalc": "声子频率（v_声速 / L）",
+      "lenrRefs": "LENR参考",
+      "noNAEResonance": "低八度无NAE范围共振。",
+      "aboutNAETitle": "关于NAE预测",
+      "aboutNAE1": "Edmund Storms确定冷聚变（LENR）发生在核活性环境（NAE）中——金属晶格中纳米级间隙，通常~1 nm宽（JCMNS 41, 2026）。",
+      "aboutNAE2": "穆勒方程 L = Z × Cₑ × 2ᴺ 在低八度（N=3, N=4）预测各元素的电子共振波长。钯（Z=46）在N=3为0.89 nm，N=4为1.79 nm。",
+      "aboutNAE3": "与氘的重叠引人注目：在质子八度N=20，氘的共振波长为1.39 nm——正好在NAE范围内。",
+      "aboutNAE4": "已知的LENR活性金属（Pd, Ni, Pt, Ti）都在N=3或N=4处具有0.9–1.8 nm范围的电子共振长度。",
+      "naeDisclaimer": "此分析结合了穆勒的共振框架和Storms的NAE模型。两者均为理论模型。结果用于探索和假设生成。"
+    }
   }
 }

@@ -1046,6 +1046,56 @@
     "about1": "Frithjof Muller's equation L = Z × C × 2ᴺ assigns a resonance wavelength to every element at every octave. When one element's electron Compton wavelength and another element's proton Compton wavelength produce the same wavelength at exact integer octave numbers, they share a cross-particle resonance.",
     "about2": "Example: Copper (Z=29) at electron octave N=31 and Iron (Z=26) at proton octave N=42 both produce L = 151.1 mm — a match to 0.0008%. The octave gap (42−31 = 11) is constrained by the electron/proton mass ratio (log₂(1836.15) ≈ 10.84). Only 8 element pairs out of 4,186 possible match to < 0.01%.",
     "about3": "The reaction counts shown are from Dr. Alexander Parkhomov's tables of exothermic nuclear reactions. These counts indicate how many energetically possible reactions exist between each pair, not reaction rates or probabilities. Statistical analysis shows no significant correlation between Muller resonance and Parkhomov reaction density — the database is governed by nuclear binding energies, not wavelength resonance. This tool is exploratory.",
-    "disclaimer": "Note: Muller's equation produces elegant mathematics but lacks independent experimental verification of the resonance mechanism. This tool is presented for exploration and hypothesis generation, not as a validated predictive model."
+    "disclaimer": "Note: Muller's equation produces elegant mathematics but lacks independent experimental verification of the resonance mechanism. This tool is presented for exploration and hypothesis generation, not as a validated predictive model.",
+    "tabs": {
+      "resonancePairs": "Resonance Pairs",
+      "naePredictions": "NAE Predictions"
+    },
+    "nae": {
+      "title": "NAE Lattice Predictions",
+      "description": "Elements ranked by electron resonance wavelength proximity to the ~1 nm Nuclear Active Environment (NAE) gap identified by Edmund Storms (JCMNS 41, 2026). Highlighted elements have resonance in the 0.5–2.0 nm range at low octaves.",
+      "element": "Element",
+      "octave": "Octave (N)",
+      "electronResonance": "e⁻ Resonance",
+      "naeQuality": "NAE Match",
+      "naeScore": "NAE Score",
+      "deuteriumOverlap": "D Overlap",
+      "deuteriumOctave": "D Octave (N)",
+      "deuteriumMismatch": "D Mismatch",
+      "phononFrequency": "Phonon Freq",
+      "knownLENR": "Known LENR",
+      "parkhomovReactions": "Parkhomov Rxns",
+      "showNAEOnly": "Show only elements with resonance in NAE range",
+      "elementsInRange": "Elements in NAE range (0.5–2.0 nm)",
+      "withDOverlap": "With D overlap (<30%)",
+      "confirmedLENR": "Known LENR-active",
+      "qualityLabels": {
+        "optimal": "Optimal",
+        "good": "Good",
+        "marginal": "Marginal",
+        "distant": "Distant"
+      },
+      "lenrLabels": {
+        "strong": "Strong",
+        "moderate": "Moderate",
+        "weak": "Weak"
+      },
+      "octaveDetail": "Octave Detail",
+      "electronOctaves": "Electron Resonance Octaves (N=1–10)",
+      "inNAERange": "In NAE?",
+      "deuteriumProtonResonance": "Deuterium Proton Resonance Overlap",
+      "hostElectron": "Host electron resonance",
+      "dProton": "D proton resonance",
+      "overlapMismatch": "Overlap mismatch",
+      "phononCalc": "Phonon frequency (v_sound / L)",
+      "lenrRefs": "LENR references",
+      "noNAEResonance": "No resonance in NAE range at low octaves.",
+      "aboutNAETitle": "About NAE Predictions",
+      "aboutNAE1": "Edmund Storms identified that cold fusion (LENR) occurs in Nuclear Active Environments (NAE) — nano-scale gaps or cracks in the metal lattice, typically ~1 nm wide (JCMNS 41, 2026). The unsolved question: WHY does the lattice gap need to be ~1 nm?",
+      "aboutNAE2": "Muller's equation L = Z × Cₑ × 2ᴺ at low octave numbers (N=3, N=4) predicts electron resonance wavelengths for each element. Palladium (Z=46) at N=3 gives 0.89 nm and at N=4 gives 1.79 nm — the NAE gap falls directly between these octaves.",
+      "aboutNAE3": "The overlap with deuterium is striking: at proton octave N=20, deuterium has a resonance wavelength of 1.39 nm — right in the NAE range. When the host metal's electron resonance AND the fuel's proton resonance both fall near 1 nm, the system may achieve dual resonance.",
+      "aboutNAE4": "The known LENR-active metals (Pd, Ni, Pt, Ti) all have electron resonance lengths that bracket the 0.9–1.8 nm range at N=3 or N=4. Elements with no LENR reports (Al, most light elements) miss this range entirely. If this correlation holds, it would be the first quantitative lattice theory for cold fusion.",
+      "naeDisclaimer": "This analysis combines Muller's resonance framework with Storms' NAE model. Both are theoretical models. Muller's equation lacks independent experimental verification of its resonance mechanism. Storms' NAE gap size is inferred from experimental conditions, not directly measured. Results are presented for exploration and hypothesis generation."
+    }
   }
 }

@@ -1047,6 +1047,56 @@
     "about1": "La ecuación de Frithjof Muller L = Z × C × 2ᴺ asigna una longitud de onda de resonancia a cada elemento en cada octava.",
     "about2": "Ejemplo: Cobre (Z=29) en octava electrónica N=31 y Hierro (Z=26) en octava protónica N=42 producen L = 151,1 mm — una coincidencia del 0,0008%.",
     "about3": "Los conteos de reacciones provienen de las tablas de reacciones nucleares exotérmicas del Dr. Alexander Parkhomov. El análisis estadístico no muestra correlación significativa entre la resonancia de Muller y la densidad de reacciones. Esta herramienta es exploratoria.",
-    "disclaimer": "Nota: La ecuación de Muller produce matemáticas elegantes pero carece de verificación experimental independiente. Esta herramienta se presenta para exploración y generación de hipótesis."
+    "disclaimer": "Nota: La ecuación de Muller produce matemáticas elegantes pero carece de verificación experimental independiente. Esta herramienta se presenta para exploración y generación de hipótesis.",
+    "tabs": {
+      "resonancePairs": "Pares de resonancia",
+      "naePredictions": "Predicciones NAE"
+    },
+    "nae": {
+      "title": "Predicciones de red NAE",
+      "description": "Elementos clasificados por proximidad de la longitud de onda de resonancia electrónica al espacio NAE de ~1 nm identificado por Edmund Storms (JCMNS 41, 2026).",
+      "element": "Elemento",
+      "octave": "Octava (N)",
+      "electronResonance": "Resonancia e⁻",
+      "naeQuality": "Coincidencia NAE",
+      "naeScore": "Puntuación NAE",
+      "deuteriumOverlap": "Superposición D",
+      "deuteriumOctave": "Octava D (N)",
+      "deuteriumMismatch": "Desajuste D",
+      "phononFrequency": "Freq. fonón",
+      "knownLENR": "LENR conocida",
+      "parkhomovReactions": "Rxns Parkhomov",
+      "showNAEOnly": "Mostrar solo elementos con resonancia en rango NAE",
+      "elementsInRange": "Elementos en rango NAE (0,5–2,0 nm)",
+      "withDOverlap": "Con superposición D (<30%)",
+      "confirmedLENR": "LENR activa conocida",
+      "qualityLabels": {
+        "optimal": "Óptimo",
+        "good": "Bueno",
+        "marginal": "Marginal",
+        "distant": "Distante"
+      },
+      "lenrLabels": {
+        "strong": "Fuerte",
+        "moderate": "Moderada",
+        "weak": "Débil"
+      },
+      "octaveDetail": "Detalle de octava",
+      "electronOctaves": "Octavas de resonancia electrónica (N=1–10)",
+      "inNAERange": "¿En NAE?",
+      "deuteriumProtonResonance": "Superposición de resonancia de protones de deuterio",
+      "hostElectron": "Resonancia electrónica del huésped",
+      "dProton": "Resonancia de protones D",
+      "overlapMismatch": "Desajuste de superposición",
+      "phononCalc": "Frecuencia de fonón (v_sonido / L)",
+      "lenrRefs": "Referencias LENR",
+      "noNAEResonance": "Sin resonancia en rango NAE en octavas bajas.",
+      "aboutNAETitle": "Sobre predicciones NAE",
+      "aboutNAE1": "Edmund Storms identificó que la fusión fría (LENR) ocurre en Entornos Nucleares Activos (NAE) — espacios a nanoescala en la red metálica, típicamente ~1 nm de ancho (JCMNS 41, 2026).",
+      "aboutNAE2": "La ecuación de Muller L = Z × Cₑ × 2ᴺ en octavas bajas (N=3, N=4) predice longitudes de onda de resonancia electrónica. El Paladio (Z=46) en N=3 da 0,89 nm y en N=4 da 1,79 nm.",
+      "aboutNAE3": "La superposición con deuterio es notable: en la octava de protones N=20, el deuterio tiene una longitud de onda de resonancia de 1,39 nm — en el rango NAE.",
+      "aboutNAE4": "Los metales LENR-activos conocidos (Pd, Ni, Pt, Ti) tienen longitudes de resonancia electrónica en el rango 0,9–1,8 nm en N=3 o N=4.",
+      "naeDisclaimer": "Este análisis combina el marco de resonancia de Muller con el modelo NAE de Storms. Ambos son modelos teóricos. Los resultados se presentan para exploración y generación de hipótesis."
+    }
   }
 }

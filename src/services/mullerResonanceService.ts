@@ -14,10 +14,17 @@
  * both produce L = 151.1 mm — a match to 0.0008%.
  */
 
+import {
+  NAE_GAP_MIN,
+  NAE_GAP_MAX,
+  NAE_TARGET,
+  COMPTON_PROTON,
+  SPEED_OF_SOUND,
+  KNOWN_LENR_ELEMENTS,
+} from '../constants/naeConstants'
+
 // Fundamental constants
 const COMPTON_ELECTRON = 2.42631e-12 // meters
-// Proton Compton wavelength used in the equation (referenced via ELECTRON_PROTON_MASS_RATIO)
-// const COMPTON_PROTON = 1.32141e-15 // meters
 const ELECTRON_PROTON_MASS_RATIO = 1836.15267
 
 // Octave search range
@@ -243,4 +250,192 @@ export function getResonanceQuality(mismatch: number): 'exact' | 'strong' | 'mod
   if (mismatch < 0.5) return 'strong'
   if (mismatch < 2.0) return 'moderate'
   return 'weak'
+}
+
+// ============================================================================
+// NAE Lattice Predictions
+// ============================================================================
+
+export interface OctaveResonance {
+  N: number
+  L: number // meters
+}
+
+export interface NAEPrediction {
+  Z: number
+  E: string
+  electronResonances: OctaveResonance[] // N=1..10
+  naeOctave: number | null // which N falls in NAE range
+  naeWavelength: number | null // L at that N (meters)
+  naeScore: number // |log2(L/1nm)|, lower = better
+  deuteriumOverlapN: number | null
+  deuteriumOverlapL: number | null
+  deuteriumMismatch: number | null // % mismatch between host electron and D proton
+  phononFrequency: number | null // Hz
+  speedOfSound: number | null // m/s
+  lenrStrength: 'strong' | 'moderate' | 'weak' | null
+  lenrReference: string | null
+}
+
+/**
+ * Compute electron resonance wavelength for an element at a given octave.
+ */
+export function electronResonance(Z: number, N: number): number {
+  return Z * COMPTON_ELECTRON * Math.pow(2, N)
+}
+
+/**
+ * Compute proton resonance wavelength for Z protons at a given octave.
+ */
+export function protonResonance(Z: number, N: number): number {
+  return Z * COMPTON_PROTON * Math.pow(2, N)
+}
+
+/**
+ * Compute NAE lattice predictions for all elements.
+ * Identifies which elements have electron resonance wavelengths
+ * near the ~1 nm NAE gap identified by Storms.
+ */
+export function computeNAEPredictions(
+  elements: Array<{ Z: number; E: string }>
+): NAEPrediction[] {
+  const predictions: NAEPrediction[] = []
+
+  for (const el of elements) {
+    if (el.Z === 0) continue
+
+    // Compute electron resonances for N=1..10
+    const electronRes: OctaveResonance[] = []
+    let bestNaeOctave: number | null = null
+    let bestNaeWavelength: number | null = null
+    let bestNaeScore = Infinity
+
+    for (let N = 1; N <= 10; N++) {
+      const L = electronResonance(el.Z, N)
+      electronRes.push({ N, L })
+
+      // Check if this falls in NAE range
+      if (L >= NAE_GAP_MIN && L <= NAE_GAP_MAX) {
+        const score = Math.abs(Math.log2(L / NAE_TARGET))
+        if (score < bestNaeScore) {
+          bestNaeScore = score
+          bestNaeOctave = N
+          bestNaeWavelength = L
+        }
+      }
+    }
+
+    // If no octave falls exactly in range, find closest N=3 or N=4
+    if (bestNaeOctave === null) {
+      for (const N of [3, 4, 5, 2]) {
+        const L = electronResonance(el.Z, N)
+        const score = Math.abs(Math.log2(L / NAE_TARGET))
+        if (score < bestNaeScore) {
+          bestNaeScore = score
+          bestNaeOctave = N
+          bestNaeWavelength = L
+        }
+      }
+    }
+
+    // Find deuterium proton resonance overlap
+    let bestDOverlapN: number | null = null
+    let bestDOverlapL: number | null = null
+    let bestDMismatch: number | null = null
+
+    if (bestNaeWavelength !== null) {
+      let bestDDistance = Infinity
+      for (let N = 1; N <= 30; N++) {
+        const L_D = protonResonance(1, N) // Deuterium Z=1 proton
+        const distance = Math.abs(L_D - bestNaeWavelength)
+        if (distance < bestDDistance) {
+          bestDDistance = distance
+          bestDOverlapN = N
+          bestDOverlapL = L_D
+          bestDMismatch = (distance / bestNaeWavelength) * 100
+        }
+      }
+    }
+
+    // Speed of sound and phonon frequency
+    const sos = SPEED_OF_SOUND[el.E] ?? null
+    let phononFreq: number | null = null
+    if (sos !== null && bestNaeWavelength !== null && bestNaeWavelength > 0) {
+      phononFreq = sos / bestNaeWavelength
+    }
+
+    // Known LENR status
+    const lenrData = KNOWN_LENR_ELEMENTS[el.E]
+
+    predictions.push({
+      Z: el.Z,
+      E: el.E,
+      electronResonances: electronRes,
+      naeOctave: bestNaeOctave,
+      naeWavelength: bestNaeWavelength,
+      naeScore: bestNaeScore,
+      deuteriumOverlapN: bestDOverlapN,
+      deuteriumOverlapL: bestDOverlapL,
+      deuteriumMismatch: bestDMismatch,
+      phononFrequency: phononFreq,
+      speedOfSound: sos,
+      lenrStrength: lenrData?.strength ?? null,
+      lenrReference: lenrData?.reference ?? null,
+    })
+  }
+
+  // Sort by NAE score (best first)
+  predictions.sort((a, b) => a.naeScore - b.naeScore)
+
+  return predictions
+}
+
+/**
+ * Get NAE prediction quality based on how close the wavelength is to 1 nm.
+ */
+export function getNAEQuality(naeScore: number, inRange: boolean): 'optimal' | 'good' | 'marginal' | 'distant' {
+  if (inRange && naeScore < 0.3) return 'optimal'
+  if (inRange) return 'good'
+  if (naeScore < 1.5) return 'marginal'
+  return 'distant'
+}
+
+/**
+ * Format frequency for display.
+ */
+export function formatFrequency(hz: number): string {
+  if (hz >= 1e12) return `${(hz / 1e12).toFixed(1)} THz`
+  if (hz >= 1e9) return `${(hz / 1e9).toFixed(1)} GHz`
+  if (hz >= 1e6) return `${(hz / 1e6).toFixed(1)} MHz`
+  if (hz >= 1e3) return `${(hz / 1e3).toFixed(1)} kHz`
+  return `${hz.toFixed(0)} Hz`
+}
+
+/**
+ * Query total Parkhomov reaction counts for individual elements.
+ * Returns a map from Z to total reaction count (fusion + fission + two-to-two as input).
+ */
+export function queryElementReactionCounts(
+  db: import('sql.js').Database,
+  elements: Array<{ Z: number }>
+): Map<number, number> {
+  const map = new Map<number, number>()
+
+  for (const el of elements) {
+    if (el.Z === 0) continue
+
+    const result = db.exec(
+      `SELECT
+        (SELECT COUNT(*) FROM FusionAll WHERE Z1=?1 OR Z2=?1) +
+        (SELECT COUNT(*) FROM FissionAll WHERE Z1=?1) +
+        (SELECT COUNT(*) FROM TwoToTwoAll WHERE Z1=?1 OR Z2=?1)
+       AS total`,
+      [el.Z]
+    )
+
+    const count = result[0]?.values[0]?.[0]
+    map.set(el.Z, Number(count) || 0)
+  }
+
+  return map
 }
