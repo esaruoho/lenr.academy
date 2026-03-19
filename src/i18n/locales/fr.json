@@ -45,7 +45,8 @@
     "privacySettings": "Paramètres de confidentialité",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
-    "help": "Aide et glossaire"
+    "help": "Aide et glossaire",
+    "mullerResonance": "Résonance Muller"
   },
   "theme": {
     "lightMode": "Mode clair",
@@ -1013,5 +1014,39 @@
       "database": "Champs de base de données",
       "measurement": "Mesures et unités"
     }
+  },
+  "mullerResonance": {
+    "title": "Explorateur de Résonance Muller",
+    "description": "Explorez les résonances de longueur d'onde électron-proton entre les éléments en utilisant l'équation de Frithjof Muller L = Z × Cₑ × 2ᴺ, avec références croisées à la base de données de réactions nucléaires de Parkhomov.",
+    "equationExplanation": "L = longueur d'onde de résonance, Z = numéro atomique, Cₑ = longueur d'onde Compton de l'électron ou du proton, N = numéro d'octave (entier). Lorsque N est un entier exact pour les deux longueurs d'onde Compton, deux éléments partagent une résonance inter-particules.",
+    "threshold": "Seuil de décalage",
+    "selectElement": "Sélectionnez un élément pour trouver ses partenaires résonants",
+    "resonantPartners": "Partenaires résonants",
+    "exactMatches": "Correspondances exactes (<0,01%)",
+    "withReactions": "Avec réactions Parkhomov",
+    "totalReactions": "Total des réactions",
+    "resonancePairs": "Paires de résonance",
+    "noResonantPairs": "Aucune paire résonante trouvée à ce seuil.",
+    "partner": "Partenaire",
+    "mismatchHeader": "Décalage",
+    "quality": "Qualité",
+    "wavelength": "Longueur d'onde",
+    "octaves": "Octaves (e/p)",
+    "twoToTwo": "Rxn 2→2",
+    "fusion": "Fusion",
+    "avgMeV": "MeV moy",
+    "electronOctave": "Numéro d'octave électronique",
+    "protonOctave": "Numéro d'octave protonique",
+    "qualityLabels": {
+      "exact": "Exact",
+      "strong": "Fort",
+      "moderate": "Modéré",
+      "weak": "Faible"
+    },
+    "aboutTitle": "À propos de cet outil",
+    "about1": "L'équation de Frithjof Muller L = Z × C × 2ᴺ attribue une longueur d'onde de résonance à chaque élément à chaque octave.",
+    "about2": "Exemple : le Cuivre (Z=29) à l'octave électronique N=31 et le Fer (Z=26) à l'octave protonique N=42 produisent L = 151,1 mm — une correspondance de 0,0008%.",
+    "about3": "Les nombres de réactions proviennent des tables de réactions nucléaires exothermiques du Dr Alexander Parkhomov. L'analyse statistique ne montre aucune corrélation significative. Cet outil est exploratoire.",
+    "disclaimer": "Note : L'équation de Muller produit des mathématiques élégantes mais manque de vérification expérimentale indépendante. Cet outil est présenté pour l'exploration et la génération d'hypothèses."
   }
 }

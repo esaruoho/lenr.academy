@@ -45,7 +45,8 @@
     "privacySettings": "隐私设置",
     "openMenu": "打开菜单",
     "closeMenu": "关闭菜单",
-    "help": "帮助与术语表"
+    "help": "帮助与术语表",
+    "mullerResonance": "穆勒共振"
   },
   "theme": {
     "lightMode": "浅色模式",
@@ -1013,5 +1014,39 @@
       "database": "数据库字段",
       "measurement": "测量与单位"
     }
+  },
+  "mullerResonance": {
+    "title": "穆勒共振探索器",
+    "description": "使用弗里乔夫·穆勒方程 L = Z × Cₑ × 2ᴺ 探索元素之间的电子-质子波长共振，并与帕尔霍莫夫核反应数据库交叉参考。",
+    "equationExplanation": "L = 共振波长，Z = 原子序数，Cₑ = 电子或质子的康普顿波长，N = 八度数（整数）。当N对两种康普顿波长都是精确整数时，两个元素共享跨粒子共振。",
+    "threshold": "失配阈值",
+    "selectElement": "选择一个元素以查找其共振伙伴",
+    "resonantPartners": "共振伙伴",
+    "exactMatches": "精确匹配 (<0.01%)",
+    "withReactions": "具有帕尔霍莫夫反应",
+    "totalReactions": "总反应数",
+    "resonancePairs": "共振对",
+    "noResonantPairs": "在此阈值下未找到共振对。",
+    "partner": "伙伴",
+    "mismatchHeader": "失配",
+    "quality": "质量",
+    "wavelength": "波长",
+    "octaves": "八度 (e/p)",
+    "twoToTwo": "2→2反应",
+    "fusion": "聚变",
+    "avgMeV": "平均MeV",
+    "electronOctave": "电子八度数",
+    "protonOctave": "质子八度数",
+    "qualityLabels": {
+      "exact": "精确",
+      "strong": "强",
+      "moderate": "中等",
+      "weak": "弱"
+    },
+    "aboutTitle": "关于此工具",
+    "about1": "弗里乔夫·穆勒方程 L = Z × C × 2ᴺ 为每个八度的每个元素分配一个共振波长。",
+    "about2": "示例：铜（Z=29）在电子八度N=31和铁（Z=26）在质子八度N=42都产生L = 151.1 mm — 匹配度为0.0008%。",
+    "about3": "显示的反应计数来自帕尔霍莫夫博士的放热核反应表。统计分析显示穆勒共振与帕尔霍莫夫反应密度之间没有显著相关性。此工具是探索性的。",
+    "disclaimer": "注意：穆勒方程产生了优雅的数学，但缺乏共振机制的独立实验验证。此工具用于探索和假设生成。"
   }
 }

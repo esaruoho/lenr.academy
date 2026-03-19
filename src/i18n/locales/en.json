@@ -45,7 +45,8 @@
     "privacySettings": "Privacy Settings",
     "help": "Help & Glossary",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "mullerResonance": "Muller Resonance"
   },
   "theme": {
     "lightMode": "Light Mode",
@@ -1012,5 +1013,39 @@
       "database": "Database Fields",
       "measurement": "Measurements & Units"
     }
+  },
+  "mullerResonance": {
+    "title": "Muller Resonance Explorer",
+    "description": "Explore electron-proton wavelength resonances between elements using Frithjof Muller's equation L = Z × Cₑ × 2ᴺ, cross-referenced against Parkhomov's nuclear reaction database.",
+    "equationExplanation": "L = resonance wavelength, Z = atomic number, Cₑ = electron or proton Compton wavelength, N = octave number (integer). When N is an exact integer for both electron and proton Compton wavelengths, two elements share a cross-particle resonance.",
+    "threshold": "Mismatch threshold",
+    "selectElement": "Select an element to find its resonant partners",
+    "resonantPartners": "Resonant partners",
+    "exactMatches": "Exact matches (<0.01%)",
+    "withReactions": "With Parkhomov reactions",
+    "totalReactions": "Total reactions",
+    "resonancePairs": "Resonance Pairs",
+    "noResonantPairs": "No resonant pairs found at this threshold.",
+    "partner": "Partner",
+    "mismatchHeader": "Mismatch",
+    "quality": "Quality",
+    "wavelength": "Wavelength",
+    "octaves": "Octaves (e/p)",
+    "twoToTwo": "2→2 Rxns",
+    "fusion": "Fusion",
+    "avgMeV": "Avg MeV",
+    "electronOctave": "Electron octave number",
+    "protonOctave": "Proton octave number",
+    "qualityLabels": {
+      "exact": "Exact",
+      "strong": "Strong",
+      "moderate": "Moderate",
+      "weak": "Weak"
+    },
+    "aboutTitle": "About This Tool",
+    "about1": "Frithjof Muller's equation L = Z × C × 2ᴺ assigns a resonance wavelength to every element at every octave. When one element's electron Compton wavelength and another element's proton Compton wavelength produce the same wavelength at exact integer octave numbers, they share a cross-particle resonance.",
+    "about2": "Example: Copper (Z=29) at electron octave N=31 and Iron (Z=26) at proton octave N=42 both produce L = 151.1 mm — a match to 0.0008%. The octave gap (42−31 = 11) is constrained by the electron/proton mass ratio (log₂(1836.15) ≈ 10.84). Only 8 element pairs out of 4,186 possible match to < 0.01%.",
+    "about3": "The reaction counts shown are from Dr. Alexander Parkhomov's tables of exothermic nuclear reactions. These counts indicate how many energetically possible reactions exist between each pair, not reaction rates or probabilities. Statistical analysis shows no significant correlation between Muller resonance and Parkhomov reaction density — the database is governed by nuclear binding energies, not wavelength resonance. This tool is exploratory.",
+    "disclaimer": "Note: Muller's equation produces elegant mathematics but lacks independent experimental verification of the resonance mechanism. This tool is presented for exploration and hypothesis generation, not as a validated predictive model."
   }
 }

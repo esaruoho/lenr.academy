@@ -45,7 +45,8 @@
     "privacySettings": "Datenschutzeinstellungen",
     "openMenu": "Menü öffnen",
     "closeMenu": "Menü schließen",
-    "help": "Hilfe &amp; Glossar"
+    "help": "Hilfe &amp; Glossar",
+    "mullerResonance": "Muller-Resonanz"
   },
   "theme": {
     "lightMode": "Heller Modus",
@@ -1009,5 +1010,39 @@
       "database": "Datenbankfelder",
       "measurement": "Messungen &amp; Einheiten"
     }
+  },
+  "mullerResonance": {
+    "title": "Muller-Resonanz-Explorer",
+    "description": "Erkunden Sie Elektron-Proton-Wellenlängenresonanzen zwischen Elementen mit Frithjof Mullers Gleichung L = Z × Cₑ × 2ᴺ, querverwiesen mit Parkhomovs Kernreaktionsdatenbank.",
+    "equationExplanation": "L = Resonanzwellenlänge, Z = Ordnungszahl, Cₑ = Compton-Wellenlänge des Elektrons oder Protons, N = Oktavzahl (ganzzahlig). Wenn N für beide Compton-Wellenlängen exakt ganzzahlig ist, teilen zwei Elemente eine Kreuz-Teilchen-Resonanz.",
+    "threshold": "Abweichungsschwelle",
+    "selectElement": "Wählen Sie ein Element, um seine Resonanzpartner zu finden",
+    "resonantPartners": "Resonanzpartner",
+    "exactMatches": "Exakte Übereinstimmungen (<0,01%)",
+    "withReactions": "Mit Parkhomov-Reaktionen",
+    "totalReactions": "Gesamtreaktionen",
+    "resonancePairs": "Resonanzpaare",
+    "noResonantPairs": "Keine Resonanzpaare bei diesem Schwellenwert gefunden.",
+    "partner": "Partner",
+    "mismatchHeader": "Abweichung",
+    "quality": "Qualität",
+    "wavelength": "Wellenlänge",
+    "octaves": "Oktaven (e/p)",
+    "twoToTwo": "2→2 Rxn",
+    "fusion": "Fusion",
+    "avgMeV": "Ø MeV",
+    "electronOctave": "Elektronen-Oktavzahl",
+    "protonOctave": "Protonen-Oktavzahl",
+    "qualityLabels": {
+      "exact": "Exakt",
+      "strong": "Stark",
+      "moderate": "Mäßig",
+      "weak": "Schwach"
+    },
+    "aboutTitle": "Über dieses Tool",
+    "about1": "Frithjof Mullers Gleichung L = Z × C × 2ᴺ weist jedem Element bei jeder Oktave eine Resonanzwellenlänge zu. Wenn die Compton-Wellenlänge des Elektrons eines Elements und die Compton-Wellenlänge des Protons eines anderen Elements bei exakt ganzzahligen Oktavzahlen die gleiche Wellenlänge erzeugen, teilen sie eine Kreuz-Teilchen-Resonanz.",
+    "about2": "Beispiel: Kupfer (Z=29) bei Elektronenoktave N=31 und Eisen (Z=26) bei Protonenoktave N=42 erzeugen beide L = 151,1 mm — eine Übereinstimmung von 0,0008%.",
+    "about3": "Die angezeigten Reaktionszahlen stammen aus Dr. Alexander Parkhomovs Tabellen exothermer Kernreaktionen. Die statistische Analyse zeigt keine signifikante Korrelation zwischen Muller-Resonanz und Parkhomov-Reaktionsdichte. Dieses Tool ist explorativ.",
+    "disclaimer": "Hinweis: Mullers Gleichung erzeugt elegante Mathematik, aber es fehlt eine unabhängige experimentelle Verifizierung des Resonanzmechanismus. Dieses Tool dient der Erkundung und Hypothesengenerierung."
   }
 }

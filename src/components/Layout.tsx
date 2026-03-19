@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useCallback, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Atom, Moon, Sun, ChevronLeft, ChevronRight, Home as HomeIcon, GitMerge, Scissors, ArrowLeftRight, FlaskConical, Table, TableProperties, Shield, Workflow, HelpCircle } from 'lucide-react'
+import { Menu, X, Atom, Moon, Sun, ChevronLeft, ChevronRight, Home as HomeIcon, GitMerge, Scissors, ArrowLeftRight, FlaskConical, Table, TableProperties, Shield, Workflow, HelpCircle, Waves } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../contexts/ThemeContext'
 import { useLayout } from '../contexts/LayoutContext'
@@ -33,6 +33,7 @@ const navigationItems: NavigationItem[] = [
   { nameKey: 'navigation.cascades', path: '/cascades', icon: Workflow },
   { nameKey: 'navigation.tablesInDetail', path: '/tables', icon: Table },
   { nameKey: 'navigation.allTables', path: '/all-tables', icon: TableProperties },
+  { nameKey: 'navigation.mullerResonance', path: '/muller-resonance', icon: Waves },
   { nameKey: 'navigation.help', path: '/help', icon: HelpCircle },
 ]
 
