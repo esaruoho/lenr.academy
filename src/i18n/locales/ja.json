@@ -45,7 +45,8 @@
     "privacySettings": "プライバシー設定",
     "openMenu": "メニューを開く",
     "closeMenu": "メニューを閉じる",
-    "help": "ヘルプ＆用語集"
+    "help": "ヘルプ＆用語集",
+    "mullerResonance": "ミュラー共鳴"
   },
   "theme": {
     "lightMode": "ライトモード",
@@ -1012,6 +1013,92 @@
       "reaction": "反応タイプ",
       "database": "データベースフィールド",
       "measurement": "測定と単位"
+    }
+  },
+  "mullerResonance": {
+    "title": "ミュラー共鳴エクスプローラー",
+    "description": "フリッチョフ・ミュラーの方程式 L = Z × Cₑ × 2ᴺ を使用して元素間の電子-陽子波長共鳴を探索し、パルホモフの核反応データベースと相互参照します。",
+    "equationExplanation": "L = 共鳴波長、Z = 原子番号、Cₑ = 電子または陽子のコンプトン波長、N = オクターブ番号（整数）。Nが両方のコンプトン波長で正確な整数の場合、2つの元素は粒子間共鳴を共有します。",
+    "threshold": "不一致しきい値",
+    "selectElement": "共鳴パートナーを見つけるために元素を選択してください",
+    "resonantPartners": "共鳴パートナー",
+    "exactMatches": "完全一致 (<0.01%)",
+    "withReactions": "パルホモフ反応あり",
+    "totalReactions": "総反応数",
+    "resonancePairs": "共鳴ペア",
+    "topGlobalPairs": "全元素のトップ共鳴ペア",
+    "pair": "ペア",
+    "noResonantPairs": "このしきい値では共鳴ペアが見つかりませんでした。",
+    "partner": "パートナー",
+    "mismatchHeader": "不一致",
+    "quality": "品質",
+    "wavelength": "波長",
+    "octaves": "オクターブ (e/p)",
+    "twoToTwo": "2→2反応",
+    "fusion": "融合",
+    "avgMeV": "平均MeV",
+    "electronOctave": "電子オクターブ番号",
+    "protonOctave": "陽子オクターブ番号",
+    "qualityLabels": {
+      "exact": "完全",
+      "strong": "強い",
+      "moderate": "中程度",
+      "weak": "弱い"
+    },
+    "aboutTitle": "このツールについて",
+    "about1": "フリッチョフ・ミュラーの方程式 L = Z × C × 2ᴺ は、各オクターブの各元素に共鳴波長を割り当てます。",
+    "about2": "例：銅（Z=29）の電子オクターブN=31と鉄（Z=26）の陽子オクターブN=42は共にL = 151.1 mmを生成します — 0.0008%の一致。",
+    "about3": "表示される反応数は、パルホモフ博士の発熱核反応表からのものです。統計分析では、ミュラー共鳴とパルホモフ反応密度の間に有意な相関は示されていません。このツールは探索的です。",
+    "disclaimer": "注意：ミュラーの方程式はエレガントな数学を生成しますが、共鳴メカニズムの独立した実験的検証がありません。このツールは探索と仮説生成のために提示されています。",
+    "tabs": {
+      "resonancePairs": "共鳴ペア",
+      "naePredictions": "NAE予測"
+    },
+    "nae": {
+      "title": "NAE格子予測",
+      "description": "Edmund Storms (JCMNS 41, 2026) が特定した ~1 nm の核活性環境 (NAE) ギャップに対する電子共鳴波長の近接度で元素をランク付け。ハイライトされた元素は低いオクターブで 0.5–2.0 nm 範囲に共鳴を持ちます。",
+      "element": "元素",
+      "octave": "オクターブ (N)",
+      "electronResonance": "e⁻共鳴",
+      "naeQuality": "NAE一致",
+      "naeScore": "NAEスコア",
+      "deuteriumOverlap": "D重複",
+      "deuteriumOctave": "Dオクターブ (N)",
+      "deuteriumMismatch": "D不一致",
+      "phononFrequency": "フォノン周波数",
+      "knownLENR": "既知のLENR",
+      "parkhomovReactions": "パルホモフ反応",
+      "showNAEOnly": "NAE範囲に共鳴を持つ元素のみ表示",
+      "elementsInRange": "NAE範囲内の元素 (0.5–2.0 nm)",
+      "withDOverlap": "D重複あり (<30%)",
+      "confirmedLENR": "既知のLENR活性",
+      "qualityLabels": {
+        "optimal": "最適",
+        "good": "良好",
+        "marginal": "限界",
+        "distant": "遠隔"
+      },
+      "lenrLabels": {
+        "strong": "強い",
+        "moderate": "中程度",
+        "weak": "弱い"
+      },
+      "octaveDetail": "オクターブ詳細",
+      "electronOctaves": "電子共鳴オクターブ (N=1–10)",
+      "inNAERange": "NAE内？",
+      "deuteriumProtonResonance": "重水素プロトン共鳴重複",
+      "hostElectron": "ホスト電子共鳴",
+      "dProton": "Dプロトン共鳴",
+      "overlapMismatch": "重複不一致",
+      "phononCalc": "フォノン周波数 (v_音速 / L)",
+      "lenrRefs": "LENR参考文献",
+      "noNAEResonance": "低いオクターブでNAE範囲に共鳴なし。",
+      "aboutNAETitle": "NAE予測について",
+      "aboutNAE1": "Edmund Stormsは、常温核融合（LENR）が核活性環境（NAE）で発生することを特定しました — 金属格子のナノスケールのギャップまたは亀裂、通常 ~1 nm幅（JCMNS 41, 2026）。",
+      "aboutNAE2": "ミュラーの方程式 L = Z × Cₑ × 2ᴺ は低いオクターブ（N=3, N=4）で各元素の電子共鳴波長を予測します。パラジウム（Z=46）はN=3で0.89 nm、N=4で1.79 nmです。",
+      "aboutNAE3": "重水素との重複は顕著です：プロトンオクターブN=20で、重水素の共鳴波長は1.39 nm — NAE範囲内です。",
+      "aboutNAE4": "既知のLENR活性金属（Pd, Ni, Pt, Ti）はすべてN=3またはN=4で0.9–1.8 nm範囲の電子共鳴長を持ちます。",
+      "naeDisclaimer": "この分析はミュラーの共鳴フレームワークとStormsのNAEモデルを組み合わせています。両方とも理論モデルです。結果は探索と仮説生成のために提示されています。"
     }
   }
 }
