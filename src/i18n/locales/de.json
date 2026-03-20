@@ -58,8 +58,8 @@
     "collapse": "Seitenleiste einklappen"
   },
   "footer": {
-    "basedOnWork": "Basierend auf der Arbeit von Dr. Alexander Parkhomov",
-    "project": "Martin Fleischmann Gedächtnisprojekt"
+    "basedOnWork": "Basierend auf der Arbeit von <parkhomovLink>Dr. Alexander Parkhomov</parkhomovLink>",
+    "project": "<mfmpLink>Martin Fleischmann Gedächtnisprojekt</mfmpLink>"
   },
   "language": {
     "selectLanguage": "Sprache auswählen",
@@ -127,7 +127,7 @@
   "home": {
     "title": "Das Nanosoft-Paket",
     "subtitle": "Interaktive Werkzeuge zur Erforschung von Niedrigenergie-Kernreaktionen (LENR) und Kalte-Fusion-Transmutationspfaden",
-    "basedOn": "Basierend auf der bahnbrechenden Arbeit von Dr. Alexander Parkhomov",
+    "basedOn": "Basierend auf der bahnbrechenden Arbeit von <parkhomovLink>Dr. Alexander Parkhomov</parkhomovLink>",
     "queryReactions": {
       "title": "Kernreaktionen abfragen",
       "description": "Durchsuchen Sie Tausende exothermer Fusions-, Spaltungs- und Zwei-zu-Zwei-Kerntransmutationsreaktionen",

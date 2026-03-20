@@ -38,7 +38,14 @@ export const mockReactI18next = {
   useTranslation: () => ({
     t: resolveI18nKey,
   }),
-  Trans: ({ children }: { children: React.ReactNode }) => children,
+  Trans: ({ children, i18nKey }: { children?: React.ReactNode; i18nKey?: string }) => {
+    if (i18nKey) {
+      // Strip XML-like tags and return plain text for testing
+      const raw = resolveI18nKey(i18nKey);
+      return raw.replace(/<[^>]+>/g, '');
+    }
+    return children;
+  },
   initReactI18next: {
     type: '3rdParty' as const,
     init: () => {},
