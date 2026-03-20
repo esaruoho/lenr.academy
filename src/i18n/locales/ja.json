@@ -57,8 +57,8 @@
     "collapse": "サイドバーを折りたたむ"
   },
   "footer": {
-    "basedOnWork": "アレクサンダー・パルホモフ博士の研究に基づく",
-    "project": "マーティン・フライシュマン記念プロジェクト"
+    "basedOnWork": "<parkhomovLink>アレクサンダー・パルホモフ博士</parkhomovLink>の研究に基づく",
+    "project": "<mfmpLink>マーティン・フライシュマン記念プロジェクト</mfmpLink>"
   },
   "language": {
     "selectLanguage": "言語を選択",
@@ -126,7 +126,7 @@
   "home": {
     "title": "Nanosoftパッケージ",
     "subtitle": "低エネルギー核反応（LENR）と常温核融合変換経路を探索するためのインタラクティブツール",
-    "basedOn": "アレクサンダー・パルホモフ博士の画期的な研究に基づく",
+    "basedOn": "<parkhomovLink>アレクサンダー・パルホモフ博士</parkhomovLink>の画期的な研究に基づく",
     "queryReactions": {
       "title": "核反応を検索",
       "description": "数千の発熱核融合反応、核分裂反応、2対2核変換反応を検索",

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, Trans } from 'react-i18next'
 import { Atom, Database, Beaker, Zap } from 'lucide-react'
+import { parkhomovLink } from '../components/ExternalLinks'
 
 export default function Home() {
   const { t } = useTranslation()
@@ -18,7 +19,12 @@ export default function Home() {
           {t('home.subtitle')}
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-          {t('home.basedOn')}
+          <Trans
+            i18nKey="home.basedOn"
+            components={{
+              parkhomovLink
+            }}
+          />
         </p>
       </div>
 
