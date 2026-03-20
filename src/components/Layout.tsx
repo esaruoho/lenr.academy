@@ -6,6 +6,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { useLayout } from '../contexts/LayoutContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import DatabaseUpdateBanner from './DatabaseUpdateBanner'
+import { parkhomovLink, mfmpLink } from './ExternalLinks'
 import PrivacyBanner from './PrivacyBanner'
 import AppUpdateBanner from './AppUpdateBanner'
 import ChangelogModal from './ChangelogModal'
@@ -255,7 +256,7 @@ export default function Layout({ children }: LayoutProps) {
                 <Trans
                   i18nKey="footer.basedOnWork"
                   components={{
-                    parkhomovLink: <a href="https://lenr-canr.org/wordpress/?page_id=1081" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors" />
+                    parkhomovLink
                   }}
                 />
               </p>
@@ -263,7 +264,7 @@ export default function Layout({ children }: LayoutProps) {
                 <Trans
                   i18nKey="footer.project"
                   components={{
-                    mfmpLink: <a href="https://www.quantumheat.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors" />
+                    mfmpLink
                   }}
                 />
               </p>
@@ -368,7 +369,7 @@ export default function Layout({ children }: LayoutProps) {
                 <Trans
                   i18nKey="footer.basedOnWork"
                   components={{
-                    parkhomovLink: <a href="https://lenr-canr.org/wordpress/?page_id=1081" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors" />
+                    parkhomovLink
                   }}
                 />
               </p>
@@ -376,7 +377,7 @@ export default function Layout({ children }: LayoutProps) {
                 <Trans
                   i18nKey="footer.project"
                   components={{
-                    mfmpLink: <a href="https://www.quantumheat.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors" />
+                    mfmpLink
                   }}
                 />
               </p>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation, Trans } from 'react-i18next'
 import { Atom, Database, Beaker, Zap } from 'lucide-react'
+import { parkhomovLink } from '../components/ExternalLinks'
 
 export default function Home() {
   const { t } = useTranslation()
@@ -21,7 +22,7 @@ export default function Home() {
           <Trans
             i18nKey="home.basedOn"
             components={{
-              parkhomovLink: <a href="https://lenr-canr.org/wordpress/?page_id=1081" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary-600 dark:hover:text-primary-400 transition-colors" />
+              parkhomovLink
             }}
           />
         </p>
