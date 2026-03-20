@@ -318,6 +318,11 @@ export default function MullerResonance() {
     return naeSortDirection === 'asc' ? ' ↑' : ' ↓'
   }, [naeSortColumn, naeSortDirection])
 
+  const ariaSort = useCallback((col: SortColumn): 'ascending' | 'descending' | 'none' => {
+    if (naeSortColumn !== col) return 'none'
+    return naeSortDirection === 'asc' ? 'ascending' : 'descending'
+  }, [naeSortColumn, naeSortDirection])
+
   if (dbLoading || !db) {
     return (
       <div className="max-w-7xl mx-auto">
@@ -603,18 +608,21 @@ export default function MullerResonance() {
                   <tr className="border-b border-gray-200 dark:border-gray-700">
                     <th
                       className="text-left py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      aria-sort={ariaSort('element')}
                       onClick={() => handleNAESort('element')}
                     >
                       {t('mullerResonance.nae.element')}{sortIndicator('element')}
                     </th>
                     <th
                       className="text-center py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      aria-sort={ariaSort('naeScore')}
                       onClick={() => handleNAESort('naeScore')}
                     >
                       {t('mullerResonance.nae.octave')}{sortIndicator('naeScore')}
                     </th>
                     <th
                       className="text-right py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      aria-sort={ariaSort('wavelength')}
                       onClick={() => handleNAESort('wavelength')}
                     >
                       {t('mullerResonance.nae.electronResonance')}{sortIndicator('wavelength')}
@@ -624,24 +632,28 @@ export default function MullerResonance() {
                     </th>
                     <th
                       className="text-center py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      aria-sort={ariaSort('deuterium')}
                       onClick={() => handleNAESort('deuterium')}
                     >
                       {t('mullerResonance.nae.deuteriumOverlap')}{sortIndicator('deuterium')}
                     </th>
                     <th
                       className="text-right py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      aria-sort={ariaSort('phonon')}
                       onClick={() => handleNAESort('phonon')}
                     >
                       {t('mullerResonance.nae.phononFrequency')}{sortIndicator('phonon')}
                     </th>
                     <th
                       className="text-right py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      aria-sort={ariaSort('reactions')}
                       onClick={() => handleNAESort('reactions')}
                     >
                       {t('mullerResonance.nae.parkhomovReactions')}{sortIndicator('reactions')}
                     </th>
                     <th
                       className="text-center py-2 px-3 text-gray-700 dark:text-gray-300 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 select-none"
+                      aria-sort={ariaSort('lenr')}
                       onClick={() => handleNAESort('lenr')}
                     >
                       {t('mullerResonance.nae.knownLENR')}{sortIndicator('lenr')}
@@ -674,12 +686,21 @@ export default function MullerResonance() {
                     return (
                       <tr
                         key={pred.Z}
+                        role="button"
+                        tabIndex={0}
+                        aria-expanded={isExpanded}
                         className={`border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors ${
                           inRange
                             ? 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
                             : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
                         } ${isExpanded ? 'bg-gray-50 dark:bg-gray-800/50' : ''}`}
                         onClick={() => setExpandedRow(isExpanded ? null : pred.Z)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            setExpandedRow(isExpanded ? null : pred.Z)
+                          }
+                        }}
                       >
                         <td className={`py-2 px-3 font-medium ${pred.lenrStrength ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
                           {pred.E} <span className="text-gray-400 dark:text-gray-500 text-xs">(Z={pred.Z})</span>

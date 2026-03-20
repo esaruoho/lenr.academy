@@ -411,7 +411,10 @@ export function computeNAEPredictions(
     if (bestNaeWavelength !== null) {
       let bestDDistance = Infinity
       for (let N = 1; N <= 30; N++) {
-        const L_D = protonResonance(1, N) // Deuterium Z=1 proton
+        // Muller's equation uses Z (atomic number), not A (mass number).
+        // Deuterium has Z=1 (same as protium). The proton Compton wavelength
+        // is the fundamental constant in L = Z × C_p × 2^N, not particle-specific.
+        const L_D = protonResonance(1, N)
         const distance = Math.abs(L_D - bestNaeWavelength)
         if (distance < bestDDistance) {
           bestDDistance = distance
