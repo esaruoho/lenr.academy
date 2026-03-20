@@ -494,6 +494,7 @@
     "waveDescription": "Elements plotted as points on Russell's octave wave — amplitude rises through Generation (compression) to Carbon at the apex, then falls through Radiation (expansion)",
     "amplitude": "Amplitude",
     "octaveAxis": "Octave",
+    "carbonPeak": "Carbon (Peak)",
     "predictionsTitle": "Russell's Predictions",
     "predictionsDescription": "Walter Russell predicted several elements before their official discovery, demonstrating the predictive power of his wave-based periodic system.",
     "aboutTitle": "About Russell's Periodic Table",
