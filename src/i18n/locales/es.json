@@ -1026,6 +1026,8 @@
     "withReactions": "Con reacciones Parkhomov",
     "totalReactions": "Total de reacciones",
     "resonancePairs": "Pares de resonancia",
+    "topGlobalPairs": "Principales pares de resonancia de todos los elementos",
+    "pair": "Par",
     "noResonantPairs": "No se encontraron pares resonantes en este umbral.",
     "partner": "Socio",
     "mismatchHeader": "Desajuste",

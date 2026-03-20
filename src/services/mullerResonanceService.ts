@@ -188,48 +188,113 @@ export function computeAllPairMismatches(
 }
 
 /**
+ * Compute the top global Muller-resonant pairs across all element combinations,
+ * sorted by mismatch (best resonance first).
+ */
+export function computeTopGlobalPairs(
+  elements: Array<{ Z: number; E: string }>,
+  limit: number = 25
+): MullerResonancePair[] {
+  const pairs: MullerResonancePair[] = []
+
+  for (let i = 0; i < elements.length; i++) {
+    for (let j = i + 1; j < elements.length; j++) {
+      const z1 = elements[i].Z
+      const z2 = elements[j].Z
+      if (z1 === 0 || z2 === 0) continue
+
+      const result = computeMullerMismatch(z1, z2)
+      if (result) {
+        pairs.push({
+          Z1: result.electronIsZ1 ? z1 : z2,
+          E1: result.electronIsZ1 ? elements[i].E : elements[j].E,
+          Z2: result.electronIsZ1 ? z2 : z1,
+          E2: result.electronIsZ1 ? elements[j].E : elements[i].E,
+          mismatch: result.mismatch,
+          wavelength: result.wavelength,
+          electronOctave: result.electronOctave,
+          protonOctave: result.protonOctave,
+          electronElement: 'Z1',
+        })
+      }
+    }
+  }
+
+  pairs.sort((a, b) => a.mismatch - b.mismatch)
+  return pairs.slice(0, limit)
+}
+
+/**
  * Query the database for reaction counts between Muller-resonant pairs.
  */
 export function queryResonantReactions(
   db: import('sql.js').Database,
   pairs: MullerResonancePair[]
 ): ReactionOverlap[] {
-  const overlaps: ReactionOverlap[] = []
+  if (pairs.length === 0) return []
 
-  for (const pair of pairs) {
-    // Two-to-two reactions where this pair is input
-    const tttResult = db.exec(
-      `SELECT COUNT(*), COALESCE(AVG(MeV), 0), COALESCE(MAX(MeV), 0)
-       FROM TwoToTwoAll
-       WHERE (Z1=? AND Z2=?) OR (Z1=? AND Z2=?)`,
-      [pair.Z2, pair.Z1, pair.Z1, pair.Z2]
-    )
+  // Build a pair key for lookup: "minZ:maxZ"
+  const pairKey = (z1: number, z2: number) => `${Math.min(z1, z2)}:${Math.max(z1, z2)}`
 
-    // Fusion reactions
-    const fusResult = db.exec(
-      `SELECT COUNT(*)
-       FROM FusionAll
-       WHERE (Z1=? AND Z2=?) OR (Z1=? AND Z2=?)`,
-      [pair.Z2, pair.Z1, pair.Z1, pair.Z2]
-    )
+  // Collect unique Z values across all pairs for batch queries
+  const allZ = new Set<number>()
+  for (const p of pairs) { allZ.add(p.Z1); allZ.add(p.Z2) }
+  const zList = Array.from(allZ).join(',')
 
-    const tttRow = tttResult[0]?.values[0] || [0, 0, 0]
-    const fusRow = fusResult[0]?.values[0] || [0]
+  // Single query for TwoToTwoAll — filter to relevant Z values, then group by pair
+  const tttResult = db.exec(
+    `SELECT
+      CASE WHEN Z1 <= Z2 THEN Z1 ELSE Z2 END AS Za,
+      CASE WHEN Z1 <= Z2 THEN Z2 ELSE Z1 END AS Zb,
+      COUNT(*), COALESCE(AVG(MeV), 0), COALESCE(MAX(MeV), 0)
+     FROM TwoToTwoAll
+     WHERE Z1 IN (${zList}) AND Z2 IN (${zList})
+     GROUP BY Za, Zb`
+  )
 
-    overlaps.push({
+  // Single query for FusionAll
+  const fusResult = db.exec(
+    `SELECT
+      CASE WHEN Z1 <= Z2 THEN Z1 ELSE Z2 END AS Za,
+      CASE WHEN Z1 <= Z2 THEN Z2 ELSE Z1 END AS Zb,
+      COUNT(*)
+     FROM FusionAll
+     WHERE Z1 IN (${zList}) AND Z2 IN (${zList})
+     GROUP BY Za, Zb`
+  )
+
+  // Index results by pair key
+  const tttMap = new Map<string, [number, number, number]>()
+  if (tttResult[0]) {
+    for (const row of tttResult[0].values) {
+      tttMap.set(`${row[0]}:${row[1]}`, [Number(row[2]), Number(row[3]), Number(row[4])])
+    }
+  }
+
+  const fusMap = new Map<string, number>()
+  if (fusResult[0]) {
+    for (const row of fusResult[0].values) {
+      fusMap.set(`${row[0]}:${row[1]}`, Number(row[2]))
+    }
+  }
+
+  return pairs.map(pair => {
+    const key = pairKey(pair.Z1, pair.Z2)
+    const ttt = tttMap.get(key) || [0, 0, 0]
+    const fus = fusMap.get(key) || 0
+
+    return {
       Z1: pair.Z1,
       E1: pair.E1,
       Z2: pair.Z2,
       E2: pair.E2,
       mismatch: pair.mismatch,
-      twoToTwoCount: Number(tttRow[0]),
-      fusionCount: Number(fusRow[0]),
-      avgMeV: Number(tttRow[1]),
-      maxMeV: Number(tttRow[2]),
-    })
-  }
-
-  return overlaps.sort((a, b) => a.mismatch - b.mismatch)
+      twoToTwoCount: ttt[0],
+      fusionCount: fus,
+      avgMeV: ttt[1],
+      maxMeV: ttt[2],
+    }
+  }).sort((a, b) => a.mismatch - b.mismatch)
 }
 
 /**
@@ -416,25 +481,24 @@ export function formatFrequency(hz: number): string {
  * Returns a map from Z to total reaction count (fusion + fission + two-to-two as input).
  */
 export function queryElementReactionCounts(
-  db: import('sql.js').Database,
-  elements: Array<{ Z: number }>
+  db: import('sql.js').Database
 ): Map<number, number> {
   const map = new Map<number, number>()
 
-  for (const el of elements) {
-    if (el.Z === 0) continue
+  const result = db.exec(
+    `SELECT Z, SUM(cnt) AS total FROM (
+      SELECT Z1 AS Z, COUNT(*) AS cnt FROM FusionAll GROUP BY Z1
+      UNION ALL SELECT Z2 AS Z, COUNT(*) AS cnt FROM FusionAll GROUP BY Z2
+      UNION ALL SELECT Z1 AS Z, COUNT(*) AS cnt FROM FissionAll GROUP BY Z1
+      UNION ALL SELECT Z1 AS Z, COUNT(*) AS cnt FROM TwoToTwoAll GROUP BY Z1
+      UNION ALL SELECT Z2 AS Z, COUNT(*) AS cnt FROM TwoToTwoAll GROUP BY Z2
+    ) GROUP BY Z`
+  )
 
-    const result = db.exec(
-      `SELECT
-        (SELECT COUNT(*) FROM FusionAll WHERE Z1=?1 OR Z2=?1) +
-        (SELECT COUNT(*) FROM FissionAll WHERE Z1=?1) +
-        (SELECT COUNT(*) FROM TwoToTwoAll WHERE Z1=?1 OR Z2=?1)
-       AS total`,
-      [el.Z]
-    )
-
-    const count = result[0]?.values[0]?.[0]
-    map.set(el.Z, Number(count) || 0)
+  if (result[0]) {
+    for (const row of result[0].values) {
+      map.set(Number(row[0]), Number(row[1]) || 0)
+    }
   }
 
   return map

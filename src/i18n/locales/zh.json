@@ -1026,6 +1026,8 @@
     "withReactions": "具有帕尔霍莫夫反应",
     "totalReactions": "总反应数",
     "resonancePairs": "共振对",
+    "topGlobalPairs": "所有元素的顶级共振对",
+    "pair": "对",
     "noResonantPairs": "在此阈值下未找到共振对。",
     "partner": "伙伴",
     "mismatchHeader": "失配",

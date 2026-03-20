@@ -1025,6 +1025,8 @@
     "withReactions": "With Parkhomov reactions",
     "totalReactions": "Total reactions",
     "resonancePairs": "Resonance Pairs",
+    "topGlobalPairs": "Top Resonance Pairs Across All Elements",
+    "pair": "Pair",
     "noResonantPairs": "No resonant pairs found at this threshold.",
     "partner": "Partner",
     "mismatchHeader": "Mismatch",

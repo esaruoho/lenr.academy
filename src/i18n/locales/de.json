@@ -1022,6 +1022,8 @@
     "withReactions": "Mit Parkhomov-Reaktionen",
     "totalReactions": "Gesamtreaktionen",
     "resonancePairs": "Resonanzpaare",
+    "topGlobalPairs": "Top-Resonanzpaare aller Elemente",
+    "pair": "Paar",
     "noResonantPairs": "Keine Resonanzpaare bei diesem Schwellenwert gefunden.",
     "partner": "Partner",
     "mismatchHeader": "Abweichung",

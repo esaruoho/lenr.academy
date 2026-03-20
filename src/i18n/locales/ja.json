@@ -1026,6 +1026,8 @@
     "withReactions": "パルホモフ反応あり",
     "totalReactions": "総反応数",
     "resonancePairs": "共鳴ペア",
+    "topGlobalPairs": "全元素のトップ共鳴ペア",
+    "pair": "ペア",
     "noResonantPairs": "このしきい値では共鳴ペアが見つかりませんでした。",
     "partner": "パートナー",
     "mismatchHeader": "不一致",

@@ -1026,6 +1026,8 @@
     "withReactions": "Avec réactions Parkhomov",
     "totalReactions": "Total des réactions",
     "resonancePairs": "Paires de résonance",
+    "topGlobalPairs": "Meilleures paires de résonance de tous les éléments",
+    "pair": "Paire",
     "noResonantPairs": "Aucune paire résonante trouvée à ce seuil.",
     "partner": "Partenaire",
     "mismatchHeader": "Décalage",

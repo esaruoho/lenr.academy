@@ -1023,6 +1023,8 @@
     "withReactions": "С реакциями Пархомова",
     "totalReactions": "Всего реакций",
     "resonancePairs": "Резонансные пары",
+    "topGlobalPairs": "Лучшие резонансные пары всех элементов",
+    "pair": "Пара",
     "noResonantPairs": "При данном пороге резонансные пары не найдены.",
     "partner": "Партнёр",
     "mismatchHeader": "Рассогл.",

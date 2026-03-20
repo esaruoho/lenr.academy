@@ -3,23 +3,18 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { getAllElements } from '../services/queryService'
+import { useMullerWorker } from '../hooks/useMullerWorker'
 import DatabaseLoadingCard from '../components/DatabaseLoadingCard'
 import PeriodicTable from '../components/PeriodicTable'
 import TabNavigation from '../components/TabNavigation'
 import type { Tab } from '../components/TabNavigation'
-import type { Element } from '../types'
+import type { Element, HeatmapMetrics } from '../types'
 import {
-  findResonantPartners,
-  queryResonantReactions,
   formatWavelength,
   formatFrequency,
   getResonanceQuality,
   getNAEQuality,
   computeMullerMismatch,
-  computeNAEPredictions,
-  queryElementReactionCounts,
-  type MullerResonancePair,
-  type ReactionOverlap,
   type NAEPrediction,
 } from '../services/mullerResonanceService'
 import { NAE_GAP_MIN, NAE_GAP_MAX } from '../constants/naeConstants'
@@ -36,120 +31,218 @@ export default function MullerResonance() {
   const [elements, setElements] = useState<Element[]>([])
   const [selectedElement, setSelectedElement] = useState<string | null>(null)
   const [threshold, setThreshold] = useState(5.0)
-  const [pairs, setPairs] = useState<MullerResonancePair[]>([])
-  const [overlaps, setOverlaps] = useState<ReactionOverlap[]>([])
-  const [loading, setLoading] = useState(false)
 
   // Tab state
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'resonance')
 
-  // NAE state
-  const [naePredictions, setNaePredictions] = useState<NAEPrediction[]>([])
-  const [reactionCounts, setReactionCounts] = useState<Map<number, number>>(new Map())
+  // NAE UI state
   const [naeFilter, setNaeFilter] = useState(false)
   const [naeSortColumn, setNaeSortColumn] = useState<SortColumn>('naeScore')
   const [naeSortDirection, setNaeSortDirection] = useState<SortDirection>('asc')
   const [expandedRow, setExpandedRow] = useState<number | null>(null)
+
+  // Worker handles all heavy computation off the main thread
+  const {
+    initialize: initWorker,
+    selectElement: workerSelectElement,
+    clearElement: workerClearElement,
+    globalPairs,
+    globalOverlaps,
+    naePredictions,
+    reactionCounts,
+    pairs,
+    overlaps,
+    isLoading: loading,
+  } = useMullerWorker()
 
   const tabs: Tab[] = useMemo(() => [
     { id: 'resonance', label: t('mullerResonance.tabs.resonancePairs') },
     { id: 'nae', label: t('mullerResonance.tabs.naePredictions') },
   ], [t])
 
+  // Load elements and initialize worker
   useEffect(() => {
     if (!db) return
     const allElements = getAllElements(db)
     setElements(allElements)
-  }, [db])
 
-  // Compute NAE predictions when elements are loaded
-  useEffect(() => {
-    if (elements.length === 0) return
-
-    const predictions = computeNAEPredictions(
-      elements.map(e => ({ Z: e.Z, E: e.E }))
-    )
-    setNaePredictions(predictions)
-  }, [elements])
-
-  // Query reaction counts when switching to NAE tab
-  useEffect(() => {
-    if (!db || activeTab !== 'nae' || reactionCounts.size > 0) return
-
-    const counts = queryElementReactionCounts(
-      db,
-      elements.map(e => ({ Z: e.Z }))
-    )
-    setReactionCounts(counts)
-  }, [db, activeTab, elements, reactionCounts.size])
+    // Send DB + elements to worker for all init computations
+    const dbBuffer = db.export().buffer as ArrayBuffer
+    initWorker(dbBuffer, allElements.map(e => ({ Z: e.Z, E: e.E })))
+  }, [db, initWorker])
 
   const handleElementClick = useCallback((symbol: string) => {
     setSelectedElement(prev => prev === symbol ? null : symbol)
   }, [])
 
-  // Compute resonant partners when element or threshold changes
+  // Delegate element selection/clearing to worker
   useEffect(() => {
-    if (!db || !selectedElement) {
-      setPairs([])
-      setOverlaps([])
+    if (!selectedElement) {
+      workerClearElement()
       return
     }
 
-    setLoading(true)
-    try {
-      const el = elements.find(e => e.E === selectedElement)
-      if (!el) return
+    const el = elements.find(e => e.E === selectedElement)
+    if (!el) return
 
-      const result = findResonantPartners(
-        el.Z,
-        el.E,
-        elements.map(e => ({ Z: e.Z, E: e.E })),
-        threshold
-      )
-      setPairs(result.pairs)
-
-      // Query reactions for resonant pairs
-      const rxOverlaps = queryResonantReactions(db, result.pairs)
-      setOverlaps(rxOverlaps)
-    } finally {
-      setLoading(false)
-    }
-  }, [db, selectedElement, threshold, elements])
+    workerSelectElement(
+      el.Z,
+      el.E,
+      elements.map(e => ({ Z: e.Z, E: e.E })),
+      threshold
+    )
+  }, [selectedElement, threshold, elements, workerSelectElement, workerClearElement])
 
   // Build heatmap data for periodic table highlighting
   const heatmapData = useMemo(() => {
     const map = new Map<string, number>()
-    if (!selectedElement) return map
 
-    const selectedEl = elements.find(e => e.E === selectedElement)
-    if (!selectedEl) return map
+    if (selectedElement) {
+      // Per-element view: show resonant partners
+      const selectedEl = elements.find(e => e.E === selectedElement)
+      if (!selectedEl) return map
 
-    for (const el of elements) {
-      if (el.E === selectedElement) continue
-      const result = computeMullerMismatch(selectedEl.Z, el.Z)
-      if (result && result.mismatch < threshold) {
-        // Invert: lower mismatch = higher value for heatmap
-        const intensity = Math.max(0, 1 - result.mismatch / threshold)
-        map.set(el.E, intensity)
+      for (const el of elements) {
+        if (el.E === selectedElement) continue
+        const result = computeMullerMismatch(selectedEl.Z, el.Z)
+        if (result && result.mismatch < threshold) {
+          const intensity = Math.max(0, 1 - result.mismatch / threshold)
+          map.set(el.E, intensity)
+        }
+      }
+    } else {
+      // Global view: highlight elements by their best mismatch across all pairs
+      const bestMismatch = new Map<string, number>()
+      for (const pair of globalPairs) {
+        for (const sym of [pair.E1, pair.E2]) {
+          const prev = bestMismatch.get(sym) ?? Infinity
+          if (pair.mismatch < prev) bestMismatch.set(sym, pair.mismatch)
+        }
+      }
+      const maxMismatch = Math.max(...bestMismatch.values(), 0.01)
+      for (const [sym, mm] of bestMismatch) {
+        map.set(sym, Math.max(0, 1 - mm / maxMismatch))
       }
     }
     return map
-  }, [selectedElement, elements, threshold])
+  }, [selectedElement, elements, threshold, globalPairs])
 
-  // NAE heatmap: highlight elements by NAE score
+  // Build heatmapMetrics to control the green↔blue gradient
+  // Green = strong resonance (low mismatch), Blue = weaker resonance
+  const resonanceHeatmapMetrics = useMemo((): HeatmapMetrics | undefined => {
+    const inputOutputRatio = new Map<string, { inputCount: number; outputCount: number; ratio: number }>()
+
+    if (selectedElement) {
+      const selectedEl = elements.find(e => e.E === selectedElement)
+      if (!selectedEl) return undefined
+
+      for (const el of elements) {
+        if (el.E === selectedElement) continue
+        const result = computeMullerMismatch(selectedEl.Z, el.Z)
+        if (result && result.mismatch < threshold) {
+          // ratio=1 (green) for best matches, ratio=0 (blue) for worst
+          const ratio = Math.max(0, 1 - result.mismatch / threshold)
+          inputOutputRatio.set(el.E, { inputCount: 0, outputCount: 0, ratio })
+        }
+      }
+    } else {
+      // Global view
+      const bestMismatch = new Map<string, number>()
+      for (const pair of globalPairs) {
+        for (const sym of [pair.E1, pair.E2]) {
+          const prev = bestMismatch.get(sym) ?? Infinity
+          if (pair.mismatch < prev) bestMismatch.set(sym, pair.mismatch)
+        }
+      }
+      const maxMismatch = Math.max(...bestMismatch.values(), 0.01)
+      for (const [sym, mm] of bestMismatch) {
+        const ratio = Math.max(0, 1 - mm / maxMismatch)
+        inputOutputRatio.set(sym, { inputCount: 0, outputCount: 0, ratio })
+      }
+    }
+
+    return {
+      frequency: new Map(),
+      energy: new Map(),
+      diversity: new Map(),
+      inputOutputRatio,
+    }
+  }, [selectedElement, elements, threshold, globalPairs])
+
+  // NAE heatmap: rank-based normalization for better dynamic range
   const naeHeatmapData = useMemo(() => {
     const map = new Map<string, number>()
+
+    // Separate in-range and out-of-range elements
+    const inRange: NAEPrediction[] = []
+    const outOfRange: NAEPrediction[] = []
     for (const pred of naePredictions) {
-      const inRange = pred.naeWavelength !== null &&
+      const isInRange = pred.naeWavelength !== null &&
         pred.naeWavelength >= NAE_GAP_MIN &&
         pred.naeWavelength <= NAE_GAP_MAX
-      if (inRange) {
-        // Score 0 = perfect match at 1nm, higher = worse
-        const intensity = Math.max(0, 1 - pred.naeScore / 1.5)
-        map.set(pred.E, intensity)
+      if (isInRange) {
+        inRange.push(pred)
+      } else if (pred.naeWavelength !== null) {
+        outOfRange.push(pred)
       }
     }
+
+    // In-range: rank-based intensity (best = 1.0, worst in-range = 0.5)
+    const sorted = [...inRange].sort((a, b) => a.naeScore - b.naeScore)
+    const count = sorted.length
+    for (let i = 0; i < count; i++) {
+      const intensity = count > 1
+        ? 1.0 - 0.5 * (i / (count - 1))
+        : 1.0
+      map.set(sorted[i].E, intensity)
+    }
+
+    // Out-of-range: faint presence for visual contrast
+    for (const pred of outOfRange) {
+      map.set(pred.E, 0.12)
+    }
+
     return map
+  }, [naePredictions])
+
+  // NAE heatmap metrics: green = best NAE match, blue = weaker/out-of-range
+  const naeHeatmapMetrics = useMemo((): HeatmapMetrics => {
+    const inputOutputRatio = new Map<string, { inputCount: number; outputCount: number; ratio: number }>()
+
+    const inRange: NAEPrediction[] = []
+    const outOfRange: NAEPrediction[] = []
+    for (const pred of naePredictions) {
+      const isInRange = pred.naeWavelength !== null &&
+        pred.naeWavelength >= NAE_GAP_MIN &&
+        pred.naeWavelength <= NAE_GAP_MAX
+      if (isInRange) {
+        inRange.push(pred)
+      } else if (pred.naeWavelength !== null) {
+        outOfRange.push(pred)
+      }
+    }
+
+    // In-range: rank-based ratio (best = 1.0/green, worst in-range = 0.5/teal)
+    const sorted = [...inRange].sort((a, b) => a.naeScore - b.naeScore)
+    const count = sorted.length
+    for (let i = 0; i < count; i++) {
+      const ratio = count > 1
+        ? 1.0 - 0.5 * (i / (count - 1))
+        : 1.0
+      inputOutputRatio.set(sorted[i].E, { inputCount: 0, outputCount: 0, ratio })
+    }
+
+    // Out-of-range: blue end of gradient
+    for (const pred of outOfRange) {
+      inputOutputRatio.set(pred.E, { inputCount: 0, outputCount: 0, ratio: 0 })
+    }
+
+    return {
+      frequency: new Map(),
+      energy: new Map(),
+      diversity: new Map(),
+      inputOutputRatio,
+    }
   }, [naePredictions])
 
   // Stats
@@ -298,7 +391,8 @@ export default function MullerResonance() {
               selectedElement={selectedElement}
               onElementClick={handleElementClick}
               heatmapData={heatmapData}
-              showHeatmap={!!selectedElement}
+              heatmapMetrics={resonanceHeatmapMetrics}
+              showHeatmap={heatmapData.size > 0}
               hideLegend
               hideCardContainer
             />
@@ -323,91 +417,110 @@ export default function MullerResonance() {
           </div>
 
           {/* Results table */}
-          {selectedElement && (
-            <div className="card p-4 mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                {t('mullerResonance.resonancePairs')}
-              </h2>
+          {(() => {
+            const displayPairs = selectedElement ? pairs : globalPairs
+            const displayOverlaps = selectedElement ? overlaps : globalOverlaps
+            const isGlobal = !selectedElement
 
-              {loading ? (
-                <p className="text-gray-500 dark:text-gray-400">{t('common.loading')}</p>
-              ) : pairs.length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-400">{t('mullerResonance.noResonantPairs')}</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-200 dark:border-gray-700">
-                        <th className="text-left py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.partner')}</th>
-                        <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.mismatchHeader')}</th>
-                        <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.quality')}</th>
-                        <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.wavelength')}</th>
-                        <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.octaves')}</th>
-                        <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.twoToTwo')}</th>
-                        <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.fusion')}</th>
-                        <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.avgMeV')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {overlaps.map((overlap, i) => {
-                        const pair = pairs[i]
-                        if (!pair) return null
-                        const quality = getResonanceQuality(pair.mismatch)
-                        const qualityColors: Record<string, string> = {
-                          exact: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-                          strong: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-                          moderate: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-                          weak: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
-                        }
+            return (
+              <div className="card p-4 mb-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                  {isGlobal
+                    ? t('mullerResonance.topGlobalPairs')
+                    : t('mullerResonance.resonancePairs')
+                  }
+                </h2>
 
-                        return (
-                          <tr
-                            key={`${pair.Z1}-${pair.Z2}`}
-                            className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                          >
-                            <td className="py-2 px-3 font-medium text-gray-900 dark:text-white">
-                              {pair.E2} <span className="text-gray-400 dark:text-gray-500">(Z={pair.Z2})</span>
-                            </td>
-                            <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                              {pair.mismatch < 0.01 ? pair.mismatch.toFixed(4) : pair.mismatch.toFixed(2)}%
-                            </td>
-                            <td className="py-2 px-3 text-center">
-                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${qualityColors[quality]}`}>
-                                {t(`mullerResonance.qualityLabels.${quality}`)}
-                              </span>
-                            </td>
-                            <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                              {formatWavelength(pair.wavelength)}
-                            </td>
-                            <td className="py-2 px-3 text-center text-gray-500 dark:text-gray-400 font-mono text-xs">
-                              <span title={t('mullerResonance.electronOctave')}>e:{pair.electronOctave}</span>
-                              {' / '}
-                              <span title={t('mullerResonance.protonOctave')}>p:{pair.protonOctave}</span>
-                            </td>
-                            <td className="py-2 px-3 text-right text-gray-700 dark:text-gray-300">
-                              {overlap.twoToTwoCount > 0 ? overlap.twoToTwoCount.toLocaleString() : (
-                                <span className="text-gray-400 dark:text-gray-600">-</span>
-                              )}
-                            </td>
-                            <td className="py-2 px-3 text-right text-gray-700 dark:text-gray-300">
-                              {overlap.fusionCount > 0 ? overlap.fusionCount : (
-                                <span className="text-gray-400 dark:text-gray-600">-</span>
-                              )}
-                            </td>
-                            <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
-                              {overlap.avgMeV > 0 ? overlap.avgMeV.toFixed(1) : (
-                                <span className="text-gray-400 dark:text-gray-600">-</span>
-                              )}
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
+                {loading ? (
+                  <p className="text-gray-500 dark:text-gray-400">{t('common.loading')}</p>
+                ) : displayPairs.length === 0 ? (
+                  <p className="text-gray-500 dark:text-gray-400">{t('mullerResonance.noResonantPairs')}</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-gray-200 dark:border-gray-700">
+                          <th className="text-left py-2 px-3 text-gray-700 dark:text-gray-300">
+                            {isGlobal ? t('mullerResonance.pair') : t('mullerResonance.partner')}
+                          </th>
+                          <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.mismatchHeader')}</th>
+                          <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.quality')}</th>
+                          <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.wavelength')}</th>
+                          <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.octaves')}</th>
+                          <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.twoToTwo')}</th>
+                          <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.fusion')}</th>
+                          <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">{t('mullerResonance.avgMeV')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {displayOverlaps.map((overlap, i) => {
+                          const pair = displayPairs[i]
+                          if (!pair) return null
+                          const quality = getResonanceQuality(pair.mismatch)
+                          const qualityColors: Record<string, string> = {
+                            exact: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+                            strong: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                            moderate: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+                            weak: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+                          }
+
+                          return (
+                            <tr
+                              key={`${pair.Z1}-${pair.Z2}`}
+                              className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                            >
+                              <td className="py-2 px-3 font-medium text-gray-900 dark:text-white">
+                                {isGlobal ? (
+                                  <>
+                                    {pair.E1} <span className="text-gray-400 dark:text-gray-500">–</span> {pair.E2}
+                                  </>
+                                ) : (
+                                  <>
+                                    {pair.E2} <span className="text-gray-400 dark:text-gray-500">(Z={pair.Z2})</span>
+                                  </>
+                                )}
+                              </td>
+                              <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                                {pair.mismatch < 0.01 ? pair.mismatch.toFixed(4) : pair.mismatch.toFixed(2)}%
+                              </td>
+                              <td className="py-2 px-3 text-center">
+                                <span className={`px-2 py-0.5 rounded text-xs font-medium ${qualityColors[quality]}`}>
+                                  {t(`mullerResonance.qualityLabels.${quality}`)}
+                                </span>
+                              </td>
+                              <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                                {formatWavelength(pair.wavelength)}
+                              </td>
+                              <td className="py-2 px-3 text-center text-gray-500 dark:text-gray-400 font-mono text-xs">
+                                <span title={t('mullerResonance.electronOctave')}>e:{pair.electronOctave}</span>
+                                {' / '}
+                                <span title={t('mullerResonance.protonOctave')}>p:{pair.protonOctave}</span>
+                              </td>
+                              <td className="py-2 px-3 text-right text-gray-700 dark:text-gray-300">
+                                {overlap.twoToTwoCount > 0 ? overlap.twoToTwoCount.toLocaleString() : (
+                                  <span className="text-gray-400 dark:text-gray-600">-</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-3 text-right text-gray-700 dark:text-gray-300">
+                                {overlap.fusionCount > 0 ? overlap.fusionCount : (
+                                  <span className="text-gray-400 dark:text-gray-600">-</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                                {overlap.avgMeV > 0 ? overlap.avgMeV.toFixed(1) : (
+                                  <span className="text-gray-400 dark:text-gray-600">-</span>
+                                )}
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
 
           {/* Explanation card */}
           <div className="card p-6 mb-6">
@@ -446,6 +559,7 @@ export default function MullerResonance() {
               selectedElement={null}
               onElementClick={handleElementClick}
               heatmapData={naeHeatmapData}
+              heatmapMetrics={naeHeatmapMetrics}
               showHeatmap={true}
               hideLegend
               hideCardContainer
