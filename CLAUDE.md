@@ -407,13 +407,13 @@ Every PR is automatically reviewed by the [greptile](https://greptile.com/) bot.
 
 ### Codebase Conventions (Not Obvious from Code)
 
-- **~200 pre-existing lint errors** (mostly `no-explicit-any`) — do not fix them; they're known and accepted.
+- **Pre-existing lint errors are known and accepted** (mostly `no-explicit-any`) — do not fix them as part of unrelated PRs. Check the current count with `npx eslint . 2>&1 | tail -5` before assuming a new error is yours.
 - **`document.execCommand('copy')` return value must be checked** — the maintainer has explicitly requested this for clipboard operations.
 - **Import shared types from `src/types/index.ts`** — do not redeclare types that already exist there.
 - **Query pages follow parallel structure**: `FusionQuery`, `FissionQuery`, and `TwoToTwoQuery` share the same patterns. Changes to one usually need mirroring to the other two.
 - **Collapsible card pattern**: `useState(false)` + `max-h-0/max-h-[800px]` transition + ChevronDown icon rotation.
 - **D3 force graphs**: Follow `CascadeNetworkDiagram` patterns (forceLink, forceManyBody, forceCenter, forceCollide).
-- **Three.js/R3F**: Use `@react-three/fiber@8.18.0` and `@react-three/drei@9.122.0` (React 18 compatible — v9 requires React 19). Use `<primitive object={...} />` for THREE.Line (not JSX `<line>`).
+- **Three.js / React Three Fiber**: Check `package.json` for the pinned `@react-three/fiber` and `@react-three/drei` versions before upgrading — they are constrained by the React major version in use. Use `<primitive object={...} />` for `THREE.Line` (not JSX `<line>`).
 - **Always verify current type definitions** in `src/types/index.ts` before writing tests — interfaces evolve and type mismatches are a common PR issue.
 
 ### PR Strategy That Works
@@ -423,46 +423,22 @@ Every PR is automatically reviewed by the [greptile](https://greptile.com/) bot.
 - **Visualization PRs get more scrutiny** — dark mode and i18n must be addressed upfront.
 - **Stacked PRs across forks**: GitHub doesn't support using a fork branch as a PR base. Instead, base on `main` and note `Depends on #NNN` in the PR body. When the parent merges, rebase to clean up the diff.
 
-### Maintainer Patterns
-
-- The maintainer merges PRs **in batches** (often 5-20 at once), not one-by-one. Silence between batches is normal and does not indicate rejection.
-- After merging external contributions, the maintainer sometimes ships a follow-up PR to integrate or refactor the feature into the broader codebase (e.g., integrating a new visualization into an existing page).
-- The maintainer proactively fixes minor type mismatches or test issues from contributed PRs rather than requesting changes — but it's better to get them right the first time.
-
 ### Fork Contribution Workflow
 
-External contributors work from a fork:
+External contributors work from a fork — see [CONTRIBUTING.md](CONTRIBUTING.md) for setup, branching, and the pull request process. A few rebase tips that catch people out:
 
-```bash
-# Setup (one-time)
-git remote add fork https://github.com/YOUR_USERNAME/lenr.academy.git
-
-# Create feature branch
-git checkout -b feat/my-feature main
-
-# Push to your fork
-git push -u fork feat/my-feature
-
-# Create PR (targets upstream main)
-gh pr create --title "feat: description" --body "Fixes #NNN"
-
-# Rebase after upstream changes
-git checkout main && git pull origin main
-git checkout feat/my-feature && git rebase main
-git push fork feat/my-feature --force-with-lease
-```
-
-**Rebase tips**:
 - Already-merged commits are auto-dropped by `git rebase` (or use `git rebase --skip`)
 - Stash untracked files with `git stash push -u` (the `-u` flag is essential for new files)
 - After force-push, GitHub may show `mergeable_state: dirty` temporarily — it recalculates in ~2 minutes
 
 ### Test Coverage
 
-The project has **85+ unit test files** (Vitest) and **31 E2E spec files** (Playwright). Coverage includes all contexts, hooks, most components, and many pages. Key remaining gaps:
+The project has substantial unit test coverage (Vitest) and E2E coverage (Playwright). To see current counts and coverage gaps:
 
-- `ShowElementData` page (most complex page, no unit test)
-- Cascade visualization components (`CascadeNetworkDiagram`, `SankeyDiagram`)
-- Newer visualization components (`RussellChart`, `Russell3DView`)
+```bash
+find src -name '*.test.ts' -o -name '*.test.tsx' | wc -l   # unit test files
+find tests/e2e -name '*.spec.ts' | wc -l                   # E2E spec files
+npx vitest run --coverage                                  # coverage report
+```
 
-When writing E2E tests, use the database to find which elements/nuclides to select to put the UI into the state you need to test — don't hardcode element names that might not have relevant data.
+Compare the covered file list against `src/pages/` and `src/components/` to find gaps. When writing E2E tests, use the database to find which elements/nuclides to select to put the UI into the state you need to test — don't hardcode element names that might not have relevant data.

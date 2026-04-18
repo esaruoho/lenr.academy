@@ -124,8 +124,8 @@ Having issues? Check our troubleshooting guide:
 Interested in contributing or running locally?
 
 - 📖 **[Contributing Guide](CONTRIBUTING.md)** - How to contribute, setup instructions, development workflow
+  - Using an LLM coding assistant? [CLAUDE.md](CLAUDE.md) is loaded automatically by [Claude Code](https://claude.ai/code), [Cursor](https://cursor.com), and similar tools — it covers architecture plus contributor knowledge (CI gotchas, review patterns, codebase conventions).
 - 🛠️ **[Developer Documentation](docs/DEVELOPMENT.md)** - Architecture, technology stack, deployment guides
-- 🤖 **[LLM-Assisted Contributing](CLAUDE.md)** - If you use [Claude Code](https://claude.ai/code), [Cursor](https://cursor.com), or another LLM coding assistant, the `CLAUDE.md` file is loaded automatically and includes architecture docs plus contributor knowledge (CI gotchas, review patterns, codebase conventions) to help you land PRs on the first try
 - 💬 **[GitHub Discussions](https://github.com/Episk-pos/lenr.academy/discussions)** - Ask questions and share ideas
 
 ## Development Roadmap
