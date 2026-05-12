@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useCallback, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Atom, Moon, Sun, ChevronLeft, ChevronRight, Home as HomeIcon, GitMerge, Scissors, ArrowLeftRight, FlaskConical, Table, TableProperties, Shield, Workflow, HelpCircle, Waves, Beaker } from 'lucide-react'
+import { Menu, X, Atom, Moon, Sun, ChevronLeft, ChevronRight, Home as HomeIcon, GitMerge, Scissors, ArrowLeftRight, FlaskConical, Table, TableProperties, Shield, Workflow, RefreshCw, HelpCircle, Waves, Beaker } from 'lucide-react'
 import { useTranslation, Trans } from 'react-i18next'
 import { useTheme } from '../contexts/ThemeContext'
 import { useLayout } from '../contexts/LayoutContext'
@@ -32,6 +32,7 @@ const navigationItems: NavigationItem[] = [
   { nameKey: 'navigation.fissionReactions', path: '/fission', icon: Scissors },
   { nameKey: 'navigation.twoToTwoReactions', path: '/twotwo', icon: ArrowLeftRight },
   { nameKey: 'navigation.cascades', path: '/cascades', icon: Workflow },
+  { nameKey: 'navigation.cycleDiscovery', path: '/cycles', icon: RefreshCw },
   { nameKey: 'navigation.tablesInDetail', path: '/tables', icon: Table },
   { nameKey: 'navigation.allTables', path: '/all-tables', icon: TableProperties },
   { nameKey: 'navigation.mullerResonance', path: '/muller-resonance', icon: Waves },
@@ -224,7 +225,7 @@ export default function Layout({ children }: LayoutProps) {
               <X className="w-6 h-6" />
             </button>
           </div>
-          <nav className="flex-1 overflow-y-auto p-4">
+          <nav className="flex-1 min-h-0 overflow-y-auto p-4">
             {navigationItems.map((item) => {
               const Icon = item.icon
               return (
@@ -294,7 +295,7 @@ export default function Layout({ children }: LayoutProps) {
           transition: 'top 300ms ease-out, width 300ms'
         }}
       >
-        <div className="flex flex-col flex-grow border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative">
+        <div className="flex flex-col flex-grow min-h-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative">
           {/* Collapse toggle button */}
           <button
             onClick={() => setDesktopSidebarCollapsed(!desktopSidebarCollapsed)}
@@ -315,7 +316,7 @@ export default function Layout({ children }: LayoutProps) {
               <p className="text-xs text-gray-500 dark:text-gray-400">{t('brand.appSubtitle')}</p>
             </div>
           </div>
-          <nav className="flex-1 overflow-y-auto p-4">
+          <nav className="flex-1 min-h-0 overflow-y-auto p-4">
             {navigationItems.map((item) => {
               const Icon = item.icon
               return (
