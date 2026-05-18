@@ -17,12 +17,8 @@ test.describe('Transmutations Page', () => {
   });
 
   test('renders the page title and disclaimer banner', async ({ page }) => {
-    await expect(
-      page.getByRole('heading', { name: /Transmutation Pathway Explorer/i })
-    ).toBeVisible();
-    await expect(
-      page.getByText(/Documented claims, not verified mechanisms/i)
-    ).toBeVisible();
+    await expect(page.getByTestId('transmutations-heading')).toBeVisible();
+    await expect(page.getByTestId('transmutations-disclaimer')).toBeVisible();
   });
 
   test('renders documented transmutation cards', async ({ page }) => {
@@ -46,18 +42,17 @@ test.describe('Transmutations Page', () => {
     await expect(firstButton).toBeEnabled({ timeout: 30000 });
     await firstButton.click();
 
-    // Wait for either pathway results or "no pathways found" to appear.
-    // We don't assert which — both are valid outcomes for the first cut.
-    await expect(
-      page
-        .getByText(/Candidate pathways|No 1- or 2-step pathway found/i)
-        .first()
-    ).toBeVisible({ timeout: 30000 });
+    // Either pathway results or "no pathways found" is a valid outcome.
+    const pathwayResults = page.getByTestId('transmutations-pathway-results');
+    const pathwayEmpty = page.getByTestId('transmutations-pathway-empty');
+    await expect(pathwayResults.or(pathwayEmpty).first()).toBeVisible({
+      timeout: 30000,
+    });
   });
 
   test('category filter narrows the visible cards', async ({ page }) => {
     // Click the Biological filter
-    await page.getByRole('button', { name: 'Biological', exact: true }).click();
+    await page.getByTestId('transmutations-category-biological').click();
 
     // Scope assertions to transmutation card content (avoid matching against
     // the hidden lab-filter <select>'s <option> elements, which contain
