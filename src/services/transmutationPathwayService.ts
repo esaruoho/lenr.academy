@@ -50,15 +50,45 @@ export interface FindPathwayOptions {
 const DEFAULT_MAX_RESULTS = 50;
 const DEFAULT_SEED_LIMIT = 200;
 
+/** Columns this service reads from a TwoToTwoAll row. */
+const REQUIRED_NUMBER_COLUMNS = [
+  'Z1', 'A1', 'Z2', 'A2', 'Z3', 'A3', 'Z4', 'A4', 'MeV',
+] as const;
+const REQUIRED_STRING_COLUMNS = ['E1', 'E2', 'E3', 'E4'] as const;
+
 /**
- * Convert a sql.js exec result row (array) into a TwoToTwoReaction-shaped object.
+ * Convert a sql.js exec result row (array) into a TwoToTwoReaction-shaped
+ * object. Validates that the columns this service actually reads (Z1..Z4,
+ * A1..A4, E1..E4, MeV) are present with the expected scalar type so that
+ * schema drift in TwoToTwoAll fails loudly instead of yielding undefined or
+ * NaN downstream.
  */
 function rowToReaction(columns: string[], row: unknown[]): TwoToTwoReaction {
   const obj: Record<string, unknown> = {};
   columns.forEach((col, idx) => {
     obj[col] = row[idx];
   });
-  return obj as unknown as TwoToTwoReaction;
+
+  for (const col of REQUIRED_NUMBER_COLUMNS) {
+    if (typeof obj[col] !== 'number') {
+      throw new Error(
+        `TwoToTwoAll row is missing or has non-numeric value for "${col}" ` +
+          `(got ${obj[col] === undefined ? 'undefined' : typeof obj[col]}). ` +
+          'Database schema may have drifted.'
+      );
+    }
+  }
+  for (const col of REQUIRED_STRING_COLUMNS) {
+    if (typeof obj[col] !== 'string') {
+      throw new Error(
+        `TwoToTwoAll row is missing or has non-string value for "${col}" ` +
+          `(got ${obj[col] === undefined ? 'undefined' : typeof obj[col]}). ` +
+          'Database schema may have drifted.'
+      );
+    }
+  }
+
+  return obj as TwoToTwoReaction;
 }
 
 /**
