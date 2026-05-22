@@ -184,7 +184,10 @@ export default function Transmutations() {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
           <FlaskConical className="w-6 h-6 text-primary-600" />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1
+            data-testid="transmutations-heading"
+            className="text-3xl font-bold text-gray-900 dark:text-white"
+          >
             {t('transmutations.title', {
               defaultValue: 'Transmutation Pathway Explorer',
             })}
@@ -199,7 +202,10 @@ export default function Transmutations() {
       </div>
 
       {/* Disclaimer banner */}
-      <div className="card p-4 mb-6 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20">
+      <div
+        data-testid="transmutations-disclaimer"
+        className="card p-4 mb-6 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20"
+      >
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-amber-900 dark:text-amber-200">
@@ -223,6 +229,7 @@ export default function Transmutations() {
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="flex flex-wrap gap-1.5">
           <FilterButton
+            testId="transmutations-category-all"
             label={t('transmutations.filterAllCategories', {
               defaultValue: 'All categories',
             })}
@@ -232,6 +239,7 @@ export default function Transmutations() {
           {CATEGORY_KEYS.map(cat => (
             <FilterButton
               key={cat}
+              testId={`transmutations-category-${cat}`}
               label={categoryLabel(cat)}
               active={categoryFilter === cat}
               onClick={() => setCategoryFilter(cat)}
@@ -543,7 +551,10 @@ function PathwayResults({ pathways, onClear }: { pathways: Pathway[]; onClear: (
   const { t } = useTranslation()
   if (pathways.length === 0) {
     return (
-      <div className="mt-4 p-4 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div
+        data-testid="transmutations-pathway-empty"
+        className="mt-4 p-4 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+      >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-2.5 text-sm text-gray-700 dark:text-gray-300">
             <BookOpen className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-400 dark:text-gray-500" />
@@ -586,7 +597,10 @@ function PathwayResults({ pathways, onClear }: { pathways: Pathway[]; onClear: (
   }
 
   return (
-    <div className="mt-4 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
+    <div
+      data-testid="transmutations-pathway-results"
+      className="mt-4 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3"
+    >
       <div className="flex items-center justify-between mb-2.5">
         <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
           {t('transmutations.pathwayResults.header', {
@@ -641,14 +655,17 @@ function FilterButton({
   label,
   active,
   onClick,
+  testId,
 }: {
   label: string
   active: boolean
   onClick: () => void
+  testId?: string
 }) {
   return (
     <button
       onClick={onClick}
+      data-testid={testId}
       className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
         active
           ? 'bg-primary-100 dark:bg-primary-900/30 border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300'
